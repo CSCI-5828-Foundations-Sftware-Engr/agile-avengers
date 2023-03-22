@@ -1,7 +1,7 @@
 
 sudo apt-get update
 sudo apt-get install -y python3 python3-pip git
-git clone git@github.com:CSCI-5828-Foundations-Sftware-Engr/AgileAvengers.git
+git clone git@github.com:CSCI-5828-Foundations-Sftware-Engr/agile-avengers.git
 #cd flask-tutorial
 sudo python3 setup.py install
 sudo pip3 install -e 
