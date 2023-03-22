@@ -1,5 +1,5 @@
 provider "google" {
-  project = "YOUR_PROJECT_ID"
+  project = "seventh-port-360504"
   region = "us-west1-b"
 }
 
@@ -31,7 +31,7 @@ resource "google_compute_instance" "vm_instance" {
     netrc = <<EOF
       machine github.com
       login AishwaryaJayaramu
-      password ghp
+      password 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
     EOF
   }
 
