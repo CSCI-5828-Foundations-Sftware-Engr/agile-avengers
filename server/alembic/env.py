@@ -1,13 +1,14 @@
 import os
 import sys
 from logging.config import fileConfig
-
 from sqlalchemy import engine_from_config, pool
 
 from alembic import context
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "../"))
 
+from datamodel.models.userinfo import Base as UserBase
+from datamodel.models.payments import Base as PaymentBase
 from config.constants import DB_CREDENTIALS
 
 # from config.constants import DB_CREDENTIALS
@@ -35,7 +36,7 @@ fileConfig(config.config_file_name)
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = None
+target_metadata = [UserBase.metadata, PaymentBase.metadata]
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

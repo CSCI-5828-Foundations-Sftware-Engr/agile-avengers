@@ -1,5 +1,5 @@
 from sqlalchemy.orm import declarative_base
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, DOUBLE
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, FLOAT
 
 Base = declarative_base()
 
@@ -23,7 +23,7 @@ class BankAccount(Base):
     account_number = Column(String(30), primary_key=True)
     user_id = Column(String(30), ForeignKey("user_info.user_id"))
     account_holders_name = Column(String(30))
-    account_balance = Column(DOUBLE(precision=64))
+    account_balance = Column(FLOAT())
     bank_name = Column(String(30))
     routing_number = Column(String(30))
     created_on = Column(DateTime)
@@ -61,7 +61,7 @@ class CreditCard(Base):
     card_network = Column(String(30))
     cvv = Column(String(30))
     billing_info_id = Column(Integer, ForeignKey("billing_info.billing_info_id"))
-    credit_limit = Column(DOUBLE())
+    credit_limit = Column(FLOAT())
     created_on = Column(DateTime)
     created_by = Column(String(30))
     updated_on = Column(DateTime)
@@ -69,7 +69,7 @@ class CreditCard(Base):
 
 class Merchant(Base):
     __tablename__ = "merchant"
-
+    merchant_id = Column(Integer, autoincrement=True, primary_key=True)
     merchant_name = Column(String)
     category = Column(String)
     sub_category = Column(String)
