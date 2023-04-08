@@ -1,8 +1,8 @@
 DB_CREDENTIALS = {
     "HOSTNAME": "localhost",
     "DB_NAME": "postgres",
-    "USERNAME": "",
-    "PASSWORD": "",
+    "USERNAME": "postgres",
+    "PASSWORD": "postgres",
     "SSLCERT": "",
     "SSLKEY": "",
     "SSLROOTCERT": "",
