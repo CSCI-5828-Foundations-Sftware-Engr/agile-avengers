@@ -8,6 +8,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import Spinner from "../common/Spinner";
 
 import Container from "./Container";
+import { AuthProvider } from "./Context/Authcontext";
 
 const App = () => {
   const [showLoader, setShowLoader] = useState(false);
@@ -18,7 +19,7 @@ const App = () => {
     if (showNotFound) {
       return <NotFound />;
     }
-    return <Container />;
+    return <AuthProvider><Container /></AuthProvider>;
   };
 
   return (
