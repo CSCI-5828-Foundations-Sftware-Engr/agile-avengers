@@ -9,10 +9,13 @@ import sqlalchemy
 from sqlalchemy.orm import sessionmaker
 
 from flask import Flask, abort, jsonify, render_template, request, make_response
-
-
 from flask_cors import CORS
 from werkzeug.exceptions import HTTPException
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+
+
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "../"))
 
@@ -25,6 +28,8 @@ app = Flask(
     template_folder="../client",
     # static_url_path="",
 )
+
+
 api_url = "/api/v1/"
 CORS(app)
 
@@ -79,6 +84,8 @@ def get_current_time():
 
 @app.route(api_url + "/userinfo/<int:user_id>", methods=["GET"])
 def get_user_info(user_id):
+    # db = DB_CREDENTIALS["DB_NAME"]
+    # table = db.user_info
     user = user_info.query.filter_by(id=user_id).first()
     if user:
         return jsonify(
@@ -95,7 +102,8 @@ def get_user_info(user_id):
             }
         )
     else:
-        return jsonify({"message": "User not found"})
+        return jsonify({'message': 'User not found'})
+    
 
 
 base_route = f"/api/v1/auth"
