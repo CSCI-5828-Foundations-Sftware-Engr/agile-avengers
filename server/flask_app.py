@@ -98,10 +98,10 @@ def get_user_info(user_id):
         return jsonify({"message": "User not found"})
 
 
-base_route = f"/api/auth"
+base_route = f"/api/v1/auth"
 
 
-@app.route(f"{base_route}/create_user", methods=["POST"])
+@app.route(f"{base_route}/create", methods=["POST"])
 def create_user():
     user_data = request.json
 
