@@ -63,3 +63,23 @@ def get_current_time():
         ),
         "message": "This is the default API endpoint",
     }
+
+@app.route(api_url +'/userinfo/<int:user_id>', methods=['GET'])
+def get_user_info(user_id):
+    user = db.query.filter_by(id=user_id).first()
+    if user:
+        return jsonify({
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'mobile_number': user.mobile_number,
+            'email': user.email_id,
+            'is_merchant' : user.is_merchant,
+            'created_on': user.created_on,
+            'created_by' : user.created_by,
+            'updated_on' : user.updated_on,
+            'updated_by' : user.updated_by,
+
+        })
+    else:
+        return jsonify({'message': 'User not found'})
+
