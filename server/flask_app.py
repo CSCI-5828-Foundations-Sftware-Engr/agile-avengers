@@ -5,20 +5,33 @@ import socket
 import sys
 import traceback
 from datetime import datetime
-
+# from sqlalchemy import engine_from_config, pool
+# from alembic import context
 from flask import Flask, abort, jsonify, render_template, request
 from flask_cors import CORS
 from werkzeug.exceptions import HTTPException
+from config.constants import DB_CREDENTIALS
+from flask_sqlalchemy import SQLAlchemy
+
+
+
+
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "../"))
 
-
+DATABASE_URI = "postgresql://{}:{}@{}/{}".format(
+    DB_CREDENTIALS["USERNAME"], DB_CREDENTIALS["PASSWORD"], DB_CREDENTIALS["HOSTNAME"], DB_CREDENTIALS["DB_NAME"],
+)
 app = Flask(
     __name__,
     static_folder="../client",
     template_folder="../client",
     # static_url_path="",
 )
+app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URI
+db = SQLAlchemy(app)
+
+
 api_url = "/api/v1/"
 CORS(app)
 
@@ -66,7 +79,9 @@ def get_current_time():
 
 @app.route(api_url +'/userinfo/<int:user_id>', methods=['GET'])
 def get_user_info(user_id):
-    user = db.query.filter_by(id=user_id).first()
+    # db = DB_CREDENTIALS["DB_NAME"]
+    table = db.userinfo
+    user = table.query.filter_by(id=user_id).first()
     if user:
         return jsonify({
             'first_name': user.first_name,
@@ -82,4 +97,32 @@ def get_user_info(user_id):
         })
     else:
         return jsonify({'message': 'User not found'})
+    
 
+# config = context.config
+
+# section = config.config_ini_section
+# config.set_section_option(section, "DB_USER", DB_CREDENTIALS["USERNAME"])
+# config.set_section_option(section, "DB_PASS", DB_CREDENTIALS["PASSWORD"])
+# config.set_section_option(section, "DB_HOST", DB_CREDENTIALS["HOSTNAME"])
+# config.set_section_option(section, "DB_NAME", DB_CREDENTIALS["DB_NAME"])
+
+# def connect_db():
+#     connectable = engine_from_config(
+#         config.get_section(config.config_ini_section),
+#         prefix="sqlalchemy.",
+#         poolclass=pool.NullPool,
+#         connect_args=ssl_args,
+#     )
+
+#     with connectable.connect() as connection:
+#         context.configure(
+#             connection=connection,
+#             target_metadata=target_metadata,
+#         )
+
+#         with context.begin_transaction():
+#             context.run_migrations()
+
+
+# connect_db()
