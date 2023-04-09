@@ -76,6 +76,7 @@ def get_current_time():
     }
 
 
+
 @app.route(api_url + "/userinfo/<int:user_id>", methods=["GET"])
 def get_user_info(user_id):
     user = db.query.filter_by(id=user_id).first()
@@ -156,7 +157,6 @@ def userinfo():
         return resp
 
     return make_response(jsonify({"message": "Unauthorized"}), 403)
-
 
 if __name__ == "__main__":
     app.run(port=5000, host="localhost")
