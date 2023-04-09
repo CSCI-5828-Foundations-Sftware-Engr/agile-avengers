@@ -8,9 +8,10 @@ const New = () => {
   const {isLoggedIn, setIsLoggedIn} = useContext(AuthContext);
   const history = useHistory();
 
+  //change to history.push("/login") after DB setup and authentication
   useEffect(() => {
     if (!isLoggedIn) {
-      history.push("/login")
+      history.push("/payment")
     }
   }, []);
   return (
