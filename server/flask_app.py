@@ -10,7 +10,7 @@ from sqlalchemy.orm import sessionmaker
 
 from flask import Flask, abort, jsonify, render_template, request, make_response
 
-    
+
 from flask_cors import CORS
 from werkzeug.exceptions import HTTPException
 
@@ -68,29 +68,33 @@ def catch_all(path):
 def get_current_time():
     return {
         "status": "Welcome - {}\nFull name - {} {}".format(
-            request.headers.get("X-Remote-User"), request.headers.get("X-Firstname"), request.headers.get("-Lastname"),
+            request.headers.get("X-Remote-User"),
+            request.headers.get("X-Firstname"),
+            request.headers.get("-Lastname"),
         ),
         "message": "This is the default API endpoint",
     }
 
-@app.route(api_url +'/userinfo/<int:user_id>', methods=['GET'])
+
+@app.route(api_url + "/userinfo/<int:user_id>", methods=["GET"])
 def get_user_info(user_id):
     user = db.query.filter_by(id=user_id).first()
     if user:
-        return jsonify({
-            'first_name': user.first_name,
-            'last_name': user.last_name,
-            'mobile_number': user.mobile_number,
-            'email': user.email_id,
-            'is_merchant' : user.is_merchant,
-            'created_on': user.created_on,
-            'created_by' : user.created_by,
-            'updated_on' : user.updated_on,
-            'updated_by' : user.updated_by,
-
-        })
+        return jsonify(
+            {
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "mobile_number": user.mobile_number,
+                "email": user.email_id,
+                "is_merchant": user.is_merchant,
+                "created_on": user.created_on,
+                "created_by": user.created_by,
+                "updated_on": user.updated_on,
+                "updated_by": user.updated_by,
+            }
+        )
     else:
-        return jsonify({'message': 'User not found'})
+        return jsonify({"message": "User not found"})
 
 
 base_route = f"/api/auth"
@@ -98,10 +102,9 @@ base_route = f"/api/auth"
 
 @app.route(f"{base_route}/create_user", methods=["POST"])
 def create_user():
-    print("**"*30)
     user_data = request.json
 
-    # Add to userinfo table 
+    # Add to userinfo table
     ui = UserInfo(user_id=user_data["username"])
     try:
         with Session() as session:
@@ -154,6 +157,6 @@ def userinfo():
 
     return make_response(jsonify({"message": "Unauthorized"}), 403)
 
-# Development environment
+
 if __name__ == "__main__":
     app.run(port=5000, host="localhost")
