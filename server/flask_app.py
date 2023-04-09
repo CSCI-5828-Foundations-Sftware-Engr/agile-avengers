@@ -6,12 +6,14 @@ import sys
 import traceback
 from datetime import datetime
 
-from flask import Flask, abort, jsonify, render_template, request
+from flask import Flask, abort, jsonify, render_template, request, make_response
 from flask_cors import CORS
 from werkzeug.exceptions import HTTPException
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "../"))
 
+from helpers.user_management import create_new_user, user_login, user_logout, check_userinfo
+from datamodel.models import userinfo
 
 app = Flask(
     __name__,
@@ -83,3 +85,50 @@ def get_user_info(user_id):
     else:
         return jsonify({'message': 'User not found'})
 
+
+base_route = f"/api/auth"
+
+
+@app.route(f"{base_route}/create_user", methods=["POST"])
+def create_user():
+    user_data = request.json
+    new_user = create_new_user(user_data["username"], user_data["password"])
+    if new_user is None:
+        return make_response(jsonify({"message": "user already exists"}), 409)
+
+    return jsonify({"message": "user created"})
+
+
+@app.route(f"{base_route}/login", methods=["POST"])
+def login():
+    user_data = request.json
+    token = user_login(user_data["username"], user_data["password"])
+    resp = make_response(jsonify({"message": "logged in successfully"}), 200)
+    for key, value in token.items():
+        resp.set_cookie(key, json.dumps(value))
+    resp.set_cookie("auth_token", json.dumps(token))
+    return resp
+
+
+@app.route(f"{base_route}/logout", methods=["POST"])
+def logout():
+    token = request.cookies.get("refresh_token")
+    user_logout(token)
+    return jsonify({"message": "logged out"})
+
+
+@app.route(f"{base_route}/userinfo")
+def userinfo():
+    access_token = request.cookies.get("access_token")
+    refresh_token = request.cookies.get("refresh_token")
+    auth_token = {"access_token": access_token, "refresh_token": refresh_token}
+    token, userinfo = check_userinfo(auth_token)
+
+    if userinfo is not None:
+        resp = make_response(jsonify({"userinfo": userinfo}), 200)
+        resp.set_cookie("auth_token", json.dumps(token))
+        resp.set_cookie("access_token", json.dumps(token["access_token"]))
+        resp.set_cookie("refresh_token", json.dumps(token["refresh_token"]))
+        return resp
+
+    return make_response(jsonify({"message": "Unauthorized"}), 403)
