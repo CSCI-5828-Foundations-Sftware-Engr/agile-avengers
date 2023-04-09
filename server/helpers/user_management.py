@@ -1,3 +1,4 @@
+import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "../"))
 
@@ -5,7 +6,6 @@ from config import user_management as config
 from keycloak import KeycloakAdmin, KeycloakOpenID
 from keycloak import KeycloakOpenIDConnection
 import keycloak
-import os
 
 CLIENT_SECRET_KEY = "Shhhh"
 CLIENT_ID = "test"

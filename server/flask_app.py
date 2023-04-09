@@ -5,15 +5,19 @@ import socket
 import sys
 import traceback
 from datetime import datetime
+import sqlalchemy
+from sqlalchemy.orm import sessionmaker
 
 from flask import Flask, abort, jsonify, render_template, request, make_response
+
+    
 from flask_cors import CORS
 from werkzeug.exceptions import HTTPException
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "../"))
 
 from helpers.user_management import create_new_user, user_login, user_logout, check_userinfo
-from datamodel.models import userinfo
+from datamodel.models.userinfo import UserInfo
 
 app = Flask(
     __name__,
@@ -23,6 +27,9 @@ app = Flask(
 )
 api_url = "/api/v1/"
 CORS(app)
+
+engine = sqlalchemy.create_engine("postgresql://postgres:password@localhost:5432/agile_avengers")
+Session = sessionmaker(engine)
 
 if __name__ != "__main__":
     gunicorn_error_logger = logging.getLogger("gunicorn.error")
@@ -91,8 +98,22 @@ base_route = f"/api/auth"
 
 @app.route(f"{base_route}/create_user", methods=["POST"])
 def create_user():
+    print("**"*30)
     user_data = request.json
+
+    # Add to userinfo table 
+    ui = UserInfo(user_id=user_data["username"])
+    try:
+        with Session() as session:
+            print("adding userinfo")
+            session.add(ui)
+            session.commit()
+    except Exception as e:
+        print(e)
+        make_response(jsonify({"message": "Server Error"}), 500)
+
     new_user = create_new_user(user_data["username"], user_data["password"])
+    print(new_user)
     if new_user is None:
         return make_response(jsonify({"message": "user already exists"}), 409)
 
@@ -132,3 +153,7 @@ def userinfo():
         return resp
 
     return make_response(jsonify({"message": "Unauthorized"}), 403)
+
+# Development environment
+if __name__ == "__main__":
+    app.run(port=5000, host="localhost")
