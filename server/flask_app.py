@@ -79,7 +79,7 @@ def get_current_time():
 
 @app.route(api_url + "/userinfo/<int:user_id>", methods=["GET"])
 def get_user_info(user_id):
-    user = db.query.filter_by(id=user_id).first()
+    user = user_info.query.filter_by(id=user_id).first()
     if user:
         return jsonify(
             {

@@ -24,8 +24,9 @@ const Container = () => {
       </header>
       <div className="position-relative">
         <ul className="nav nav-tabs">
-          {/* <NavigationItem link="/">Home</NavigationItem> */}
+          
           <NavigationItem link="/payment">Payment</NavigationItem>
+          {/* <NavigationItem link="/logout">Log Out</NavigationItem> */}
         </ul>
       </div>
       <div className="body-content">
@@ -34,7 +35,7 @@ const Container = () => {
       <footer>
         <div className="footer">
           <span>
-            <a className="link-white" href="mailto:hemanth@colorado.com">
+            <a className="link-white" href="mailto:hemanth@colorado.com?cc=rudh9897@colorado.edu,aija">
               Contact us
             </a>
           </span>

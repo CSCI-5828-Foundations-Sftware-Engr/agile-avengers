@@ -4,7 +4,8 @@ import { Redirect } from "react-router-dom";
 const Home = () => {
   return (
     <div>
-      <Redirect to="/payment/" />
+      <Redirect to="/login/"/>
+      {/* <Redirect to="/payment/" /> */}
     </div>
   );
 };
