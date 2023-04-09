@@ -5,8 +5,6 @@ import socket
 import sys
 import traceback
 from datetime import datetime
-# from sqlalchemy import engine_from_config, pool
-# from alembic import context
 from flask import Flask, abort, jsonify, render_template, request
 from flask_cors import CORS
 from werkzeug.exceptions import HTTPException
@@ -106,30 +104,3 @@ def get_user_info(user_id):
         return jsonify({'message': 'User not found'})
     
 
-# config = context.config
-
-# section = config.config_ini_section
-# config.set_section_option(section, "DB_USER", DB_CREDENTIALS["USERNAME"])
-# config.set_section_option(section, "DB_PASS", DB_CREDENTIALS["PASSWORD"])
-# config.set_section_option(section, "DB_HOST", DB_CREDENTIALS["HOSTNAME"])
-# config.set_section_option(section, "DB_NAME", DB_CREDENTIALS["DB_NAME"])
-
-# def connect_db():
-#     connectable = engine_from_config(
-#         config.get_section(config.config_ini_section),
-#         prefix="sqlalchemy.",
-#         poolclass=pool.NullPool,
-#         connect_args=ssl_args,
-#     )
-
-#     with connectable.connect() as connection:
-#         context.configure(
-#             connection=connection,
-#             target_metadata=target_metadata,
-#         )
-
-#         with context.begin_transaction():
-#             context.run_migrations()
-
-
-# connect_db()
