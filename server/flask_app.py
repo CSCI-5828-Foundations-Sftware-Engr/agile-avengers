@@ -10,26 +10,35 @@ from datetime import datetime
 from flask import Flask, abort, jsonify, render_template, request
 from flask_cors import CORS
 from werkzeug.exceptions import HTTPException
-from config.constants import DB_CREDENTIALS
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import create_engine,MetaData
+import sqlalchemy as db
+from sqlalchemy.orm import sessionmaker
 
 
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "./"))
+from datamodel.models.userinfo import UserInfo
+from config.constants import DB_CREDENTIALS
 
 
-
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "../"))
-
-DATABASE_URI = "postgresql://{}:{}@{}/{}".format(
-    DB_CREDENTIALS["USERNAME"], DB_CREDENTIALS["PASSWORD"], DB_CREDENTIALS["HOSTNAME"], DB_CREDENTIALS["DB_NAME"],
-)
 app = Flask(
     __name__,
     static_folder="../client",
     template_folder="../client",
     # static_url_path="",
 )
-app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URI
-db = SQLAlchemy(app)
+
+
+
+#connecting to postgres database
+DATABASE_URI = "postgresql://{}:{}@{}/{}".format(
+    DB_CREDENTIALS["USERNAME"], DB_CREDENTIALS["PASSWORD"], DB_CREDENTIALS["HOSTNAME"], DB_CREDENTIALS["DB_NAME"],
+)
+engine=create_engine(DATABASE_URI)
+Session =sessionmaker(bind=engine)
+session=Session()
+
+
 
 
 api_url = "/api/v1/"
@@ -77,11 +86,9 @@ def get_current_time():
         "message": "This is the default API endpoint",
     }
 
-@app.route(api_url +'/userinfo/<int:user_id>', methods=['GET'])
+@app.route(api_url +'/userinfo/<user_id>', methods=['GET'])
 def get_user_info(user_id):
-    # db = DB_CREDENTIALS["DB_NAME"]
-    table = db.userinfo
-    user = table.query.filter_by(id=user_id).first()
+    user = session.query(UserInfo).filter_by(user_id=user_id).first()
     if user:
         return jsonify({
             'first_name': user.first_name,
