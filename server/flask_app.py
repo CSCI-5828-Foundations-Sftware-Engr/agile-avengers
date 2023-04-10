@@ -177,7 +177,17 @@ def update_user_info(user_id):
         return jsonify({'message': 'User not found'})    
     
 
+# route to delete user
 
+@app.route(api_url +'/delete_userinfo/<user_id>')
+def delete_user_info(user_id):
+    user = session.query(UserInfo).filter_by(user_id=user_id).first()
+    if user:
+        session.delete(user)
+        session.commit()
+        return jsonify({'result': True})
+    else:
+        return jsonify({'message': 'User not found'})
 
 
     
