@@ -7,11 +7,7 @@ import traceback
 from datetime import datetime
 import sqlalchemy
 from sqlalchemy.orm import sessionmaker
-
 from flask import Flask, abort, jsonify, render_template, request, make_response
-
-
-
 from flask_cors import CORS
 from werkzeug.exceptions import HTTPException
 from flask_sqlalchemy import SQLAlchemy
@@ -19,7 +15,7 @@ from sqlalchemy import create_engine,MetaData
 import sqlalchemy as db
 import random
 import string
-from sqlalchemy.orm import sessionmaker
+
 
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "./"))
@@ -170,9 +166,6 @@ def update_user_info(user_id):
             user.last_name = data["last_name"]
             user.mobile_number= data["mobile_number"]
             user.email_id= data["email_id"]
-            # 'is_merchant' : user.is_merchant,
-            # 'created_on': user.created_on,
-            # 'created_by' : user.created_by,
             user.updated_on =datetime.now() 
             user.updated_by =user_id
             return jsonify({
@@ -205,9 +198,7 @@ def delete_user_info(user_id):
         return jsonify({'message': 'User not found'})
 
 
-    
-    
-
+ 
 
 base_route = f"/api/v1/auth"
 
