@@ -5,13 +5,21 @@ import socket
 import sys
 import traceback
 from datetime import datetime
-
-from flask import Flask, abort, jsonify, render_template, request
+import sqlalchemy
+from sqlalchemy.orm import sessionmaker
+from flask import Flask, abort, jsonify, render_template, request, make_response
 from flask_cors import CORS
 from werkzeug.exceptions import HTTPException
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import create_engine,MetaData
+import sqlalchemy as db
+import random
+import string
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "../"))
 
+from helpers.user_management import create_new_user, user_login, user_logout, check_userinfo
+from datamodel.models.userinfo import UserInfo
 
 app = Flask(
     __name__,
@@ -19,8 +27,25 @@ app = Flask(
     template_folder="../client",
     # static_url_path="",
 )
+
+
+
+#connecting to postgres database
+DATABASE_URI = "postgresql://{}:{}@{}/{}".format(
+    DB_CREDENTIALS["USERNAME"], DB_CREDENTIALS["PASSWORD"], DB_CREDENTIALS["HOSTNAME"], DB_CREDENTIALS["DB_NAME"],
+)
+engine=create_engine(DATABASE_URI)
+Session =sessionmaker(bind=engine)
+session=Session()
+
+
+
+
 api_url = "/api/v1/"
 CORS(app)
+
+engine = sqlalchemy.create_engine("postgresql://postgres:password@localhost:5432/agile_avengers")
+Session = sessionmaker(engine)
 
 if __name__ != "__main__":
     gunicorn_error_logger = logging.getLogger("gunicorn.error")
@@ -65,3 +90,6 @@ def get_current_time():
         ),
         "message": "This is the default API endpoint",
     }
+
+
+

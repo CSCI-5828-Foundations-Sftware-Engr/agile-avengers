@@ -1,16 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
+import { useHistory } from "react-router-dom";
 import Mandatory from "../../common/component/Mandatory";
-import SendPayment from "./SendPayment";
-import RequestPayment from "./RequestPayment";
 
-const NewPayment = () => {
-  const [requestType, setRequestType] = useState("");
-
-  useEffect(() => {}, []);
-
-  const handleChange = e => {
-    setRequestType(e.target[e.target.options.selectedIndex].id);
-  };
+const New = () => {
   return (
     <div className="container-flex">
       <div className="container">
