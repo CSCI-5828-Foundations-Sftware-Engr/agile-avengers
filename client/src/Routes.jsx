@@ -2,12 +2,14 @@ import React from "react";
 import { Route, Switch } from "react-router-dom";
 import propTypes from "prop-types";
 import Home from "./component/Home/Home";
-import New from "./component/Payment/New";
+import NewPayment from "./component/Payment/NewPayment";
+import AddPaymentMethod from "./component/PaymentMethod/AddPaymentMethod";
 
 const Routes = () => (
   <Switch>
     <Route exact path="/" component={Home} />
-    <Route exact path="/payment" component={New} />
+    <Route exact path="/payment" component={NewPayment} />
+    <Route exact path="/add_payment_method" component={AddPaymentMethod} />
   </Switch>
 );
 

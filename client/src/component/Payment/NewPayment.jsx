@@ -1,7 +1,16 @@
 import React, { useEffect, useState } from "react";
 import Mandatory from "../../common/component/Mandatory";
+import SendPayment from "./SendPayment";
+import RequestPayment from "./RequestPayment";
 
-const New = () => {
+const NewPayment = () => {
+  const [requestType, setRequestType] = useState("");
+
+  useEffect(() => {}, []);
+
+  const handleChange = e => {
+    setRequestType(e.target[e.target.options.selectedIndex].id);
+  };
   return (
     <div className="container-flex">
       <div className="container">
@@ -19,6 +28,7 @@ const New = () => {
               className="form-control"
               id="requestType"
               style={{ width: "100%" }}
+              onChange={handleChange}
             >
               <option
                 id="notselected"
@@ -26,32 +36,22 @@ const New = () => {
                 disabled
                 selected
               >
-                Select
+                --Select A Value--
               </option>
-              <option id="newRequest" value="newRequest">
-                Create a new payment request
+              <option id="send" value="send">
+                Send
               </option>
-              <option id="cloneRequest" value="cloneRequest">
-                Clone an existing payment request
+              <option id="request" value="request">
+                request
               </option>
             </select>
-
-            <br />
           </div>
-          <div>
-            <button
-              type="button"
-              id="submitButton"
-              className="btn btn-primary float-right"
-            >
-              Submit
-            </button>
-          </div>
-          <br />
+          {requestType === "send" ? <SendPayment /> : <></>}
+          {requestType === "request" ? <RequestPayment /> : <></>}
         </div>
       </div>
     </div>
   );
 };
 
-export default New;
+export default NewPayment;

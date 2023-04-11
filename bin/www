@@ -1,8 +1,0 @@
-const app = require('../server/server')
-
-//Serve App///
-
-var port = 9000;
-app.listen(port, function () {
-  console.log('running on localhost:' + port);
-});

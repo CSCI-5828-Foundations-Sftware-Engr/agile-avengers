@@ -59,10 +59,9 @@ def catch_all(path):
 def get_current_time():
     return {
         "status": "Welcome - {}\nFull name - {} {}".format(
-            request.headers.get("X-Remote-User"), request.headers.get("X-Firstname"), request.headers.get("-Lastname"),
+            request.headers.get("X-Remote-User"),
+            request.headers.get("X-Firstname"),
+            request.headers.get("-Lastname"),
         ),
         "message": "This is the default API endpoint",
     }
-
-
-
