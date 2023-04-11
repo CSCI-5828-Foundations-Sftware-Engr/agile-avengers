@@ -27,7 +27,12 @@ const Container = () => {
       <div className="position-relative">
         <ul className="nav nav-tabs">
           {/* <NavigationItem link="/">Home</NavigationItem> */}
-          <NavigationItem link="/payment">Payment</NavigationItem>
+          <NavigationItem link="/payment">
+            Send or Request Payment
+          </NavigationItem>
+          <NavigationItem link="/add_payment_method">
+            Add Payment Methods
+          </NavigationItem>
         </ul>
       </div>
       <div className="body-content">
@@ -36,7 +41,7 @@ const Container = () => {
       <footer>
         <div className="footer">
           <span>
-            <a className="link-white" href="mailto:agileavengers@gmail.com">
+            <a className="link-white" href="mailto:hemanth@colorado.com">
               Contact us
             </a>
           </span>
