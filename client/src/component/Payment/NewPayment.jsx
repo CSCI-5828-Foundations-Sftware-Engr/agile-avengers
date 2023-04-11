@@ -53,3 +53,4 @@ const NewPayment = () => {
     </div>
   );
 };
+export default NewPayment;
