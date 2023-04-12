@@ -23,7 +23,7 @@ from config.constants import DB_CREDENTIALS
 from datamodel.models.userinfo import UserInfo, CreditCard, DebitCard, BillingInfo, BankAccount, Merchant
 from datamodel.models.payments import Transaction
 from helpers.user_management import check_userinfo, create_new_user, user_login, user_logout
-from helpers.validator import validate_transaction
+from helpers.validator import validate_transaction, user_exists
 
 
 
@@ -271,20 +271,48 @@ def userinfo():
 #   }
 
 
-@app.route(api_url + "/get_all_payment_methods")
-def get_all_payment_methods():
-    return {
-        "status": "Success",
-        "data": {
-            "visa - 2232": "1223",
-            "Mastercard - 8881": "1234",
-            "Bank Account - 1223": "9302",
-            "American Express - 9282": "2323",
-        },
-    }
+@app.route(f"{payment_route}/get_all_payment_methods/<user_id>", methods=["GET"])
+def get_all_payment_methods(user_id):
+    try:
+        if user_exists(user_id, session):
+            method_dict = {}
+            # get all bank accounts
+            bank_info = session.query(BankAccount).filter_by(user_id=user_id).all()
+            if bank_info:
+                for bank in bank_info:
+                    method_dict[f"{bank.bank_name}_{bank.account_number[-4:]}"] = bank.account_number
+            
+            # get all credit cards
+            credit_cards = session.query(CreditCard).filter_by(user_id=user_id).all()
+            if credit_cards:
+                for card in credit_cards:
+                    method_dict[f"{card.card_network}_{card.card_number[-4:]}"] = card.card_number
+
+            # get all debit cards 
+            debit_cards = session.query(DebitCard).filter_by(user_id=user_id).all()
+            if debit_cards:
+                for card in debit_cards:
+                    method_dict[f"{card.card_network}_{card.card_number[-4:]}"] = card.card_number
+            return make_response(jsonify({"status": "Success", "data": method_dict}), 200)
+            
+        else:
+            return make_response(jsonify({"message": "User does not exists"}), 404)
+    
+    except Exception as ex:
+        traceback.print_exc()
+        return make_response(jsonify({"message": "Server Error"}), 500)
+    # return {
+    #     "status": "Success",
+    #     "data": {
+    #         "visa - 2232": "1223",
+    #         "Mastercard - 8881": "1234",
+    #         "Bank Account - 1223": "9302",
+    #         "American Express - 9282": "2323",
+    #     },
+    # }
 
 
-@app.route(payment_route + "/get_payee_list", methods=["GET"])
+@app.route(f"{payment_route}/get_payee_list", methods=["GET"])
 def get_payee_list():
     payee_dict = {}
     try:
@@ -294,7 +322,7 @@ def get_payee_list():
             user_id = user.user_id
             payee_dict[f"{name}_{user_id}"] = user_id
         
-        return make_response(jsonify({"status": "Success", "data": payee_dict}), 201)
+        return make_response(jsonify({"status": "Success", "data": payee_dict}), 200)
     except Exception as ex:
         traceback.print_exc()
         make_response(jsonify({"message": "Server Error"}), 500)
@@ -302,7 +330,7 @@ def get_payee_list():
     # return {"status": "Success", "data": {"aishwarya123": "123", "hemanth234": "234", "namratha345": "345"}}
 
 
-@app.route(payment_route + "/send", methods=["POST"])
+@app.route(f"{payment_route}/send", methods=["POST"])
 def make_payment():
     data = request.get_json()
     payee_id=data["payee_id"]

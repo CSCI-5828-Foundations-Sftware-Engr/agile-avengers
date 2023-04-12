@@ -59,3 +59,10 @@ def validate_transaction(transaction_detail, db_session):
     except Exception as ex:
         traceback.print_exc()
         return False, {"message": "Internal Server error."}
+
+
+def user_exists(user_id, db_session):
+    user = db_session.query(UserInfo).filter_by(user_id=user_id).first()
+    if user:
+        return True
+    return False
