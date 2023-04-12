@@ -109,7 +109,7 @@ const RequestPayment = () => {
       <div className="form-group">
         <div>
           <div className="font-14 font-w-500 mb-2">
-            <Mandatory> User to Pay</Mandatory>
+            <Mandatory> Payee</Mandatory>
           </div>
           <select
             className="form-control"
