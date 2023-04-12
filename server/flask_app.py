@@ -10,7 +10,7 @@ from datetime import datetime
 
 # import sqlalchemy
 import sqlalchemy as db
-from flask import Flask, abort, jsonify, make_response, render_template, request
+from flask import Flask, abort, jsonify, make_response, render_template, request, Response
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import MetaData, create_engine
@@ -20,8 +20,11 @@ from werkzeug.exceptions import HTTPException
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "./"))
 from config.constants import DB_CREDENTIALS
-from datamodel.models.userinfo import UserInfo, CreditCard,DebitCard,BillingInfo,BankAccount,Merchant
+from datamodel.models.userinfo import UserInfo, CreditCard, DebitCard, BillingInfo, BankAccount, Merchant
+from datamodel.models.payments import Transaction
 from helpers.user_management import check_userinfo, create_new_user, user_login, user_logout
+from helpers.validator import validate_transaction
+
 
 
 app = Flask(
@@ -34,6 +37,7 @@ app = Flask(
 
 
 api_url = "/api/v1/"
+payment_route = f"{api_url}payment"
 CORS(app)
 
 engine = create_engine("postgresql://admin:password@localhost:5432/agile_avengers")
@@ -103,7 +107,7 @@ def get_user_info(user_id):
             }
         )
     else:
-        return make_response(jsonify({'message': 'User not found'}),403)
+        return make_response(jsonify({'message': 'User not found'}), 404)
     
 
 
@@ -157,7 +161,7 @@ def update_user_info(user_id):
         )
 
     else:
-        return make_response(jsonify({'message': 'User not found'}),403)
+        return make_response(jsonify({'message': 'User not found'}), 404)
 
 
 
@@ -280,14 +284,77 @@ def get_all_payment_methods():
     }
 
 
-@app.route(api_url + "/get_payee_list")
+@app.route(payment_route + "/get_payee_list", methods=["GET"])
 def get_payee_list():
-    return {"status": "Success", "data": {"aishwarya123": "123", "hemanth234": "234", "namratha345": "345"}}
+    payee_dict = {}
+    try:
+        users = session.query(UserInfo).all()
+        for user in users:
+            name = f"{user.first_name}_{user.last_name}"
+            user_id = user.user_id
+            payee_dict[f"{name}_{user_id}"] = user_id
+        
+        return make_response(jsonify({"status": "Success", "data": payee_dict}), 201)
+    except Exception as ex:
+        traceback.print_exc()
+        make_response(jsonify({"message": "Server Error"}), 500)
+
+    # return {"status": "Success", "data": {"aishwarya123": "123", "hemanth234": "234", "namratha345": "345"}}
 
 
-@app.route(api_url + "/make_payment", methods=["POST"])
+@app.route(payment_route + "/send", methods=["POST"])
 def make_payment():
-    return {"status": "Success"}
+    data = request.get_json()
+    payee_id=data["payee_id"]
+    transaction_method = data["transaction_method"]
+    transaction_method_id = data["transaction_method_id"]
+    transaction_amount = data["transaction_amount"]
+
+    try:
+        # validate the input
+        is_valid, err_resp = validate_transaction(data, session)
+        if not is_valid:
+            return make_response(jsonify(err_resp), 400)
+        
+        # create a new transaction
+        transaction = Transaction (
+            payer_id=data["payer_id"],
+            payee_id=payee_id,
+            transaction_amount=transaction_amount,
+            transaction_method=transaction_method,
+            transaction_method_id=transaction_method_id,
+            is_completed = True,
+            created_on=datetime.now(),
+            created_by=data["payer_id"]
+        )
+
+        # update the balance/credit limit for payer
+        if transaction_method == "bank":
+            method = session.query(BankAccount).filter_by(account_number=transaction_method_id).first()
+            method.account_balance -= transaction_amount
+        elif transaction_method == "credit":
+            method = session.query(CreditCard).filter_by(card_number=transaction_method_id).first()
+            method.credit_limit -= transaction_amount
+        else:
+            method = session.query(DebitCard).filter_by(card_number=transaction_method_id).first()
+            bank_detail = session.query(BankAccount).filter_by(account_number=method.bank_account_number).first()
+            bank_detail.account_balance -= transaction_amount
+
+        # update the balance for payee
+        bank = session.query(BankAccount).filter_by(user_id=payee_id).first()
+        bank.account_balance += transaction_amount
+
+        # add the transaction to the session
+        session.add(transaction)
+
+        # commit the changes
+        session.commit()
+        
+        return make_response(jsonify({"message": "Transaction successful"}), 201)
+    
+    except Exception as ex:
+        traceback.print_exc()
+        make_response(jsonify({"message": "Server Error"}), 500)
 
 
 
@@ -396,4 +463,4 @@ def delete_credit_card(card_number):
 
 
 if __name__ == "__main__":
-    app.run(port=5000, host="localhost")
+    app.run(port=5001, host="localhost")
