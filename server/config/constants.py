@@ -1,8 +1,8 @@
 DB_CREDENTIALS = {
     "HOSTNAME": "localhost",
-    "DB_NAME": "postgres",
+    "DB_NAME": "agile_avengers",
     "USERNAME": "postgres",
-    "PASSWORD": "aRa20021998!",
+    "PASSWORD": "password",
     "SSLCERT": "",
     "SSLKEY": "",
     "SSLROOTCERT": "",
