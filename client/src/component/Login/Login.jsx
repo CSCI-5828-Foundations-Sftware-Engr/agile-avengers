@@ -40,7 +40,7 @@ const Login = () => {
             console.log(data);
             const cookies = new Cookies();
             cookies.set('access_token', data.token.access_token, { path: '/' });
-            cookies.set('refresh_token', data.token.refresh_token, { path: '/' });
+            cookies.set('refresh_token', data.tokenrefresh_token, { path: '/' });
 
             // console.log(document.cookie);
             // cookies.get('myCat');
