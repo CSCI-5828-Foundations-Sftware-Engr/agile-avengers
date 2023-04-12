@@ -26,7 +26,7 @@ app = Flask(
     # static_url_path="",
 )
 api_url = "/api/v1/"
-CORS(app)
+CORS(app, supports_credentials=True)
 
 engine = sqlalchemy.create_engine("postgresql://postgres:password@localhost:5432/agile_avengers")
 Session = sessionmaker(engine)
@@ -120,18 +120,23 @@ def create_user():
     print(new_user)
     if new_user is None:
         return make_response(jsonify({"message": "user already exists"}), 409)
-
-    return jsonify({"message": "user created"})
+    
+    response = make_response(jsonify({"message": "user created"}), 200)
+    response.headers.add('Access-Control-Allow-Origin', 'http://localhost:8081')    
+    
+    return response
 
 
 @app.route(f"{base_route}/login", methods=["POST"])
 def login():
     user_data = request.json
     token = user_login(user_data["username"], user_data["password"])
-    resp = make_response(jsonify({"message": "logged in successfully"}), 200)
-    for key, value in token.items():
-        resp.set_cookie(key, json.dumps(value))
-    resp.set_cookie("auth_token", json.dumps(token))
+    # print(token)
+    resp = make_response(jsonify({"token": token}), 200)
+    # for key, value in token.items():
+    #     resp.set_cookie(key, json.dumps(value))
+    # print(json.dumps(token))
+    # resp.set_cookie("auth_token", json.dumps(token))
     return resp
 
 
@@ -142,10 +147,14 @@ def logout():
     return jsonify({"message": "logged out"})
 
 
-@app.route(f"{base_route}/userinfo")
+@app.route(f"{base_route}/userinfo", methods=["GET"])
 def userinfo():
     access_token = request.cookies.get("access_token")
     refresh_token = request.cookies.get("refresh_token")
+    print("here!!!!!!!!!")
+    print(request.cookies)
+    # print(refresh_token)
+    
     auth_token = {"access_token": access_token, "refresh_token": refresh_token}
     token, userinfo = check_userinfo(auth_token)
 
@@ -158,5 +167,20 @@ def userinfo():
 
     return make_response(jsonify({"message": "Unauthorized"}), 403)
 
+# @app.route(f"{base_route}/create", methods=['OPTIONS'])
+# def preflight_test():
+#     return make_response(jsonify({"message": "ok"}), 200)
+
+from flask import Response
+
+@app.before_request
+def basic_authentication():
+    if request.method == 'OPTIONS':
+        response = make_response()
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add("Access-Control-Allow-Headers", "*")
+        response.headers.add("Access-Control-Allow-Methods", "*")
+        return Response()
+
 if __name__ == "__main__":
-    app.run(port=5000, host="localhost")
+    app.run(port=5000)
