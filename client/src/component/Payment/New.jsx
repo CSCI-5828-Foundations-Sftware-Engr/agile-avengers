@@ -1,7 +1,19 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
+import { useHistory } from "react-router-dom";
 import Mandatory from "../../common/component/Mandatory";
+import { AuthContext } from "../Context/Authcontext";
+
 
 const New = () => {
+  const {isLoggedIn, setIsLoggedIn} = useContext(AuthContext);
+  const history = useHistory();
+
+  //change to history.push("/login") after DB setup and authentication
+  useEffect(() => {
+    if (!isLoggedIn) {
+      history.push("/payment")
+    }
+  }, []);
   return (
     <div className="container-flex">
       <div className="container">
