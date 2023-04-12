@@ -70,3 +70,13 @@ export const sendPaymentSchema = yup.object().shape({
     .required("This field is required"),
   payee: yup.string().required("This field is required")
 });
+
+
+export const requestPaymentSchema = yup.object().shape({
+  sender: yup.string().required("This field is required"),
+  amountToSend: yup
+    .number()
+    .min(1, "Not a valid amount")
+    .max(99999999, "Enter an amount less than 99999999")
+    .required("This field is required"),
+});

@@ -1,277 +1,161 @@
-import React, { useEffect, useReducer, useState, useContext } from "react";
-import { Prompt } from "react-router-dom";
-import PropTypes from "prop-types";
+/* eslint-disable no-restricted-syntax */
+import { element } from "prop-types";
+import React, { useState, useEffect } from "react";
 import { Button } from "react-bootstrap";
-import { errorHandling } from "../../common/errorHandling";
+import Mandatory from "../../common/component/Mandatory";
+import { requestPaymentSchema } from "../../common/schema";
 import { utils } from "../../common/utils";
-import CONSTANTS from "../../common/constants";
-import PermissionContext from "../../common/contexts/permissionContext";
-import SpinnerConext from "../../common/contexts/spinnerContext";
-import NotFoundContext from "../../common/contexts/notFoundContext";
-import { sendReducer, initialState } from "../../reducers/sendReducer";
-import sendService from "../../services/payment/sendService";
-import {
-  UPDATE_SUCCESS,
-  SHOW_ERROR
-} from "../../common/actions/SendReturnerTypes";
-import useErrorHandling from "../../common/customHooks/useHandleError";
-
+import requestService from "../../services/payment/requestService";
 import { showToast } from "../../common/component/ToastContainer";
-import {
-  UpdatedSuccessToastMessage,
-  PlainToastMessage
-} from "../../common/component/ToastMessage";
 
-const RequestPayment = props => {
-  // const permissions = useContext(PermissionContext);
-  // const spinner = useContext(SpinnerConext);
-  // const { setNotFound } = useContext(NotFoundContext);
-  // const [error, setError] = useState();
-  // useErrorHandling(error);
+const RequestPayment = () => {
+  const emptyObject = { value: "", error: "" };
+  const [sender, setSender] = useState({
+    value: "--Select A Value--",
+    error: ""
+  });
+  const [amountToRequest, setAmountToRequest] = useState(emptyObject);
+  
 
-  // const [access, setAccess] = useState(false);
-  // const [disableSave, setDisabledSave] = useState(true);
-  // const [orgInfo, setOrgInfo] = useState([]);
-  // const [state, dispatch] = useReducer(applicationReducer, initialState);
-  // const actions = (type, payload) => dispatch({ type, payload });
-  // const { match } = props;
+  const [senderList, setSenderList] = useState({});
+  
 
-  // const getAllTheOrg = () => {
-  //   spinner.setShowLoader(true);
-  //   return getOrgList()
-  //     .then(response => {
-  //       setOrgInfo(response.data);
-  //       spinner.setShowLoader(false);
-  //     })
-  //     .catch(err => {
-  //       spinner.setShowLoader(false);
-  //       showToast({
-  //         type: "error",
-  //         message: <PlainToastMessage message={errorHandling(err)} />
-  //       });
-  //     });
-  // };
+  const setterFunctionMap = {
+    ender: setSender,
+    amountToRequest: setAmountToRequest
+  };
+  const validateSubmission = () => {
+    const objectToValidate = {};
+    const listOfVariablesToAdd = {
+      sender,
+      amountToRequest
+    };
 
-  // useEffect(() => {
-  //   spinner.setShowLoader(true);
-  //   Promise.all([
-  //     getAllTheOrg(),
-  //     getApplicationById(match.params.applicationId)
-  //       .then(response => response.data)
-  //       .then(data => {
-  //         if (!data) {
-  //           setNotFound({ notFound: true, type: 404 });
-  //           spinner.setShowLoader(false);
-  //           return;
-  //         }
+    for (const [variableName, variableValue] of Object.entries(
+      listOfVariablesToAdd
+    )) {
+      if (
+        ((variableName === "sender" || variableName === "amountToRequest") &&
+          variableValue.value !== "notselected" &&
+          variableValue.value !== "") ||
+        ((variableName !== "sender" || variableName !== "amountToRequest") &&
+          variableValue.value !== "")
+      ) {
+        objectToValidate[variableName] = variableValue.value;
+      }
+    }
+    requestPaymentSchema
+      .validate(objectToValidate, { abortEarly: false })
+      .then(() => {
+        // alert("Success");
+        const payloadToPost = {
+          sender: sender.value,
+          amountToRequest: amountToRequest.value
+        };
+        sendService.makeRequest(payloadToPost).then(data => {
+          showToast({
+            type: "success",
+            message: "Payment request has been created successfully"
+          });
+          for (const [variableName, setterFunction] of Object.entries(
+            setterFunctionMap
+          )) {
+            if (variableName === "sender") {
+              // debugger;
+              setterFunction({
+                value: "--Select A Value--",
+                error: ""
+              });
+            } else {
+              setterFunction(emptyObject);
+            }
+          }
+        });
+        // window.location.reload();
+        // });
+      })
+      .catch(e => {
+        const errorObject = utils.processValidationError(e);
+        console.log(errorObject);
+        for (const [variableName, variableValue] of Object.entries(
+          errorObject
+        )) {
+          setterFunctionMap[variableName]({
+            ...variableName,
+            error: variableValue
+          });
+        }
+      });
+  };
+  const handleDropDownChange = (e, setFunction) => {
+    setFunction({
+      value: e.target[e.target.options.selectedIndex].id,
+      error: ""
+    });
+  };
 
-  //         const appDetail = {
-  //           name: data.name,
-  //           owner: data.owner,
-  //           type: data.type,
-  //           org: data.org,
-  //           createdBy: data.data,
-  //           createdAt: data.createdAt,
-  //           updatedAt: data.updatedAt,
-  //           id: data.id,
-  //           createdUser: data.createdUser.fullname
-  //         };
-  //         actions(DATA_FETCH, appDetail);
-  //         const permission = auth.authorize(
-  //           PERMISSIONS_CONSTANTS.RESOURCE.APPLICATIONS,
-  //           PERMISSIONS_CONSTANTS.ACTION.EDIT,
-  //           "",
-  //           permissions,
-  //           data.name
-  //         );
-  //         setAccess(!permission);
-  //         spinner.setShowLoader(false);
-  //       })
-  //       .catch(err => {
-  //         setError(err);
-  //         spinner.setShowLoader(false);
-  //       })
-  //   ]);
-  // }, [match.params.applicationId]);
+  const handleTextChange = (e, setFunction) => {
+    setFunction({ value: e.target.value, error: "" });
+  };
 
-  // const alertUser = e => {
-  //   e.preventDefault();
-  //   e.returnValue = "There are unsaved changes, do you want to discard them?";
-  // };
-
-  // useEffect(() => {
-  //   if (disableSave) {
-  //     return undefined;
-  //   }
-  //   window.addEventListener("beforeunload", alertUser);
-  //   return () => {
-  //     window.removeEventListener("beforeunload", alertUser);
-  //   };
-  // }, [disableSave]);
-
-  // const handleTextChange = e => {
-  //   setDisabledSave(false);
-  //   actions(APP_DETAIL_UPDATE_FORM, {
-  //     target: e.target.name,
-  //     value: e.target.value
-  //   });
-  // };
-
-  // const updateApp = () => {
-  //   const payload = {
-  //     name: state.data.name,
-  //     owner: state.data.owner,
-  //     type: state.data.type,
-  //     org: state.data.org
-  //   };
-  //   applicationSchema
-  //     .validate(payload, { abortEarly: false })
-  //     .then(() => {
-  //       spinner.setShowLoader(true);
-  //       updateApplication(match.params.applicationId, payload)
-  //         .then(response => {
-  //           setDisabledSave(true);
-  //           spinner.setShowLoader(false);
-  //           showToast({
-  //             type: "success",
-  //             message: (
-  //               <UpdatedSuccessToastMessage
-  //                 object="application"
-  //                 recordName={state.data.name}
-  //               />
-  //             )
-  //           });
-  //           props.actions(RERENDER);
-  //           actions(UPDATE_SUCCESS, response.data);
-  //         })
-  //         .catch(err => {
-  //           spinner.setShowLoader(false);
-  //           showToast({
-  //             type: "error",
-  //             message: <PlainToastMessage message={errorHandling(err)} />
-  //           });
-  //         });
-  //     })
-  //     .catch(errors => {
-  //       actions(APPLICATION_SHOW_ERROR, utils.processValidationError(errors));
-  //     });
-  // };
+  useEffect(() => {
+    requestService. getSenderList().then(data => {
+      setSenderList(data.data.data);
+    });
+  }, []);
 
   return (
-    <div>
-      <h1>Request Payment</h1>
-    </div>
-    //   <div>
-    //     <Prompt
-    //       when={!disableSave}
-    //       message="There are unsaved changes, do you want to discard them?"
-    //     />
-    //     <div id="detailstab" className="formpanel">
-    //       <div className="form-group">
-    //         <label id="label-name" htmlFor="name">
-    //           Name <span style={{ color: "red" }}>*</span>:
-    //         </label>
-    //         <input
-    //           type="text"
-    //           className="form-control"
-    //           name="name"
-    //           id="name"
-    //           defaultValue={state.data.name}
-    //           value={state.data.name}
-    //           onChange={handleTextChange}
-    //           disabled={access}
-    //           required={!access}
-    //         />
-    //         <div className="error-message">{state.errors.name}</div>
-    //       </div>
-    //       <div className="form-group">
-    //         <label htmlFor="owner">
-    //           Owner <span style={{ color: "red" }}>*</span>:
-    //         </label>
-    //         <input
-    //           type="text"
-    //           className="form-control"
-    //           name="owner"
-    //           id="owner"
-    //           defaultValue={state.data.owner}
-    //           value={state.data.owner}
-    //           onChange={e => handleTextChange(e)}
-    //           disabled={access}
-    //         />
-    //         <div className="error-message">{state.errors.owner}</div>
-    //       </div>
-    //       <div className="form-group">
-    //         <label htmlFor="type">Type:</label>
-    //         <select
-    //           className="form-control"
-    //           id="type"
-    //           name="type"
-    //           defaultValue={state.data.type}
-    //           value={state.data.type}
-    //           onChange={e => handleTextChange(e)}
-    //           disabled={access}
-    //           required="required"
-    //         >
-    //           {CONSTANTS.applicationTypes.map(item => (
-    //             <option key={item}>{item}</option>
-    //           ))}
-    //         </select>
-    //       </div>
-    //       <div className="form-group">
-    //         <label htmlFor="type">Org:</label>
-    //         <select
-    //           className="form-control"
-    //           id="org"
-    //           name="org"
-    //           defaultValue={state.data.org}
-    //           value={state.data.org}
-    //           onChange={e => handleTextChange(e)}
-    //           disabled={access}
-    //           required="required"
-    //         >
-    //           {orgInfo.map(item => (
-    //             <option value={item.id}>{item.name}</option>
-    //           ))}
-    //         </select>
-    //       </div>
-    //       <div className="form-group">
-    //         <label htmlFor="owner">Created:</label>
-    //         <input
-    //           type="text"
-    //           className="form-control"
-    //           name="createdAt"
-    //           id="createdAt"
-    //           defaultValue={state.data.createdAt}
-    //           value={state.data.createdAt}
-    //           onChange={e => handleTextChange(e)}
-    //           disabled
-    //         />
-    //       </div>
-    //       <div className="form-group">
-    //         <label htmlFor="owner">Created By:</label>
-    //         <input
-    //           type="text"
-    //           className="form-control"
-    //           name="createdBy"
-    //           id="createdBy"
-    //           defaultValue={state.data.createdUser}
-    //           value={state.data.createdUser}
-    //           onChange={e => handleTextChange(e)}
-    //           disabled
-    //         />
-    //       </div>
-    //     </div>
-    //   </div>
-  );
-};
+    <div className="card-body">
+      <div className="form-group">
+        <div>
+          <div className="font-14 font-w-500 mb-2">
+            <Mandatory> User to Pay</Mandatory>
+          </div>
+          <select
+            className="form-control"
+            id="sender"
+            style={{ width: "100%" }}
+            onChange={e => handleDropDownChange(e, setSender)}
+            selected={sender.value}
+          >
+            <option
+              id="notselected"
+              value="--Select A Value--"
+              disabled
+              selected
+            >
+              --Select A Value--
+            </option>
+            {Object.keys(senderList).map(item => (
+              <option id={senderList[item]} value={selectedList[item]}>
+                {item}
+              </option>
+            ))}
+          </select>
+          <div className="error-message">{sender.error}</div>
+        </div>
 
-RequestPayment.propTypes = {
-  match: PropTypes.shape({
-    params: PropTypes.shape({
-      applicationId: PropTypes.string
-    })
-  }).isRequired,
-  actions: PropTypes.func.isRequired
+        <label htmlFor="setAmountToRequest">
+          <Mandatory>Amount</Mandatory>
+        </label>
+        <input
+          placeholder="1000"
+          type="number"
+          className="form-control"
+          name="setAmountToRequest"
+          id="setAmountToRequest"
+          value={amountToRequest.value}
+          onChange={e => handleTextChange(e, setAmountToRequest)}
+        />
+        
+      </div>
+      
+      <br />
+      <div className="floatright">
+        <Button onClick={validateSubmission}>Save</Button>
+      </div>
+    </div>
+  );
 };
 
 export default RequestPayment;
