@@ -6,6 +6,7 @@ import NewPayment from "./component/Payment/NewPayment";
 import AddPaymentMethod from "./component/PaymentMethod/AddPaymentMethod";
 import Login from "./component/Login/Login";
 import Signup from "./component/Signup/Signup";
+import CreateUser from "./component/UserInfo/CreateUser";
 
 const Routes = () => (
   <Switch>
@@ -14,6 +15,7 @@ const Routes = () => (
     <Route exact path="/add_payment_method" component={AddPaymentMethod} />
     <Route exact path="/login" component={Login} />
     <Route exact path="/signup" component={Signup} />
+    <Route exact path="/createuser" component={CreateUser} />
   </Switch>
 );
 

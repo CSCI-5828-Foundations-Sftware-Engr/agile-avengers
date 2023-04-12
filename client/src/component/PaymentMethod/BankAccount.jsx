@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
 import Mandatory from "../../common/component/Mandatory";
-import { debitCardSchema } from "../../common/schema";
+import { bankAccountSchema } from "../../common/schema";
 import { utils } from "../../common/utils";
 import paymentMethodService from "../../services/payment/paymentMethodService";
 
