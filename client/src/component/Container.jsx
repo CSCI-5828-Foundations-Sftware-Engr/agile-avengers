@@ -7,6 +7,7 @@ import { AuthContext } from "./Context/Authcontext";
 
 import Routes from "../Routes";
 
+
 const Container = () => {
   const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
   return (
@@ -26,13 +27,19 @@ const Container = () => {
       </header>
       <div className="position-relative">
         <ul className="nav nav-tabs">
-          {/* <NavigationItem link="/">Home</NavigationItem> */}
-          <NavigationItem link="/payment">
-            Send or Request Payment
-          </NavigationItem>
+          {isLoggedIn ? (
+            <>
+            <NavigationItem link="/payment"> Send or Request Payment </NavigationItem>
           <NavigationItem link="/add_payment_method">
             Add Payment Methods
           </NavigationItem>
+          </>
+          ) : (
+            <>
+              <NavigationItem link="/login">Login</NavigationItem>
+              <NavigationItem link="/signup">Sign Up</NavigationItem>
+            </>
+          )}
         </ul>
       </div>
       <div className="body-content">
@@ -41,7 +48,7 @@ const Container = () => {
       <footer>
         <div className="footer">
           <span>
-            <a className="link-white" href="mailto:hemanth@colorado.com">
+            <a className="link-white" href="mailto:agileavengers@gmail.com">
               Contact us
             </a>
           </span>
