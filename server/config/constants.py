@@ -5,5 +5,5 @@ DB_CREDENTIALS = {
     "PASSWORD": "password",
     "SSLCERT": "",
     "SSLKEY": "",
-    "SSLROOTCERT": "",
+    "SSLROOTCERT": ""
 }
