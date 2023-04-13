@@ -3,10 +3,13 @@ import NavigationItem from "../common/component/NavigationItem";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser } from "@fortawesome/free-solid-svg-icons";
 import { faFontAwesome } from "@fortawesome/free-brands-svg-icons";
+import { AuthContext } from "./Context/Authcontext";
 
 import Routes from "../Routes";
 
+
 const Container = () => {
+  const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
   return (
     <div>
       <header>
@@ -24,9 +27,8 @@ const Container = () => {
       </header>
       <div className="position-relative">
         <ul className="nav nav-tabs">
-          
+          {/* <NavigationItem link="/">Home</NavigationItem> */}
           <NavigationItem link="/payment">Payment</NavigationItem>
-          {/* <NavigationItem link="/logout">Log Out</NavigationItem> */}
         </ul>
       </div>
       <div className="body-content">
@@ -35,7 +37,7 @@ const Container = () => {
       <footer>
         <div className="footer">
           <span>
-            <a className="link-white" href="mailto:hemanth@colorado.com?cc=rudh9897@colorado.edu,aija">
+            <a className="link-white" href="mailto:hemanth@colorado.com">
               Contact us
             </a>
           </span>
