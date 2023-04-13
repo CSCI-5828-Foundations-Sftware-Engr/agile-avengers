@@ -120,9 +120,20 @@ def get_user_info(user_id):
     else:
         return jsonify({'message': 'User not found'})
     
+
+#route to create users
+
+@app.route(api_url + '/userinfo/createuser', methods=['POST'])
+def create_user():
+    data = request.json
+    user = UserInfo(user_id=data['user_id'], first_name=data['first_name'], last_name=data['last_name'], mobile_number=data['mobile_number'], email_id=data['email_id'], is_merchant=data['is_merchant'], created_on = datetime.now(), created_by= data['user_id'], updated_on = datetime.now(), updated_by=data['user_id'])
+    db.session.add(user)
+    db.session.commit()
+    return 'User created successfully'
+    
 # route to create random users
 
-@app.route(api_url +'/create_users')
+@app.route(api_url +'/userinfo/randomusers')
 def create_users():
     for i in range(10):
         user_id = ''.join(random.choices(string.digits, k=5))
