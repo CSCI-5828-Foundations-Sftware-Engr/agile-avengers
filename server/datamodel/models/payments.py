@@ -21,13 +21,3 @@ class Transaction(Base):
     created_by = Column(String(30))
     updated_on = Column(DateTime)
     updated_by = Column(String(30))
-
-class RequestedPayments(Base):
-    __tablename__ = "requested_payments"
-
-    transaction_id = Column(Integer, ForeignKey("transaction.transaction_id"), primary_key=True)
-    payer_id = Column(Integer, ForeignKey(UserInfo.user_id))
-    payee_id = Column(Integer, ForeignKey(UserInfo.user_id))
-    is_pending = Column(Boolean)
-    amount_requested = Column(FLOAT())
-    

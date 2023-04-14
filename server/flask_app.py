@@ -276,23 +276,24 @@ def get_all_payment_methods(user_id):
     try:
         if user_exists(user_id, session):
             method_dict = {}
+            
             # get all bank accounts
             bank_info = session.query(BankAccount).filter_by(user_id=user_id).all()
             if bank_info:
                 for bank in bank_info:
-                    method_dict[f"{bank.bank_name}_{bank.account_number[-4:]}"] = bank.account_number
+                    method_dict[f"{bank.bank_name}_{bank.account_number[-4:]}"] = {"id": bank.account_number, "method": "bank"}
             
             # get all credit cards
             credit_cards = session.query(CreditCard).filter_by(user_id=user_id).all()
             if credit_cards:
                 for card in credit_cards:
-                    method_dict[f"{card.card_network}_{card.card_number[-4:]}"] = card.card_number
+                    method_dict[f"{card.card_network}_{card.card_number[-4:]}"] = {"id": card.card_number, "method": "credit"}
 
             # get all debit cards 
             debit_cards = session.query(DebitCard).filter_by(user_id=user_id).all()
             if debit_cards:
                 for card in debit_cards:
-                    method_dict[f"{card.card_network}_{card.card_number[-4:]}"] = card.card_number
+                    method_dict[f"{card.card_network}_{card.card_number[-4:]}"] = {"id": card.card_number, "method": "credit"}
             return make_response(jsonify({"status": "Success", "data": method_dict}), 200)
             
         else:
@@ -329,11 +330,12 @@ def get_payee_list():
 
     # return {"status": "Success", "data": {"aishwarya123": "123", "hemanth234": "234", "namratha345": "345"}}
 
-
 @app.route(f"{payment_route}/send", methods=["POST"])
-def make_payment():
+@app.route(f"{payment_route}/send/<transaction_id>", methods=["POST"])
+def make_payment(transaction_id=None):
     data = request.get_json()
-    payee_id=data["payee_id"]
+    payer_id = data["payer_id"]
+    payee_id = data["payee_id"]
     transaction_method = data["transaction_method"]
     transaction_method_id = data["transaction_method_id"]
     transaction_amount = data["transaction_amount"]
@@ -344,17 +346,27 @@ def make_payment():
         if not is_valid:
             return make_response(jsonify(err_resp), 400)
         
-        # create a new transaction
-        transaction = Transaction (
-            payer_id=data["payer_id"],
-            payee_id=payee_id,
-            transaction_amount=transaction_amount,
-            transaction_method=transaction_method,
-            transaction_method_id=transaction_method_id,
-            is_completed = True,
-            created_on=datetime.now(),
-            created_by=data["payer_id"]
-        )
+        if not transaction_id:
+            # create a new transaction
+            transaction = Transaction (
+                payer_id=payer_id,
+                payee_id=payee_id,
+                transaction_amount=transaction_amount,
+                transaction_method=transaction_method,
+                transaction_method_id=transaction_method_id,
+                is_completed = True,
+                created_on=datetime.now(),
+                created_by=payer_id
+            )
+            # add the transaction to the session
+            session.add(transaction)
+        else: # @TODO verify if the transaction_id is correct and if it is already completed or not
+            transaction = session.query(Transaction).filter_by(transaction_id=transaction_id).first()
+            transaction.transaction_method=transaction_method,
+            transaction.transaction_method_id=transaction_method_id,
+            transaction.updated_on = datetime.now()
+            transaction.updated_by = payer_id
+            transaction.is_completed = True
 
         # update the balance/credit limit for payer
         if transaction_method == "bank":
@@ -372,9 +384,6 @@ def make_payment():
         bank = session.query(BankAccount).filter_by(user_id=payee_id).first()
         bank.account_balance += transaction_amount
 
-        # add the transaction to the session
-        session.add(transaction)
-
         # commit the changes
         session.commit()
         
@@ -385,6 +394,68 @@ def make_payment():
         make_response(jsonify({"message": "Server Error"}), 500)
 
 
+@app.route(f"{payment_route}/request", methods=["POST"])
+def request_payment():
+    data = request.get_json()
+    requestor_id = data["requestor_id"]
+    sender_id = data["sender_id"]
+    amount = data["transaction_amount"]
+
+    try:
+        if user_exists(requestor_id, session) and user_exists(sender_id, session):
+            transaction = Transaction (
+                payer_id = sender_id,
+                payee_id = requestor_id,
+                transaction_amount = amount,
+                is_completed = False,
+                created_on = datetime.now(),
+                created_by = requestor_id
+            )
+            session.add(transaction)
+            session.commit()
+
+            return make_response(jsonify({"message": "Transaction Request successful"}), 201)
+
+        else:
+            return make_response(jsonify({"message": "User does not exists"}), 404)
+
+    except Exception as ex:
+        traceback.print_exc()
+        make_response(jsonify({"message": "Server Error"}), 500)
+
+
+@app.route(f"{payment_route}/pending_requests/<user_id>", methods=["GET"])
+def get_pending_requests(user_id):
+    try:
+        if not user_id:
+            return make_response(jsonify({"message": "User-id is required"}), 400)
+        if user_exists(user_id, session):
+            requests = []
+            transactions = session.query(Transaction).filter_by(payer_id=user_id, is_completed=False).all()
+            for transaction in transactions:
+                requestor_id = transaction.payee_id
+                user = session.query(UserInfo).filter_by(user_id=requestor_id).first()
+                payment = {
+                    "requestor_id": requestor_id,
+                    "requestor_name": f"{user.first_name} {user.last_name}",
+                    "transaction_amount": transaction.transaction_amount,
+                    "transaction_id": transaction.transaction_id
+                }
+                requests.append(payment)
+            
+            return make_response(jsonify({"message": "Success", "data": requests}), 200)
+            
+        else:
+            return make_response(jsonify({"message": "User does not exists"}), 404)
+
+    except Exception as ex:
+        traceback.print_exc()
+        make_response(jsonify({"message": "Server Error"}), 500)
+
+
+@app.route(api_url + "/add_new_credit_card", methods=["POST"])
+def add_new_credit_card():
+    return {"status": "Success"}
 
 #route to add debit card and billing details using input from user
 
