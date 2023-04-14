@@ -103,8 +103,8 @@ def get_user_info(user_id):
             }
         )
     else:
-        return jsonify({"message": "User not found"})
-#route to create user using input from user
+        return make_response(jsonify({'message': 'User not found'}),403)
+    
 
 
 @app.route(api_url + "/userinfo/create_user", methods=['POST'])
@@ -135,6 +135,7 @@ def update_user_info(user_id):
     data = request.json()
     user = session.query(UserInfo).filter_by(user_id=user_id).first()
     if user:
+        
         user.first_name = data["first_name"]
         user.last_name = data["last_name"]
         user.mobile_number = data["mobile_number"]
@@ -156,7 +157,7 @@ def update_user_info(user_id):
         )
 
     else:
-        return jsonify({"message": "User not found"})
+        return make_response(jsonify({'message': 'User not found'}),403)
 
 
 
@@ -171,10 +172,11 @@ def delete_user_info(user_id):
         session.commit()
         return jsonify({"result": True})
     else:
-        return jsonify({"message": "User not found"})
+        return make_response(jsonify({'message': 'User not found'}),403)
+
+
     
-
-
+    
 
 
 
