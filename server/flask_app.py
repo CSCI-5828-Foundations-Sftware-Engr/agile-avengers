@@ -278,7 +278,7 @@ def make_payment():
     return {"status": "Success"}
 
 
-@app.route(api_url + "/add_new_credit_card", methods=["POST"])
+@app.route(api_url + "/creditcard/add", methods=["POST"])
 def add_new_credit_card():
     billing_address = request.json.get('billing_address')
     postal_code = request.json.get('postal_code')
@@ -309,14 +309,20 @@ def add_new_credit_card():
     return {"status": "Success"}
 
 
-@app.route(api_url + "/delete_credit_card", methods=["DELETE"])
+@app.route(api_url + "/creditcard/delete", methods=["DELETE"])
 def delete_credit_card():
     
     return {"status": "Credit card deleted successfully"}
 
-@app.route(api_url + "/add_new_debit_card", methods=["POST"])
+
+@app.route(api_url + "/debitcard/add", methods=["POST"])
 def add_new_debit_card():
     return {"status": "Success"}
+
+@app.route(api_url + "/debitcard/delete", methods=["DELETE"])
+def delete_credit_card():
+    
+    return {"status": "Debit card deleted successfully"}
 
 
 if __name__ == "__main__":
