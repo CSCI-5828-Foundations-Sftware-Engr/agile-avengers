@@ -130,7 +130,7 @@ def create_users():
 # route to update user_info
 
 
-@app.route(api_url + "/userinfo/update/<user_id>")
+@app.route(api_url + "/userinfo/update/<user_id>",methods=["PUT"])
 def update_user_info(user_id):
     data = request.json()
     user = session.query(UserInfo).filter_by(user_id=user_id).first()
@@ -163,8 +163,7 @@ def update_user_info(user_id):
 
 # route to delete user
 
-
-@app.route(api_url + "/userinfo/delete/<user_id>")
+@app.route(api_url + "/userinfo/delete/<user_id>", methods=["DELETE"])
 def delete_user_info(user_id):
     user = session.query(UserInfo).filter_by(user_id=user_id).first()
     if user:
@@ -177,7 +176,7 @@ def delete_user_info(user_id):
 
 #route to add debit card and billing details using input from user
 
-@app.route(api_url + "debitcard/add", methods=['POST'])
+@app.route(api_url + "/userinfo/debitcard/add", methods=['POST'])
 def add_debitcard():
     data = request.get_json()
     billing_address = data['billing_address']
@@ -206,7 +205,7 @@ def add_debitcard():
 
 #route to delete debit card and billing details
 
-@app.route(api_url + "/userinfo/delete/<card_number>", methods=["DELETE"])
+@app.route(api_url + "/userinfo/debitcard/delete/<card_number>", methods=["DELETE"])
 def delete_debitcard(card_number):
     debitcard = session.query(DebitCard).filter_by(card_number=card_number).first()
     billingaddress=session.query(BillingInfo).filter_by(billing_info_id=debitcard['billing_info_id']).first()
@@ -219,7 +218,7 @@ def delete_debitcard(card_number):
         return make_response(jsonify({'message': 'User not found'}),403)
 
 
-@app.route(api_url + "userinfo/creditcard/add", methods=["POST"])
+@app.route(api_url + "/userinfo/creditcard/add", methods=["POST"])
 def add_new_credit_card():
     billing_address = request.json.get('billing_address')
     postal_code = request.json.get('postal_code')
@@ -250,7 +249,7 @@ def add_new_credit_card():
     return {"status": "Success"}
 
 
-@app.route(api_url + "userinfo/creditcard/delete/<card_number>", methods=["DELETE"])
+@app.route(api_url + "/userinfo/creditcard/delete/<card_number>", methods=["DELETE"])
 def delete_credit_card(card_number):
     creditcard = session.query(CreditCard).filter_by(card_number=card_number).first()
     billingaddress=session.query(BillingInfo).filter_by(billing_info_id=creditcard['billing_info_id']).first()
