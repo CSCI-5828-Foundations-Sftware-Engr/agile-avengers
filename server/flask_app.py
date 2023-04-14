@@ -8,12 +8,13 @@ import sys
 import traceback
 from datetime import datetime
 
-import sqlalchemy
+# import sqlalchemy
 import sqlalchemy as db
 from flask import Flask, abort, jsonify, make_response, render_template, request
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import MetaData, create_engine
+from sqlalchemy.orm import Session
 from sqlalchemy.orm import sessionmaker
 from werkzeug.exceptions import HTTPException
 
@@ -21,6 +22,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "./"))
 from config.constants import DB_CREDENTIALS
 from datamodel.models.userinfo import UserInfo
 from helpers.user_management import check_userinfo, create_new_user, user_login, user_logout
+
 
 app = Flask(
     __name__,
@@ -30,23 +32,13 @@ app = Flask(
 )
 
 
-# connecting to postgres database
-DATABASE_URI = "postgresql://{}:{}@{}/{}".format(
-    DB_CREDENTIALS["USERNAME"],
-    DB_CREDENTIALS["PASSWORD"],
-    DB_CREDENTIALS["HOSTNAME"],
-    DB_CREDENTIALS["DB_NAME"],
-)
-engine = create_engine(DATABASE_URI)
-Session = sessionmaker(bind=engine)
-session = Session()
-
 
 api_url = "/api/v1/"
 CORS(app)
 
-engine = sqlalchemy.create_engine("postgresql://postgres:password@localhost:5432/agile_avengers")
-Session = sessionmaker(engine)
+engine = create_engine("postgresql://admin:password@localhost:5432/agile_avengers")
+Session = sessionmaker(bind=engine)
+session = Session()
 
 if __name__ != "__main__":
     gunicorn_error_logger = logging.getLogger("gunicorn.error")
@@ -112,46 +104,28 @@ def get_user_info(user_id):
         )
     else:
         return jsonify({"message": "User not found"})
+#route to create user using input from user
 
 
-# route to create random users
-
-
-@app.route(api_url + "/create_users")
+@app.route(api_url + "userinfo/create_user", methods=['POST'])
 def create_users():
-    for i in range(10):
-        user_id = "".join(random.choices(string.digits, k=5))
-        first_name = "".join(random.choices(string.ascii_lowercase, k=5))
-        last_name = "".join(random.choices(string.ascii_lowercase, k=5))
-        mobile_number = "".join(random.choices(string.digits, k=10))
-        email_id = first_name.lower() + "." + last_name.lower() + "@example.com"
-        is_merchant = True
-        created_on = datetime.now()
-        created_by = user_id
-        updated_on = datetime.now()
-        updated_by = user_id
-
-        # create a new user
-        user = UserInfo(
-            user_id=user_id,
-            first_name=first_name,
-            last_name=last_name,
-            mobile_number=mobile_number,
-            email_id=email_id,
-            is_merchant=is_merchant,
-            created_on=created_on,
-            created_by=created_by,
-            updated_on=updated_on,
-            updated_by=updated_by,
-        )
-
-        # add the user to the session
-        session.add(user)
-
-    # commit the changes
+    data = request.get_json()
+    user_id = data['user_id']
+    user_name = data['user_name']
+    first_name = data['first_name']
+    last_name = data['last_name']
+    mobile_number = data['mobile_number']
+    email_id = data['email_id']
+    is_merchant = data['is_merchant']
+    created_on = datetime.now()
+    created_by = data['user_id']
+    updated_on = datetime.now()
+    updated_by = data['user_id']
+    user = UserInfo(user_id = user_id,user_name=user_name, first_name=first_name, last_name=last_name, mobile_number=mobile_number, email_id=email_id, is_merchant=is_merchant, created_on=created_on, created_by=created_by, updated_on=updated_on, updated_by=updated_by)
+    session.add(user)
     session.commit()
-
-    return jsonify({"message": "10 users created successfully"})
+    return jsonify({'message': 'User created successfully'})
+    
 
 
 # route to update user_info
@@ -186,41 +160,7 @@ def update_user_info(user_id):
         return jsonify({"message": "User not found"})
 
 
-# @app.route(api_url +'/create_users')
-# def create_users():
-#     for i in range(10):
-#         user_id = ''.join(random.choices(string.digits, k=5))
-#         first_name = ''.join(random.choices(string.ascii_lowercase, k=5))
-#         last_name = ''.join(random.choices(string.ascii_lowercase, k=5))
-#         mobile_number = ''.join(random.choices(string.digits, k=10))
-#         email_id = first_name.lower() + '.' + last_name.lower() + '@example.com'
-#         is_merchant = True
-#         created_on = datetime.now()
-#         created_by = user_id
-#         updated_on = datetime.now()
-#         updated_by = user_id
 
-#         # create a new user
-#         user = UserInfo(
-#             user_id=user_id,
-#             first_name=first_name,
-#             last_name=last_name,
-#             mobile_number=mobile_number,
-#             email_id=email_id,
-#             is_merchant=is_merchant,
-#             created_on=created_on,
-#             created_by=created_by,
-#             updated_on=updated_on,
-#             updated_by=updated_by
-#         )
-
-#         # add the user to the session
-#         session.add(user)
-
-#     # commit the changes
-#     session.commit()
-
-#     return jsonify({'message': '10 users created successfully'})
 # route to delete user
 
 

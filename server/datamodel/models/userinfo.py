@@ -6,7 +6,8 @@ Base = declarative_base()
 class UserInfo(Base):
     __tablename__ = "user_info"
 
-    user_id = Column(String(30), primary_key=True)
+    user_id = Column(Integer, autoincrement=True, primary_key=True)
+    user_name = Column(String(30))
     first_name = Column(String(30))
     last_name = Column(String(30))
     mobile_number = Column(String(10))
@@ -21,7 +22,7 @@ class BankAccount(Base):
     __tablename__ = "bank_account"
 
     account_number = Column(String(30), primary_key=True)
-    user_id = Column(String(30), ForeignKey("user_info.user_id"))
+    user_id = Column(Integer, ForeignKey("user_info.user_id"))
     account_holders_name = Column(String(30))
     account_balance = Column(FLOAT())
     bank_name = Column(String(30))
@@ -44,10 +45,11 @@ class DebitCard(Base):
     __tablename__ = "debit_card"
 
     card_number = Column(String(16), primary_key=True)
-    user_id = Column(String(30), ForeignKey("user_info.user_id"))
+    user_id = Column(Integer, ForeignKey("user_info.user_id"))
     card_network = Column(String(30))
     cvv = Column(String(30))
     billing_info_id = Column(Integer, ForeignKey("billing_info.billing_info_id"))
+    bank_account_number = Column(String(30), ForeignKey("bank_account.account_number"))
     created_on = Column(DateTime)
     created_by = Column(String(30))
     updated_on = Column(DateTime)
@@ -57,7 +59,7 @@ class CreditCard(Base):
     __tablename__ = "credit_card"
 
     card_number = Column(String(16), primary_key=True)
-    user_id = Column(String(30), ForeignKey("user_info.user_id"))
+    user_id = Column(Integer, ForeignKey("user_info.user_id"))
     card_network = Column(String(30))
     cvv = Column(String(30))
     billing_info_id = Column(Integer, ForeignKey("billing_info.billing_info_id"))
@@ -73,4 +75,4 @@ class Merchant(Base):
     merchant_name = Column(String)
     category = Column(String)
     sub_category = Column(String)
-    user_id = Column(String(30), ForeignKey("user_info.user_id"))
+    user_id = Column(Integer, ForeignKey("user_info.user_id"))
