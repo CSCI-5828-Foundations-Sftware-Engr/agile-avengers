@@ -309,13 +309,16 @@ def add_new_credit_card():
 @app.route(api_url + "/creditcard/delete/<card_number>", methods=["DELETE"])
 def delete_credit_card(card_number):
     credit_card = session.query(CreditCard).filter_by(card_number=card_number).first()
-
+    billingaddress=session.query(BillingInfo).filter_by(billing_info_id=credit_card['billing_info_id']).first()
+    
     if credit_card:
+        session.delete(billingaddress)
+        session.commit()
         session.delete(credit_card)
         session.commit()
-        return {"status": "Credit card deleted successfully"}
+        return jsonify({"result": True})
     else:
-        return {"status": "Error", "message": "Credit card not found"}
+        return jsonify({'message': 'User not found'})
     
 
 #route to add debit card and billing details using input from user
