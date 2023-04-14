@@ -1,33 +1,28 @@
 import json
 import logging
 import os
+import random
 import socket
+import string
 import sys
 import traceback
 from datetime import datetime
-import sqlalchemy
-from sqlalchemy.orm import sessionmaker
 
-from flask import Flask, abort, jsonify, render_template, request, make_response
-
-
-
-from flask_cors import CORS
-from werkzeug.exceptions import HTTPException
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import create_engine,MetaData
+# import sqlalchemy
 import sqlalchemy as db
-import random
-import string
+from flask import Flask, abort, jsonify, make_response, render_template, request
+from flask_cors import CORS
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import MetaData, create_engine
+from sqlalchemy.orm import Session
 from sqlalchemy.orm import sessionmaker
-
+from werkzeug.exceptions import HTTPException
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "./"))
-from datamodel.models.userinfo import UserInfo
 from config.constants import DB_CREDENTIALS
-
-from helpers.user_management import create_new_user, user_login, user_logout, check_userinfo
 from datamodel.models.userinfo import UserInfo
+from helpers.user_management import check_userinfo, create_new_user, user_login, user_logout
+
 
 app = Flask(
     __name__,
@@ -38,22 +33,12 @@ app = Flask(
 
 
 
-#connecting to postgres database
-DATABASE_URI = "postgresql://{}:{}@{}/{}".format(
-    DB_CREDENTIALS["USERNAME"], DB_CREDENTIALS["PASSWORD"], DB_CREDENTIALS["HOSTNAME"], DB_CREDENTIALS["DB_NAME"],
-)
-engine=create_engine(DATABASE_URI)
-Session =sessionmaker(bind=engine)
-session=Session()
-
-
-
-
 api_url = "/api/v1/"
 CORS(app)
 
-engine = sqlalchemy.create_engine("postgresql://postgres:password@localhost:5432/agile_avengers")
-Session = sessionmaker(engine)
+engine = create_engine("postgresql://admin:password@localhost:5432/agile_avengers")
+Session = sessionmaker(bind=engine)
+session = Session()
 
 if __name__ != "__main__":
     gunicorn_error_logger = logging.getLogger("gunicorn.error")
@@ -100,7 +85,7 @@ def get_current_time():
     }
 
 
-@app.route(api_url +'/userinfo/<user_id>', methods=['GET'])
+@app.route(api_url + "/userinfo/<user_id>", methods=["GET"])
 def get_user_info(user_id):
     user = session.query(UserInfo).filter_by(user_id=user_id).first()
     if user:
@@ -118,94 +103,91 @@ def get_user_info(user_id):
             }
         )
     else:
+<<<<<<< HEAD
         return make_response(jsonify({'message': 'User not found'}),403)
     
 # route to create random users
+=======
+        return jsonify({"message": "User not found"})
+#route to create user using input from user
+>>>>>>> 947fa972c82550ccaf453999b4bc081434c2fc13
 
-@app.route(api_url +'/create_users')
+
+@app.route(api_url + "userinfo/create_user", methods=['POST'])
 def create_users():
-    for i in range(10):
-        user_id = ''.join(random.choices(string.digits, k=5))
-        first_name = ''.join(random.choices(string.ascii_lowercase, k=5))
-        last_name = ''.join(random.choices(string.ascii_lowercase, k=5))
-        mobile_number = ''.join(random.choices(string.digits, k=10))
-        email_id = first_name.lower() + '.' + last_name.lower() + '@example.com'
-        is_merchant = True
-        created_on = datetime.now()
-        created_by = user_id
-        updated_on = datetime.now()
-        updated_by = user_id
-
-        # create a new user
-        user = UserInfo(
-            user_id=user_id,
-            first_name=first_name,
-            last_name=last_name,
-            mobile_number=mobile_number,
-            email_id=email_id,
-            is_merchant=is_merchant,
-            created_on=created_on,
-            created_by=created_by,
-            updated_on=updated_on,
-            updated_by=updated_by
-        )
-
-        # add the user to the session
-        session.add(user)
-
-    # commit the changes
+    data = request.get_json()
+    user_id = data['user_id']
+    user_name = data['user_name']
+    first_name = data['first_name']
+    last_name = data['last_name']
+    mobile_number = data['mobile_number']
+    email_id = data['email_id']
+    is_merchant = data['is_merchant']
+    created_on = datetime.now()
+    created_by = data['user_id']
+    updated_on = datetime.now()
+    updated_by = data['user_id']
+    user = UserInfo(user_id = user_id,user_name=user_name, first_name=first_name, last_name=last_name, mobile_number=mobile_number, email_id=email_id, is_merchant=is_merchant, created_on=created_on, created_by=created_by, updated_on=updated_on, updated_by=updated_by)
+    session.add(user)
     session.commit()
-
-    return jsonify({'message': '10 users created successfully'})
+    return jsonify({'message': 'User created successfully'})
     
+
+
 # route to update user_info
 
-@app.route(api_url +'/update_userinfo/<user_id>')
+
+@app.route(api_url + "/update_userinfo/<user_id>")
 def update_user_info(user_id):
-    data=request.json()
+    data = request.json()
     user = session.query(UserInfo).filter_by(user_id=user_id).first()
     if user:
         
-            user.first_name =data["first_name"]
-            user.last_name = data["last_name"]
-            user.mobile_number= data["mobile_number"]
-            user.email_id= data["email_id"]
-            # 'is_merchant' : user.is_merchant,
-            # 'created_on': user.created_on,
-            # 'created_by' : user.created_by,
-            user.updated_on =datetime.now() 
-            user.updated_by =user_id
-            return jsonify({
-            'first_name': user.first_name,
-            'last_name': user.last_name,
-            'mobile_number': user.mobile_number,
-            'email': user.email_id,
-            'is_merchant' : user.is_merchant,
-            'created_on': user.created_on,
-            'created_by' : user.created_by,
-            'updated_on' : user.updated_on,
-            'updated_by' : user.updated_by,
+        user.first_name = data["first_name"]
+        user.last_name = data["last_name"]
+        user.mobile_number = data["mobile_number"]
+        user.email_id = data["email_id"]
+        user.updated_on = datetime.now()
+        user.updated_by = user_id
+        return jsonify(
+            {
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "mobile_number": user.mobile_number,
+                "email": user.email_id,
+                "is_merchant": user.is_merchant,
+                "created_on": user.created_on,
+                "created_by": user.created_by,
+                "updated_on": user.updated_on,
+                "updated_by": user.updated_by,
+            }
+        )
 
-        })   
-        
     else:
-        return make_response(jsonify({'message': 'User not found'}),403)    
-    
+        return make_response(jsonify({'message': 'User not found'}),403)
+
+
+
 # route to delete user
 
-@app.route(api_url +'/delete_userinfo/<user_id>')
+
+@app.route(api_url + "/delete_userinfo/<user_id>")
 def delete_user_info(user_id):
     user = session.query(UserInfo).filter_by(user_id=user_id).first()
     if user:
         session.delete(user)
         session.commit()
-        return jsonify({'result': True})
+        return jsonify({"result": True})
     else:
+<<<<<<< HEAD
         return make_response(jsonify({'message': 'User not found'}),403)
 
 
     
     
+=======
+        return jsonify({"message": "User not found"})
+>>>>>>> 947fa972c82550ccaf453999b4bc081434c2fc13
 
 
 base_route = f"/api/v1/auth"
@@ -267,6 +249,53 @@ def userinfo():
         return resp
 
     return make_response(jsonify({"message": "Unauthorized"}), 403)
+
+
+#   getAllPaymentMethods() {
+#     const url = `${instanceUrl}/api/v1/get_all_payment_methods`;
+#     return axios.get(url, config);
+#   },
+#   getPayeeList() {
+#     const url = `${instanceUrl}/api/v1/get_payee_list`;
+#     return axios.get(url, config);
+#   },
+#   makePayment(payload) {
+#     const url = `${instanceUrl}/api/v1/make_payment`;
+#     return axios.post(url, payload, config);
+#   }
+
+
+@app.route(api_url + "/get_all_payment_methods")
+def get_all_payment_methods():
+    return {
+        "status": "Success",
+        "data": {
+            "visa - 2232": "1223",
+            "Mastercard - 8881": "1234",
+            "Bank Account - 1223": "9302",
+            "American Express - 9282": "2323",
+        },
+    }
+
+
+@app.route(api_url + "/get_payee_list")
+def get_payee_list():
+    return {"status": "Success", "data": {"aishwarya123": "123", "hemanth234": "234", "namratha345": "345"}}
+
+
+@app.route(api_url + "/make_payment", methods=["POST"])
+def make_payment():
+    return {"status": "Success"}
+
+
+@app.route(api_url + "/add_new_credit_card", methods=["POST"])
+def add_new_credit_card():
+    return {"status": "Success"}
+
+
+@app.route(api_url + "/add_new_debit_card", methods=["POST"])
+def add_new_debit_card():
+    return {"status": "Success"}
 
 
 if __name__ == "__main__":
