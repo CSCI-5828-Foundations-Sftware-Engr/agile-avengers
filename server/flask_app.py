@@ -191,8 +191,10 @@ def add_debitcard():
     user_id = data['user_id']
     card_network = data['card_network']
     cvv = data['cvv']
-    # billing_info_id = billingaddress.billing_info_id
     billing_info_id = billinginfo.billing_info_id
+    a=session.query(BankAccount).filter_by(account_number=data['bank_account_number']).count()
+    if a==0:
+        return jsonify({'message': 'Incorrect Bank Account number'})
     bank_account_number = data['bank_account_number']
     created_on = datetime.now()
     created_by = data['user_id']
