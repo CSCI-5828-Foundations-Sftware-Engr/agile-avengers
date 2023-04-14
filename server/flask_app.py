@@ -8,19 +8,21 @@ import sys
 import traceback
 from datetime import datetime
 
-import sqlalchemy
+# import sqlalchemy
 import sqlalchemy as db
 from flask import Flask, abort, jsonify, make_response, render_template, request
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import MetaData, create_engine
+from sqlalchemy.orm import Session
 from sqlalchemy.orm import sessionmaker
 from werkzeug.exceptions import HTTPException
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "./"))
 from config.constants import DB_CREDENTIALS
-from datamodel.models.userinfo import UserInfo
+from datamodel.models.userinfo import UserInfo, CreditCard,DebitCard,BillingInfo,BankAccount,Merchant
 from helpers.user_management import check_userinfo, create_new_user, user_login, user_logout
+
 
 app = Flask(
     __name__,
@@ -30,23 +32,13 @@ app = Flask(
 )
 
 
-# connecting to postgres database
-DATABASE_URI = "postgresql://{}:{}@{}/{}".format(
-    DB_CREDENTIALS["USERNAME"],
-    DB_CREDENTIALS["PASSWORD"],
-    DB_CREDENTIALS["HOSTNAME"],
-    DB_CREDENTIALS["DB_NAME"],
-)
-engine = create_engine(DATABASE_URI)
-Session = sessionmaker(bind=engine)
-session = Session()
-
 
 api_url = "/api/v1/"
 CORS(app)
 
-engine = sqlalchemy.create_engine("postgresql://postgres:password@localhost:5432/agile_avengers")
-Session = sessionmaker(engine)
+engine = create_engine("postgresql://admin:password@localhost:5432/agile_avengers")
+Session = sessionmaker(bind=engine)
+session = Session()
 
 if __name__ != "__main__":
     gunicorn_error_logger = logging.getLogger("gunicorn.error")
@@ -72,7 +64,7 @@ def resource_not_found(e):
             request.headers.get("X-Remote-User"), error_object
         )
     )
-    return jsonify(error_object), code
+    return make_response(jsonify(error_object), code)
 
 
 @app.route("/", defaults={"path": ""})
@@ -93,7 +85,7 @@ def get_current_time():
     }
 
 
-@app.route(api_url + "/userinfo/<user_id>", methods=["GET"])
+@app.route(api_url + "/users/get/<user_id>", methods=["GET"])
 def get_user_info(user_id):
     user = session.query(UserInfo).filter_by(user_id=user_id).first()
     if user:
@@ -111,57 +103,39 @@ def get_user_info(user_id):
             }
         )
     else:
-        return jsonify({"message": "User not found"})
+        return make_response(jsonify({'message': 'User not found'}),403)
+    
 
 
-# route to create random users
-
-
-@app.route(api_url + "/create_users")
+@app.route(api_url + "/users/create", methods=['POST'])
 def create_users():
-    for i in range(10):
-        user_id = "".join(random.choices(string.digits, k=5))
-        first_name = "".join(random.choices(string.ascii_lowercase, k=5))
-        last_name = "".join(random.choices(string.ascii_lowercase, k=5))
-        mobile_number = "".join(random.choices(string.digits, k=10))
-        email_id = first_name.lower() + "." + last_name.lower() + "@example.com"
-        is_merchant = True
-        created_on = datetime.now()
-        created_by = user_id
-        updated_on = datetime.now()
-        updated_by = user_id
-
-        # create a new user
-        user = UserInfo(
-            user_id=user_id,
-            first_name=first_name,
-            last_name=last_name,
-            mobile_number=mobile_number,
-            email_id=email_id,
-            is_merchant=is_merchant,
-            created_on=created_on,
-            created_by=created_by,
-            updated_on=updated_on,
-            updated_by=updated_by,
-        )
-
-        # add the user to the session
-        session.add(user)
-
-    # commit the changes
+    data = request.get_json()
+    user_name = data['user_name']
+    first_name = data['first_name']
+    last_name = data['last_name']
+    mobile_number = data['mobile_number']
+    email_id = data['email_id']
+    is_merchant = data['is_merchant']
+    created_on = datetime.now()
+    created_by = data['user_name']
+    updated_on = datetime.now()
+    updated_by = data['user_name']
+    user = UserInfo(user_name=user_name, first_name=first_name, last_name=last_name, mobile_number=mobile_number, email_id=email_id, is_merchant=is_merchant, created_on=created_on, created_by=created_by, updated_on=updated_on, updated_by=updated_by)
+    session.add(user)
     session.commit()
-
-    return jsonify({"message": "10 users created successfully"})
+    return make_response(jsonify({'message': 'User created successfully'}),200)
+    
 
 
 # route to update user_info
 
 
-@app.route(api_url + "/update_userinfo/<user_id>")
+@app.route(api_url + "/userinfo/update/<user_id>",methods=["PUT"])
 def update_user_info(user_id):
     data = request.json()
     user = session.query(UserInfo).filter_by(user_id=user_id).first()
     if user:
+        
         user.first_name = data["first_name"]
         user.last_name = data["last_name"]
         user.mobile_number = data["mobile_number"]
@@ -183,21 +157,39 @@ def update_user_info(user_id):
         )
 
     else:
-        return jsonify({"message": "User not found"})
+        return make_response(jsonify({'message': 'User not found'}),403)
+
 
 
 # route to delete user
 
-
-@app.route(api_url + "/delete_userinfo/<user_id>")
+@app.route(api_url + "/userinfo/delete/<user_id>", methods=["DELETE"])
 def delete_user_info(user_id):
     user = session.query(UserInfo).filter_by(user_id=user_id).first()
     if user:
+        debitcard_count=session.query(DebitCard).filter_by(user_id=user_id).count()
+        if debitcard_count>0:
+            session.query(DebitCard).filter_by(user_id=user_id).delete()
+            session.commit()
+        creditcard_count=session.query(CreditCard).filter_by(user_id=user_id).count()
+        if creditcard_count>0:
+            session.query(CreditCard).filter_by(user_id=user_id).delete()
+            session.commit()
+        account_count=session.query(BankAccount).filter_by(user_id=user_id).count()
+        if account_count>0:
+            session.query(BankAccount).filter_by(user_id=user_id).delete()
+            session.commit()
+        merchant_count=session.query(Merchant).filter_by(user_id=user_id).count()
+        if merchant_count>0:
+            session.query(Merchant).filter_by(user_id=user_id).delete()
+            session.commit()                
         session.delete(user)
         session.commit()
-        return jsonify({"result": True})
+        return make_response(jsonify({"message": "User deleted successfully"}),200)
     else:
-        return jsonify({"message": "User not found"})
+        return make_response(jsonify({'message': 'User not found'}),403)
+
+
 
 
 base_route = f"/api/v1/auth"
@@ -298,14 +290,109 @@ def make_payment():
     return {"status": "Success"}
 
 
-@app.route(api_url + "/add_new_credit_card", methods=["POST"])
-def add_new_credit_card():
-    return {"status": "Success"}
 
+#route to add debit card and billing details using input from user
 
-@app.route(api_url + "/add_new_debit_card", methods=["POST"])
+@app.route(api_url + "/debitcard/add", methods=['POST'])
 def add_new_debit_card():
-    return {"status": "Success"}
+    data = request.get_json()
+    billing_address = data['billing_address']
+    postal_code = data['postal_code']
+    state = data['state']
+    city = data['city']
+    billingaddress=BillingInfo(billing_address=billing_address,postal_code=postal_code,state=state,city=city)
+    session.add(billingaddress)
+    session.commit()
+    billinginfo=session.query(BillingInfo).filter_by(billing_address=billing_address,postal_code=postal_code,state=state,city=city).first()
+    card_number = data['card_number']
+    user_id = data['user_id']
+    card_network = data['card_network']
+    cvv = data['cvv']
+    billing_info_id = billinginfo.billing_info_id
+    a=session.query(BankAccount).filter_by(account_number=data['bank_account_number']).count()
+    if a==0:
+        return jsonify({'message': 'Incorrect Bank Account number'},403)
+    bank_account_number = data['bank_account_number']
+    created_on = datetime.now()
+    created_by = data['user_id']
+    updated_on = datetime.now()
+    updated_by = data['user_id']
+    debitcard = DebitCard(user_id = user_id,card_number=card_number, card_network=card_network, cvv=cvv, billing_info_id =billing_info_id , bank_account_number=bank_account_number, created_on=created_on, created_by=created_by, updated_on=updated_on, updated_by=updated_by)
+    session.add(debitcard)
+    session.commit()
+    return make_response(jsonify({'message': 'Debit card details added successfully'}),200)
+
+
+#route to delete debit card and billing details
+
+@app.route(api_url + "/debitcard/delete/<card_number>", methods=["DELETE"])
+def delete_debit_card(card_number):
+    debitcard = session.query(DebitCard).filter_by(card_number=card_number).first()
+    billing_info_id=debitcard.billing_info_id
+    billingaddress=session.query(BillingInfo).filter_by(billing_info_id=billing_info_id).first()
+    if debitcard:
+        session.delete(debitcard)
+        session.commit()    
+    if billingaddress:
+        session.delete(billingaddress)
+        session.commit()
+        
+        return make_response(jsonify({"result": "Debit card deleted successfully"}),200)
+    else:
+        return make_response(jsonify({'message': 'Debit card not found'}),403)
+
+
+
+@app.route(api_url + "/creditcard/add", methods=["POST"])
+def add_new_credit_card():
+    billing_address = request.json.get('billing_address')
+    postal_code = request.json.get('postal_code')
+    state = request.json.get('state')
+    city = request.json.get('city')
+    billing_info = BillingInfo(billing_address=billing_address,postal_code=postal_code, state=state, city=city)
+    session.add(billing_info)
+    session.commit()
+    billing_info_id = billing_info.billing_info_id
+    card_number = request.json.get('card_number')
+    user_id = request.json.get('user_id')
+    card_network = request.json.get('card_network')
+    cvv = request.json.get('cvv')
+    credit_limit = request.json.get('credit_limit')
+    created_by = user_id
+    updated_by = user_id
+    created_on = datetime.now()
+    updated_on = datetime.now()
+    credit_card = CreditCard(card_number=card_number, user_id=user_id, card_network=card_network,
+                             cvv=cvv, billing_info_id=billing_info_id, credit_limit=credit_limit,
+                             created_by=created_by, updated_by=updated_by,created_on=created_on,updated_on=updated_on)
+    
+    session.add(credit_card)
+    session.commit()
+    return make_response(jsonify({'message': 'Credit card details added successfully'}),200)
+
+
+@app.route(api_url + "/creditcard/delete/<card_number>", methods=["DELETE"])
+def delete_credit_card(card_number):
+    credit_card = session.query(CreditCard).filter_by(card_number=card_number).first()
+    
+    if credit_card:
+        billing_info_id = credit_card.billing_info_id
+        session.delete(credit_card)
+        session.commit()
+        
+        billingaddress = session.query(BillingInfo).filter_by(billing_info_id=billing_info_id).first()
+        if billingaddress:
+            session.delete(billingaddress)
+            session.commit()
+        
+        return make_response(jsonify({"result": "Credit card deleted successfully"}),200)
+    else:
+        return make_response(jsonify({'message': 'Credit card not found'}),403)
+
+    
+
+
+
 
 
 if __name__ == "__main__":

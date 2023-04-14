@@ -1,8 +1,8 @@
-"""Generate user and payment tables
+"""Recreate schema
 
-Revision ID: 46571320c656
+Revision ID: 200dc919922c
 Revises: 
-Create Date: 2023-04-08 10:58:44.325806
+Create Date: 2023-04-13 21:23:22.211231
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '46571320c656'
+revision = '200dc919922c'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -27,7 +27,8 @@ def upgrade():
     sa.PrimaryKeyConstraint('billing_info_id')
     )
     op.create_table('user_info',
-    sa.Column('user_id', sa.String(length=30), nullable=False),
+    sa.Column('user_id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('user_name', sa.String(length=30), nullable=True),
     sa.Column('first_name', sa.String(length=30), nullable=True),
     sa.Column('last_name', sa.String(length=30), nullable=True),
     sa.Column('mobile_number', sa.String(length=10), nullable=True),
@@ -41,7 +42,7 @@ def upgrade():
     )
     op.create_table('bank_account',
     sa.Column('account_number', sa.String(length=30), nullable=False),
-    sa.Column('user_id', sa.String(length=30), nullable=True),
+    sa.Column('user_id', sa.Integer(), nullable=True),
     sa.Column('account_holders_name', sa.String(length=30), nullable=True),
     sa.Column('account_balance', sa.FLOAT(), nullable=True),
     sa.Column('bank_name', sa.String(length=30), nullable=True),
@@ -55,25 +56,11 @@ def upgrade():
     )
     op.create_table('credit_card',
     sa.Column('card_number', sa.String(length=16), nullable=False),
-    sa.Column('user_id', sa.String(length=30), nullable=True),
+    sa.Column('user_id', sa.Integer(), nullable=True),
     sa.Column('card_network', sa.String(length=30), nullable=True),
     sa.Column('cvv', sa.String(length=30), nullable=True),
     sa.Column('billing_info_id', sa.Integer(), nullable=True),
     sa.Column('credit_limit', sa.FLOAT(), nullable=True),
-    sa.Column('created_on', sa.DateTime(), nullable=True),
-    sa.Column('created_by', sa.String(length=30), nullable=True),
-    sa.Column('updated_on', sa.DateTime(), nullable=True),
-    sa.Column('updated_by', sa.String(length=30), nullable=True),
-    sa.ForeignKeyConstraint(['billing_info_id'], ['billing_info.billing_info_id'], ),
-    sa.ForeignKeyConstraint(['user_id'], ['user_info.user_id'], ),
-    sa.PrimaryKeyConstraint('card_number')
-    )
-    op.create_table('debit_card',
-    sa.Column('card_number', sa.String(length=16), nullable=False),
-    sa.Column('user_id', sa.String(length=30), nullable=True),
-    sa.Column('card_network', sa.String(length=30), nullable=True),
-    sa.Column('cvv', sa.String(length=30), nullable=True),
-    sa.Column('billing_info_id', sa.Integer(), nullable=True),
     sa.Column('created_on', sa.DateTime(), nullable=True),
     sa.Column('created_by', sa.String(length=30), nullable=True),
     sa.Column('updated_on', sa.DateTime(), nullable=True),
@@ -87,16 +74,33 @@ def upgrade():
     sa.Column('merchant_name', sa.String(), nullable=True),
     sa.Column('category', sa.String(), nullable=True),
     sa.Column('sub_category', sa.String(), nullable=True),
-    sa.Column('user_id', sa.String(length=30), nullable=True),
+    sa.Column('user_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['user_info.user_id'], ),
     sa.PrimaryKeyConstraint('merchant_id')
     )
+    op.create_table('debit_card',
+    sa.Column('card_number', sa.String(length=16), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=True),
+    sa.Column('card_network', sa.String(length=30), nullable=True),
+    sa.Column('cvv', sa.String(length=30), nullable=True),
+    sa.Column('billing_info_id', sa.Integer(), nullable=True),
+    sa.Column('bank_account_number', sa.String(length=30), nullable=True),
+    sa.Column('created_on', sa.DateTime(), nullable=True),
+    sa.Column('created_by', sa.String(length=30), nullable=True),
+    sa.Column('updated_on', sa.DateTime(), nullable=True),
+    sa.Column('updated_by', sa.String(length=30), nullable=True),
+    sa.ForeignKeyConstraint(['bank_account_number'], ['bank_account.account_number'], ),
+    sa.ForeignKeyConstraint(['billing_info_id'], ['billing_info.billing_info_id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['user_info.user_id'], ),
+    sa.PrimaryKeyConstraint('card_number')
+    )
     op.create_table('transaction',
     sa.Column('transaction_id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('payer_id', sa.String(length=30), nullable=True),
-    sa.Column('payee_id', sa.String(length=30), nullable=True),
+    sa.Column('payer_id', sa.Integer(), nullable=True),
+    sa.Column('payee_id', sa.Integer(), nullable=True),
     sa.Column('transaction_amount', sa.FLOAT(), nullable=True),
     sa.Column('transaction_method', sa.String(length=30), nullable=True),
+    sa.Column('transaction_method_id', sa.String(length=30), nullable=True),
     sa.Column('is_completed', sa.Boolean(), nullable=True),
     sa.Column('created_on', sa.DateTime(), nullable=True),
     sa.Column('created_by', sa.String(length=30), nullable=True),
@@ -108,8 +112,8 @@ def upgrade():
     )
     op.create_table('requested_payments',
     sa.Column('transaction_id', sa.Integer(), nullable=False),
-    sa.Column('payer_id', sa.String(length=30), nullable=True),
-    sa.Column('payee_id', sa.String(length=30), nullable=True),
+    sa.Column('payer_id', sa.Integer(), nullable=True),
+    sa.Column('payee_id', sa.Integer(), nullable=True),
     sa.Column('is_pending', sa.Boolean(), nullable=True),
     sa.Column('amount_requested', sa.FLOAT(), nullable=True),
     sa.ForeignKeyConstraint(['payee_id'], ['user_info.user_id'], ),
@@ -124,8 +128,8 @@ def downgrade():
     # ### commands auto generated by Alembic - please adjust! ###
     op.drop_table('requested_payments')
     op.drop_table('transaction')
-    op.drop_table('merchant')
     op.drop_table('debit_card')
+    op.drop_table('merchant')
     op.drop_table('credit_card')
     op.drop_table('bank_account')
     op.drop_table('user_info')
