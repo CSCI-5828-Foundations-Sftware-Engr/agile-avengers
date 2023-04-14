@@ -85,7 +85,7 @@ def get_current_time():
     }
 
 
-@app.route(api_url + "/userinfo/<user_id>", methods=["GET"])
+@app.route(api_url + "/users/get/<user_id>", methods=["GET"])
 def get_user_info(user_id):
     user = session.query(UserInfo).filter_by(user_id=user_id).first()
     if user:
@@ -107,7 +107,7 @@ def get_user_info(user_id):
     
 
 
-@app.route(api_url + "/userinfo/create_user", methods=['POST'])
+@app.route(api_url + "/users/create", methods=['POST'])
 def create_users():
     data = request.get_json()
     user_name = data['user_name']
@@ -130,7 +130,7 @@ def create_users():
 # route to update user_info
 
 
-@app.route(api_url + "/userinfo/update_userinfo/<user_id>")
+@app.route(api_url + "/users/update_userinfo/<user_id>")
 def update_user_info(user_id):
     data = request.json()
     user = session.query(UserInfo).filter_by(user_id=user_id).first()
@@ -308,6 +308,11 @@ def add_new_credit_card():
     session.commit()
     return {"status": "Success"}
 
+
+@app.route(api_url + "/delete_credit_card", methods=["DELETE"])
+def delete_credit_card():
+    
+    return {"status": "Credit card deleted successfully"}
 
 @app.route(api_url + "/add_new_debit_card", methods=["POST"])
 def add_new_debit_card():
