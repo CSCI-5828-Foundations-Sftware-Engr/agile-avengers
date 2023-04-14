@@ -20,7 +20,7 @@ from werkzeug.exceptions import HTTPException
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "./"))
 from config.constants import DB_CREDENTIALS
-from datamodel.models.userinfo import UserInfo,BillingInfo
+from datamodel.models.userinfo import UserInfo, CreditCard,DebitCard,BillingInfo
 from helpers.user_management import check_userinfo, create_new_user, user_login, user_logout
 
 
@@ -85,7 +85,7 @@ def get_current_time():
     }
 
 
-@app.route(api_url + "/userinfo/<user_id>", methods=["GET"])
+@app.route(api_url + "/users/get/<user_id>", methods=["GET"])
 def get_user_info(user_id):
     user = session.query(UserInfo).filter_by(user_id=user_id).first()
     if user:
@@ -107,12 +107,9 @@ def get_user_info(user_id):
     
 
 
-#route to create user using input from user
-
-@app.route(api_url + "userinfo/create_user", methods=['POST'])
+@app.route(api_url + "/users/create", methods=['POST'])
 def create_users():
     data = request.get_json()
-    user_id = data['user_id']
     user_name = data['user_name']
     first_name = data['first_name']
     last_name = data['last_name']
@@ -120,10 +117,10 @@ def create_users():
     email_id = data['email_id']
     is_merchant = data['is_merchant']
     created_on = datetime.now()
-    created_by = data['user_id']
+    created_by = data['user_name']
     updated_on = datetime.now()
-    updated_by = data['user_id']
-    user = UserInfo(user_id = user_id,user_name=user_name, first_name=first_name, last_name=last_name, mobile_number=mobile_number, email_id=email_id, is_merchant=is_merchant, created_on=created_on, created_by=created_by, updated_on=updated_on, updated_by=updated_by)
+    updated_by = data['user_name']
+    user = UserInfo(user_name=user_name, first_name=first_name, last_name=last_name, mobile_number=mobile_number, email_id=email_id, is_merchant=is_merchant, created_on=created_on, created_by=created_by, updated_on=updated_on, updated_by=updated_by)
     session.add(user)
     session.commit()
     return make_response(jsonify({'message': 'User created successfully'}),200)
@@ -201,7 +198,7 @@ def add_debitcard():
     created_by = data['user_id']
     updated_on = datetime.now()
     updated_by = data['user_id']
-    debitcard = UserInfo(user_id = user_id,card_number=card_number, card_network=card_network, cvv=cvv, billing_info_id =billing_info_id , bank_account_number=bank_account_number, created_on=created_on, created_by=created_by, updated_on=updated_on, updated_by=updated_by)
+    debitcard = DebitCard(user_id = user_id,card_number=card_number, card_network=card_network, cvv=cvv, billing_info_id =billing_info_id , bank_account_number=bank_account_number, created_on=created_on, created_by=created_by, updated_on=updated_on, updated_by=updated_by)
     session.add(debitcard)
     session.commit()
     return make_response(jsonify({'message': 'User created successfully'}),200)
@@ -313,14 +310,58 @@ def make_payment():
     return {"status": "Success"}
 
 
-@app.route(api_url + "/add_new_credit_card", methods=["POST"])
+@app.route(api_url + "/creditcard/add", methods=["POST"])
 def add_new_credit_card():
+    billing_address = request.json.get('billing_address')
+    postal_code = request.json.get('postal_code')
+    state = request.json.get('state')
+    city = request.json.get('city')
+    billing_info = BillingInfo(billing_address=billing_address,postal_code=postal_code, state=state, city=city)
+    session.add(billing_info)
+    session.commit()
+
+    billing_info_id = billing_info.billing_info_id
+
+    card_number = request.json.get('card_number')
+    user_id = request.json.get('user_id')
+    card_network = request.json.get('card_network')
+    cvv = request.json.get('cvv')
+    credit_limit = request.json.get('credit_limit')
+    created_by = user_id
+    updated_by = user_id
+    created_on = datetime.now()
+    updated_on = datetime.now()
+
+    credit_card = CreditCard(card_number=card_number, user_id=user_id, card_network=card_network,
+                             cvv=cvv, billing_info_id=billing_info_id, credit_limit=credit_limit,
+                             created_by=created_by, updated_by=updated_by,created_on=created_on,updated_on=updated_on)
+    
+    session.add(credit_card)
+    session.commit()
     return {"status": "Success"}
 
 
-@app.route(api_url + "/add_new_debit_card", methods=["POST"])
+@app.route(api_url + "/creditcard/delete/<card_number>", methods=["DELETE"])
+def delete_credit_card(card_number):
+    credit_card = session.query(CreditCard).filter_by(card_number=card_number).first()
+
+    if credit_card:
+        session.delete(credit_card)
+        session.commit()
+        return {"status": "Credit card deleted successfully"}
+    else:
+        return {"status": "Error", "message": "Credit card not found"}
+    
+
+
+@app.route(api_url + "/debitcard/add", methods=["POST"])
 def add_new_debit_card():
     return {"status": "Success"}
+
+@app.route(api_url + "/debitcard/delete", methods=["DELETE"])
+def delete_debit_card():
+    
+    return {"status": "Debit card deleted successfully"}
 
 
 if __name__ == "__main__":
