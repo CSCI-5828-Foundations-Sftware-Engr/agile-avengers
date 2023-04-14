@@ -103,15 +103,11 @@ def get_user_info(user_id):
             }
         )
     else:
-<<<<<<< HEAD
         return make_response(jsonify({'message': 'User not found'}),403)
     
-# route to create random users
-=======
-        return jsonify({"message": "User not found"})
-#route to create user using input from user
->>>>>>> 947fa972c82550ccaf453999b4bc081434c2fc13
 
+
+#route to create user using input from user
 
 @app.route(api_url + "userinfo/create_user", methods=['POST'])
 def create_users():
@@ -179,15 +175,12 @@ def delete_user_info(user_id):
         session.commit()
         return jsonify({"result": True})
     else:
-<<<<<<< HEAD
         return make_response(jsonify({'message': 'User not found'}),403)
 
 
     
     
-=======
-        return jsonify({"message": "User not found"})
->>>>>>> 947fa972c82550ccaf453999b4bc081434c2fc13
+
 
 
 base_route = f"/api/v1/auth"
