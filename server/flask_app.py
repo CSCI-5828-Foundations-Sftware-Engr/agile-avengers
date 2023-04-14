@@ -162,34 +162,22 @@ def create_users():
 
 @app.route(api_url +'/update_userinfo/<user_id>')
 def update_user_info(user_id):
-    # data=request.json()
-    data={'first_name':'aditi','last_name':'athreya'}
+    data=request.json()
     user = session.query(UserInfo).filter_by(user_id=user_id).first()
     if user:
         
-            # user.first_name =data["first_name"]
-            # user.last_name = data["last_name"]
-            # user.mobile_number= data["mobile_number"]
-            # user.email_id= data["email_id"]
-            # # 'is_merchant' : user.is_merchant,
-            # # 'created_on': user.created_on,
-            # # 'created_by' : user.created_by,
-            # user.updated_on =datetime.now() 
-            # user.updated_by =user_id
-            # return jsonify({
-            # 'first_name': user.first_name,
-            # 'last_name': user.last_name,
-            # 'mobile_number': user.mobile_number,
-            # 'email': user.email_id,
+            user.first_name =data["first_name"]
+            user.last_name = data["last_name"]
+            user.mobile_number= data["mobile_number"]
+            user.email_id= data["email_id"]
             # 'is_merchant' : user.is_merchant,
             # 'created_on': user.created_on,
             # 'created_by' : user.created_by,
-            # 'updated_on' : user.updated_on,
-            # 'updated_by' : user.updated_by,
-
+            user.updated_on =datetime.now() 
+            user.updated_by =user_id
             return jsonify({
-            'first_name': data["first_name"],
-            'last_name': data["last_name"],
+            'first_name': user.first_name,
+            'last_name': user.last_name,
             'mobile_number': user.mobile_number,
             'email': user.email_id,
             'is_merchant' : user.is_merchant,
