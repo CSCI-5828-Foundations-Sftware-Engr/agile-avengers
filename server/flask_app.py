@@ -320,7 +320,7 @@ def add_new_debit_card():
     return {"status": "Success"}
 
 @app.route(api_url + "/debitcard/delete", methods=["DELETE"])
-def delete_credit_card():
+def delete_debit_card():
     
     return {"status": "Debit card deleted successfully"}
 
