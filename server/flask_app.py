@@ -324,8 +324,6 @@ def make_payment():
 
 
 
-    billing_info_id = billing_info.billing_info_id
-
 @app.route(api_url + "/creditcard/add", methods=["POST"])
 def add_new_credit_card():
     billing_address = request.json.get('billing_address')
@@ -357,16 +355,22 @@ def add_new_credit_card():
 @app.route(api_url + "/creditcard/delete/<card_number>", methods=["DELETE"])
 def delete_credit_card(card_number):
     credit_card = session.query(CreditCard).filter_by(card_number=card_number).first()
-    billingaddress=session.query(BillingInfo).filter_by(billing_info_id=credit_card['billing_info_id']).first()
     
     if credit_card:
-        session.delete(billingaddress)
-        session.commit()
+        billing_info_id = credit_card.billing_info_id
         session.delete(credit_card)
         session.commit()
+        
+        billingaddress = session.query(BillingInfo).filter_by(billing_info_id=billing_info_id).first()
+        if billingaddress:
+            session.delete(billingaddress)
+            session.commit()
+        
         return jsonify({"result": True})
     else:
-        return jsonify({'message': 'User not found'})
+        return jsonify({'message': 'Credit card not found'})
+
+
     
 
 
