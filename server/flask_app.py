@@ -130,7 +130,7 @@ def create_users():
 # route to update user_info
 
 
-@app.route(api_url + "/userinfo/update/<user_id>")
+@app.route(api_url + "/userinfo/update/<user_id>",methods=["PUT"])
 def update_user_info(user_id):
     data = request.json()
     user = session.query(UserInfo).filter_by(user_id=user_id).first()
@@ -163,8 +163,7 @@ def update_user_info(user_id):
 
 # route to delete user
 
-
-@app.route(api_url + "/userinfo/delete/<user_id>")
+@app.route(api_url + "/userinfo/delete/<user_id>", methods=["DELETE"])
 def delete_user_info(user_id):
     user = session.query(UserInfo).filter_by(user_id=user_id).first()
     if user:
@@ -173,6 +172,55 @@ def delete_user_info(user_id):
         return jsonify({"result": True})
     else:
         return make_response(jsonify({'message': 'User not found'}),403)
+
+
+#route to add debit card and billing details using input from user
+
+@app.route(api_url + "/userinfo/debitcard/add", methods=['POST'])
+def add_debitcard():
+    data = request.get_json()
+    billing_address = data['billing_address']
+    postal_code = data['postal_code']
+    state = data['state']
+    city = data['city']
+    billingaddress=BillingInfo(billing_info_id=billing_info_id,billing_address=billing_address,postal_code=postal_code,state=state,city=city)
+    session.add(billingaddress)
+    session.commit()
+    billinginfo=session.query(BillingInfo).filter_by(billing_address=billing_address,postal_code=postal_code,state=state,city=city).first()
+    card_number = data['card_number']
+    user_id = data['user_id']
+    card_network = data['card_network']
+    cvv = data['cvv']
+    billing_info_id = billinginfo['billing_info_id']
+    bank_account_number = data['bank_account_number']
+    created_on = datetime.now()
+    created_by = data['user_id']
+    updated_on = datetime.now()
+    updated_by = data['user_id']
+    debitcard = DebitCard(user_id = user_id,card_number=card_number, card_network=card_network, cvv=cvv, billing_info_id =billing_info_id , bank_account_number=bank_account_number, created_on=created_on, created_by=created_by, updated_on=updated_on, updated_by=updated_by)
+    session.add(debitcard)
+    session.commit()
+    return make_response(jsonify({'message': 'User created successfully'}),200)
+
+
+#route to delete debit card and billing details
+
+@app.route(api_url + "/userinfo/debitcard/delete/<card_number>", methods=["DELETE"])
+def delete_debitcard(card_number):
+    debitcard = session.query(DebitCard).filter_by(card_number=card_number).first()
+    billingaddress=session.query(BillingInfo).filter_by(billing_info_id=debitcard['billing_info_id']).first()
+    if debitcard:
+        session.delete(billingaddress)
+        session.delete(debitcard)
+        session.commit()
+        return jsonify({"result": True})
+    else:
+        return make_response(jsonify({'message': 'User not found'}),403)
+
+
+
+
+
 
 
 
@@ -275,6 +323,9 @@ def make_payment():
     return {"status": "Success"}
 
 
+
+    billing_info_id = billing_info.billing_info_id
+
 @app.route(api_url + "/creditcard/add", methods=["POST"])
 def add_new_credit_card():
     billing_address = request.json.get('billing_address')
@@ -284,9 +335,7 @@ def add_new_credit_card():
     billing_info = BillingInfo(billing_address=billing_address,postal_code=postal_code, state=state, city=city)
     session.add(billing_info)
     session.commit()
-
     billing_info_id = billing_info.billing_info_id
-
     card_number = request.json.get('card_number')
     user_id = request.json.get('user_id')
     card_network = request.json.get('card_network')
@@ -296,7 +345,6 @@ def add_new_credit_card():
     updated_by = user_id
     created_on = datetime.now()
     updated_on = datetime.now()
-
     credit_card = CreditCard(card_number=card_number, user_id=user_id, card_network=card_network,
                              cvv=cvv, billing_info_id=billing_info_id, credit_limit=credit_limit,
                              created_by=created_by, updated_by=updated_by,created_on=created_on,updated_on=updated_on)
@@ -321,45 +369,8 @@ def delete_credit_card(card_number):
         return jsonify({'message': 'User not found'})
     
 
-#route to add debit card and billing details using input from user
-@app.route(api_url + "/debitcard/add", methods=["POST"])
-def add_new_debit_card():
-    data = request.get_json()
-    billing_address = data['billing_address']
-    postal_code = data['postal_code']
-    state = data['state']
-    city = data['city']
-    billingaddress=BillingInfo(billing_info_id=billing_info_id,billing_address=billing_address,postal_code=postal_code,state=state,city=city)
-    session.add(billingaddress)
-    session.commit()
-    billinginfo=session.query(BillingInfo).filter_by(billing_address=billing_address,postal_code=postal_code,state=state,city=city).first()
-    card_number = data['card_number']
-    user_id = data['user_id']
-    card_network = data['card_network']
-    cvv = data['cvv']
-    billing_info_id = billinginfo['billing_info_id']
-    bank_account_number = data['bank_account_number']
-    created_on = datetime.now()
-    created_by = data['user_id']
-    updated_on = datetime.now()
-    updated_by = data['user_id']
-    debitcard = DebitCard(user_id = user_id,card_number=card_number, card_network=card_network, cvv=cvv, billing_info_id =billing_info_id , bank_account_number=bank_account_number, created_on=created_on, created_by=created_by, updated_on=updated_on, updated_by=updated_by)
-    session.add(debitcard)
-    session.commit()
-    return make_response(jsonify({'message': 'User created successfully'}),200)
 
-#route to delete debit card and billing details
-@app.route(api_url + "/userinfo/delete/<card_number>", methods=["DELETE"])
-def delete_debit_card(card_number):
-    debitcard = session.query(DebitCard).filter_by(card_number=card_number).first()
-    billingaddress=session.query(BillingInfo).filter_by(billing_info_id=debitcard['billing_info_id']).first()
-    if debitcard:
-        session.delete(billingaddress)
-        session.delete(debitcard)
-        session.commit()
-        return jsonify({"result": True})
-    else:
-        return make_response(jsonify({'message': 'User not found'}),403)
+
 
 
 if __name__ == "__main__":
