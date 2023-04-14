@@ -204,7 +204,19 @@ def add_debitcard():
     return make_response(jsonify({'message': 'User created successfully'}),200)
 
 
+#route to delete debit card and billing details
 
+@app.route(api_url + "/userinfo/delete/<card_number>", methods=["DELETE"])
+def delete_debitcard(card_number):
+    debitcard = session.query(DebitCard).filter_by(card_number=card_number).first()
+    billingaddress=session.query(BillingInfo).filter_by(billing_info_id=debitcard['billing_info_id']).first()
+    if debitcard:
+        session.delete(billingaddress)
+        session.delete(debitcard)
+        session.commit()
+        return jsonify({"result": True})
+    else:
+        return make_response(jsonify({'message': 'User not found'}),403)
 
 
 
