@@ -130,7 +130,7 @@ def create_users():
 # route to update user_info
 
 
-@app.route(api_url + "/userinfo/update/<user_id>")
+@app.route(api_url + "/userinfo/update/<user_id>",methods=["PUT"])
 def update_user_info(user_id):
     data = request.json()
     user = session.query(UserInfo).filter_by(user_id=user_id).first()
@@ -163,8 +163,7 @@ def update_user_info(user_id):
 
 # route to delete user
 
-
-@app.route(api_url + "/userinfo/delete/<user_id>")
+@app.route(api_url + "/userinfo/delete/<user_id>", methods=["DELETE"])
 def delete_user_info(user_id):
     user = session.query(UserInfo).filter_by(user_id=user_id).first()
     if user:
