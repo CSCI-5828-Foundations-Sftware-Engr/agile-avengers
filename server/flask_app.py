@@ -20,7 +20,7 @@ from werkzeug.exceptions import HTTPException
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "./"))
 from config.constants import DB_CREDENTIALS
-from datamodel.models.userinfo import UserInfo, CreditCard,DebitCard,BillingInfo,BankAccount
+from datamodel.models.userinfo import UserInfo, CreditCard,DebitCard,BillingInfo,BankAccount,Merchant
 from helpers.user_management import check_userinfo, create_new_user, user_login, user_logout
 
 
@@ -64,7 +64,7 @@ def resource_not_found(e):
             request.headers.get("X-Remote-User"), error_object
         )
     )
-    return jsonify(error_object), code
+    return make_response(jsonify(error_object), code)
 
 
 @app.route("/", defaults={"path": ""})
@@ -167,6 +167,22 @@ def update_user_info(user_id):
 def delete_user_info(user_id):
     user = session.query(UserInfo).filter_by(user_id=user_id).first()
     if user:
+        debitcard_count=session.query(DebitCard).filter_by(user_id=user_id).count()
+        if debitcard_count>0:
+            session.query(DebitCard).filter_by(user_id=user_id).delete()
+            session.commit()
+        creditcard_count=session.query(CreditCard).filter_by(user_id=user_id).count()
+        if creditcard_count>0:
+            session.query(CreditCard).filter_by(user_id=user_id).delete()
+            session.commit()
+        account_count=session.query(BankAccount).filter_by(user_id=user_id).count()
+        if account_count>0:
+            session.query(BankAccount).filter_by(user_id=user_id).delete()
+            session.commit()
+        merchant_count=session.query(Merchant).filter_by(user_id=user_id).count()
+        if merchant_count>0:
+            session.query(Merchant).filter_by(user_id=user_id).delete()
+            session.commit()                
         session.delete(user)
         session.commit()
         return jsonify({"result": True})
@@ -223,11 +239,6 @@ def delete_debitcard(card_number):
         return jsonify({"result": True})
     else:
         return make_response(jsonify({'message': 'User not found'}),403)
-
-
-
-
-
 
 
 
