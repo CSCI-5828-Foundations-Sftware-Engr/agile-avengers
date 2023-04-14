@@ -20,7 +20,7 @@ from werkzeug.exceptions import HTTPException
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "./"))
 from config.constants import DB_CREDENTIALS
-from datamodel.models.userinfo import UserInfo
+from datamodel.models.userinfo import UserInfo,BillingInfo
 from helpers.user_management import check_userinfo, create_new_user, user_login, user_logout
 
 
@@ -126,14 +126,14 @@ def create_users():
     user = UserInfo(user_id = user_id,user_name=user_name, first_name=first_name, last_name=last_name, mobile_number=mobile_number, email_id=email_id, is_merchant=is_merchant, created_on=created_on, created_by=created_by, updated_on=updated_on, updated_by=updated_by)
     session.add(user)
     session.commit()
-    return jsonify({'message': 'User created successfully'})
+    return make_response(jsonify({'message': 'User created successfully'}),200)
     
 
 
 # route to update user_info
 
 
-@app.route(api_url + "/update_userinfo/<user_id>")
+@app.route(api_url + "/userinfo/update/<user_id>")
 def update_user_info(user_id):
     data = request.json()
     user = session.query(UserInfo).filter_by(user_id=user_id).first()
@@ -167,7 +167,7 @@ def update_user_info(user_id):
 # route to delete user
 
 
-@app.route(api_url + "/delete_userinfo/<user_id>")
+@app.route(api_url + "/userinfo/delete/<user_id>")
 def delete_user_info(user_id):
     user = session.query(UserInfo).filter_by(user_id=user_id).first()
     if user:
@@ -178,7 +178,51 @@ def delete_user_info(user_id):
         return make_response(jsonify({'message': 'User not found'}),403)
 
 
-    
+#route to add debit card and billing details using input from user
+
+@app.route(api_url + "debitcard/add", methods=['POST'])
+def add_debitcard():
+    data = request.get_json()
+    billing_address = data['billing_address']
+    postal_code = data['postal_code']
+    state = data['state']
+    city = data['city']
+    billingaddress=BillingInfo(billing_info_id=billing_info_id,billing_address=billing_address,postal_code=postal_code,state=state,city=city)
+    session.add(billingaddress)
+    session.commit()
+    billinginfo=session.query(BillingInfo).filter_by(billing_address=billing_address,postal_code=postal_code,state=state,city=city).first()
+    card_number = data['card_number']
+    user_id = data['user_id']
+    card_network = data['card_network']
+    cvv = data['cvv']
+    billing_info_id = billinginfo['billing_info_id']
+    bank_account_number = data['bank_account_number']
+    created_on = datetime.now()
+    created_by = data['user_id']
+    updated_on = datetime.now()
+    updated_by = data['user_id']
+    debitcard = UserInfo(user_id = user_id,card_number=card_number, card_network=card_network, cvv=cvv, billing_info_id =billing_info_id , bank_account_number=bank_account_number, created_on=created_on, created_by=created_by, updated_on=updated_on, updated_by=updated_by)
+    session.add(debitcard)
+    session.commit()
+    return make_response(jsonify({'message': 'User created successfully'}),200)
+
+
+
+#route to delete debit card and billing details using input from user
+
+@app.route(api_url + "/userinfo/delete/<card_number>", methods=["DELETE"])
+def delete_debitcard(card_number):
+    debitcard = session.query(UserInfo).filter_by(card_number=card_number).first()
+    billingaddress=session.query(BillingInfo).filter_by(billing_info_id=debitcard['billing_info_id']).first()
+    if debitcard:
+        session.delete(billingaddress)
+        session.delete(debitcard)
+        session.commit()
+        return jsonify({"result": True})
+    else:
+        return make_response(jsonify({'message': 'User not found'}),403)
+
+
     
 
 
