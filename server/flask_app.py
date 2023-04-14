@@ -20,7 +20,7 @@ from werkzeug.exceptions import HTTPException
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "./"))
 from config.constants import DB_CREDENTIALS
-from datamodel.models.userinfo import UserInfo
+from datamodel.models.userinfo import UserInfo, CreditCard, BillingInfo
 from helpers.user_management import check_userinfo, create_new_user, user_login, user_logout
 
 
@@ -107,10 +107,9 @@ def get_user_info(user_id):
 #route to create user using input from user
 
 
-@app.route(api_url + "userinfo/create_user", methods=['POST'])
+@app.route(api_url + "/userinfo/create_user", methods=['POST'])
 def create_users():
     data = request.get_json()
-    user_id = data['user_id']
     user_name = data['user_name']
     first_name = data['first_name']
     last_name = data['last_name']
@@ -118,10 +117,10 @@ def create_users():
     email_id = data['email_id']
     is_merchant = data['is_merchant']
     created_on = datetime.now()
-    created_by = data['user_id']
+    created_by = data['user_name']
     updated_on = datetime.now()
-    updated_by = data['user_id']
-    user = UserInfo(user_id = user_id,user_name=user_name, first_name=first_name, last_name=last_name, mobile_number=mobile_number, email_id=email_id, is_merchant=is_merchant, created_on=created_on, created_by=created_by, updated_on=updated_on, updated_by=updated_by)
+    updated_by = data['user_name']
+    user = UserInfo(user_name=user_name, first_name=first_name, last_name=last_name, mobile_number=mobile_number, email_id=email_id, is_merchant=is_merchant, created_on=created_on, created_by=created_by, updated_on=updated_on, updated_by=updated_by)
     session.add(user)
     session.commit()
     return jsonify({'message': 'User created successfully'})
@@ -131,7 +130,7 @@ def create_users():
 # route to update user_info
 
 
-@app.route(api_url + "/update_userinfo/<user_id>")
+@app.route(api_url + "/userinfo/update_userinfo/<user_id>")
 def update_user_info(user_id):
     data = request.json()
     user = session.query(UserInfo).filter_by(user_id=user_id).first()
@@ -164,7 +163,7 @@ def update_user_info(user_id):
 # route to delete user
 
 
-@app.route(api_url + "/delete_userinfo/<user_id>")
+@app.route(api_url + "/userinfo/delete_userinfo/<user_id>")
 def delete_user_info(user_id):
     user = session.query(UserInfo).filter_by(user_id=user_id).first()
     if user:
@@ -173,6 +172,10 @@ def delete_user_info(user_id):
         return jsonify({"result": True})
     else:
         return jsonify({"message": "User not found"})
+    
+
+
+
 
 
 base_route = f"/api/v1/auth"
@@ -275,6 +278,32 @@ def make_payment():
 
 @app.route(api_url + "/add_new_credit_card", methods=["POST"])
 def add_new_credit_card():
+    billing_address = request.json.get('billing_address')
+    postal_code = request.json.get('postal_code')
+    state = request.json.get('state')
+    city = request.json.get('city')
+    billing_info = BillingInfo(billing_address=billing_address,postal_code=postal_code, state=state, city=city)
+    session.add(billing_info)
+    session.commit()
+
+    billing_info_id = billing_info.billing_info_id
+
+    card_number = request.json.get('card_number')
+    user_id = request.json.get('user_id')
+    card_network = request.json.get('card_network')
+    cvv = request.json.get('cvv')
+    credit_limit = request.json.get('credit_limit')
+    created_by = user_id
+    updated_by = user_id
+    created_on = datetime.now()
+    updated_on = datetime.now()
+
+    credit_card = CreditCard(card_number=card_number, user_id=user_id, card_network=card_network,
+                             cvv=cvv, billing_info_id=billing_info_id, credit_limit=credit_limit,
+                             created_by=created_by, updated_by=updated_by,created_on=created_on,updated_on=updated_on)
+    
+    session.add(credit_card)
+    session.commit()
     return {"status": "Success"}
 
 

@@ -11,10 +11,11 @@ class Transaction(Base):
     __tablename__ = "transaction"
 
     transaction_id = Column(Integer, autoincrement=True, primary_key=True)
-    payer_id = Column(String(30), ForeignKey(UserInfo.user_id))
-    payee_id = Column(String(30), ForeignKey(UserInfo.user_id))
+    payer_id = Column(Integer, ForeignKey(UserInfo.user_id))
+    payee_id = Column(Integer, ForeignKey(UserInfo.user_id))
     transaction_amount = Column(FLOAT())
     transaction_method = Column(String(30))
+    transaction_method_id = Column(String(30)) 
     is_completed = Column(Boolean)
     created_on = Column(DateTime)
     created_by = Column(String(30))
@@ -25,8 +26,8 @@ class RequestedPayments(Base):
     __tablename__ = "requested_payments"
 
     transaction_id = Column(Integer, ForeignKey("transaction.transaction_id"), primary_key=True)
-    payer_id = Column(String(30), ForeignKey(UserInfo.user_id))
-    payee_id = Column(String(30), ForeignKey(UserInfo.user_id))
+    payer_id = Column(Integer, ForeignKey(UserInfo.user_id))
+    payee_id = Column(Integer, ForeignKey(UserInfo.user_id))
     is_pending = Column(Boolean)
     amount_requested = Column(FLOAT())
     
