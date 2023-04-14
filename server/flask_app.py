@@ -185,58 +185,7 @@ def delete_user_info(user_id):
             session.commit()                
         session.delete(user)
         session.commit()
-        return jsonify({"result": True})
-    else:
-        return make_response(jsonify({'message': 'User not found'}),403)
-
-
-#route to add debit card and billing details using input from user
-
-@app.route(api_url + "/debitcard/add", methods=['POST'])
-def add_debitcard():
-    data = request.get_json()
-    billing_address = data['billing_address']
-    postal_code = data['postal_code']
-    state = data['state']
-    city = data['city']
-    billingaddress=BillingInfo(billing_address=billing_address,postal_code=postal_code,state=state,city=city)
-    session.add(billingaddress)
-    session.commit()
-    billinginfo=session.query(BillingInfo).filter_by(billing_address=billing_address,postal_code=postal_code,state=state,city=city).first()
-    card_number = data['card_number']
-    user_id = data['user_id']
-    card_network = data['card_network']
-    cvv = data['cvv']
-    billing_info_id = billinginfo.billing_info_id
-    a=session.query(BankAccount).filter_by(account_number=data['bank_account_number']).count()
-    if a==0:
-        return jsonify({'message': 'Incorrect Bank Account number'})
-    bank_account_number = data['bank_account_number']
-    created_on = datetime.now()
-    created_by = data['user_id']
-    updated_on = datetime.now()
-    updated_by = data['user_id']
-    debitcard = DebitCard(user_id = user_id,card_number=card_number, card_network=card_network, cvv=cvv, billing_info_id =billing_info_id , bank_account_number=bank_account_number, created_on=created_on, created_by=created_by, updated_on=updated_on, updated_by=updated_by)
-    session.add(debitcard)
-    session.commit()
-    return make_response(jsonify({'message': 'User created successfully'}),200)
-
-
-#route to delete debit card and billing details
-
-@app.route(api_url + "/debitcard/delete/<card_number>", methods=["DELETE"])
-def delete_debitcard(card_number):
-    debitcard = session.query(DebitCard).filter_by(card_number=card_number).first()
-    # billing_info_id=debitcard.billing_info_id
-    # billingaddress=session.query(BillingInfo).filter_by(billing_info_id=billing_info_id).first()
-    if debitcard:
-        session.delete(debitcard)
-        session.commit()    
-    # if billingaddress:
-    #     session.delete(billingaddress)
-    #     session.commit()
-        
-        return jsonify({"result": True})
+        return make_response(jsonify({"message": "User deleted successfully"}),200)
     else:
         return make_response(jsonify({'message': 'User not found'}),403)
 
@@ -342,6 +291,58 @@ def make_payment():
 
 
 
+#route to add debit card and billing details using input from user
+
+@app.route(api_url + "/debitcard/add", methods=['POST'])
+def add_new_debit_card():
+    data = request.get_json()
+    billing_address = data['billing_address']
+    postal_code = data['postal_code']
+    state = data['state']
+    city = data['city']
+    billingaddress=BillingInfo(billing_address=billing_address,postal_code=postal_code,state=state,city=city)
+    session.add(billingaddress)
+    session.commit()
+    billinginfo=session.query(BillingInfo).filter_by(billing_address=billing_address,postal_code=postal_code,state=state,city=city).first()
+    card_number = data['card_number']
+    user_id = data['user_id']
+    card_network = data['card_network']
+    cvv = data['cvv']
+    billing_info_id = billinginfo.billing_info_id
+    a=session.query(BankAccount).filter_by(account_number=data['bank_account_number']).count()
+    if a==0:
+        return jsonify({'message': 'Incorrect Bank Account number'},403)
+    bank_account_number = data['bank_account_number']
+    created_on = datetime.now()
+    created_by = data['user_id']
+    updated_on = datetime.now()
+    updated_by = data['user_id']
+    debitcard = DebitCard(user_id = user_id,card_number=card_number, card_network=card_network, cvv=cvv, billing_info_id =billing_info_id , bank_account_number=bank_account_number, created_on=created_on, created_by=created_by, updated_on=updated_on, updated_by=updated_by)
+    session.add(debitcard)
+    session.commit()
+    return make_response(jsonify({'message': 'Debit card details added successfully'}),200)
+
+
+#route to delete debit card and billing details
+
+@app.route(api_url + "/debitcard/delete/<card_number>", methods=["DELETE"])
+def delete_debit_card(card_number):
+    debitcard = session.query(DebitCard).filter_by(card_number=card_number).first()
+    billing_info_id=debitcard.billing_info_id
+    billingaddress=session.query(BillingInfo).filter_by(billing_info_id=billing_info_id).first()
+    if debitcard:
+        session.delete(debitcard)
+        session.commit()    
+    if billingaddress:
+        session.delete(billingaddress)
+        session.commit()
+        
+        return make_response(jsonify({"result": "Debit card deleted successfully"}),200)
+    else:
+        return make_response(jsonify({'message': 'Debit card not found'}),403)
+
+
+
 @app.route(api_url + "/creditcard/add", methods=["POST"])
 def add_new_credit_card():
     billing_address = request.json.get('billing_address')
@@ -367,7 +368,7 @@ def add_new_credit_card():
     
     session.add(credit_card)
     session.commit()
-    return {"status": "Success"}
+    return make_response(jsonify({'message': 'Credit card details added successfully'}),200)
 
 
 @app.route(api_url + "/creditcard/delete/<card_number>", methods=["DELETE"])
@@ -384,10 +385,9 @@ def delete_credit_card(card_number):
             session.delete(billingaddress)
             session.commit()
         
-        return jsonify({"result": True})
+        return make_response(jsonify({"result": "Credit card deleted successfully"}),200)
     else:
-        return jsonify({'message': 'Credit card not found'})
-
+        return make_response(jsonify({'message': 'Credit card not found'}),403)
 
     
 
