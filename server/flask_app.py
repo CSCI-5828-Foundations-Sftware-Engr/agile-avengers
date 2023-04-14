@@ -219,8 +219,48 @@ def delete_debitcard(card_number):
         return make_response(jsonify({'message': 'User not found'}),403)
 
 
+@app.route(api_url + "userinfo/creditcard/add", methods=["POST"])
+def add_new_credit_card():
+    billing_address = request.json.get('billing_address')
+    postal_code = request.json.get('postal_code')
+    state = request.json.get('state')
+    city = request.json.get('city')
+    billing_info = BillingInfo(billing_address=billing_address,postal_code=postal_code, state=state, city=city)
+    session.add(billing_info)
+    session.commit()
 
+    billing_info_id = billing_info.billing_info_id
+
+    card_number = request.json.get('card_number')
+    user_id = request.json.get('user_id')
+    card_network = request.json.get('card_network')
+    cvv = request.json.get('cvv')
+    credit_limit = request.json.get('credit_limit')
+    created_by = user_id
+    updated_by = user_id
+    created_on = datetime.now()
+    updated_on = datetime.now()
+
+    credit_card = CreditCard(card_number=card_number, user_id=user_id, card_network=card_network,
+                             cvv=cvv, billing_info_id=billing_info_id, credit_limit=credit_limit,
+                             created_by=created_by, updated_by=updated_by,created_on=created_on,updated_on=updated_on)
     
+    session.add(credit_card)
+    session.commit()
+    return {"status": "Success"}
+
+
+@app.route(api_url + "userinfo/creditcard/delete/<card_number>", methods=["DELETE"])
+def delete_credit_card(card_number):
+    creditcard = session.query(CreditCard).filter_by(card_number=card_number).first()
+    billingaddress=session.query(BillingInfo).filter_by(billing_info_id=creditcard['billing_info_id']).first()
+    if creditcard:
+        session.delete(billingaddress)
+        session.delete(creditcard)
+        session.commit()
+        return jsonify({"result": True})
+    else:
+        return make_response(jsonify({'message': 'User not found'}),403)
 
 
 
@@ -322,58 +362,11 @@ def make_payment():
     return {"status": "Success"}
 
 
-@app.route(api_url + "/creditcard/add", methods=["POST"])
-def add_new_credit_card():
-    billing_address = request.json.get('billing_address')
-    postal_code = request.json.get('postal_code')
-    state = request.json.get('state')
-    city = request.json.get('city')
-    billing_info = BillingInfo(billing_address=billing_address,postal_code=postal_code, state=state, city=city)
-    session.add(billing_info)
-    session.commit()
 
-    billing_info_id = billing_info.billing_info_id
-
-    card_number = request.json.get('card_number')
-    user_id = request.json.get('user_id')
-    card_network = request.json.get('card_network')
-    cvv = request.json.get('cvv')
-    credit_limit = request.json.get('credit_limit')
-    created_by = user_id
-    updated_by = user_id
-    created_on = datetime.now()
-    updated_on = datetime.now()
-
-    credit_card = CreditCard(card_number=card_number, user_id=user_id, card_network=card_network,
-                             cvv=cvv, billing_info_id=billing_info_id, credit_limit=credit_limit,
-                             created_by=created_by, updated_by=updated_by,created_on=created_on,updated_on=updated_on)
-    
-    session.add(credit_card)
-    session.commit()
-    return {"status": "Success"}
-
-
-@app.route(api_url + "/creditcard/delete/<card_number>", methods=["DELETE"])
-def delete_credit_card(card_number):
-    credit_card = session.query(CreditCard).filter_by(card_number=card_number).first()
-
-    if credit_card:
-        session.delete(credit_card)
-        session.commit()
-        return {"status": "Credit card deleted successfully"}
-    else:
-        return {"status": "Error", "message": "Credit card not found"}
     
 
 
-@app.route(api_url + "/debitcard/add", methods=["POST"])
-def add_new_debit_card():
-    return {"status": "Success"}
 
-@app.route(api_url + "/debitcard/delete", methods=["DELETE"])
-def delete_debit_card():
-    
-    return {"status": "Debit card deleted successfully"}
 
 
 if __name__ == "__main__":
