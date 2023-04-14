@@ -78,7 +78,7 @@ def resource_not_found(e):
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
 def catch_all(path):
-    return render_template("index.html")
+    return jsonify({"Test": "ok"})
 
 
 @app.route(api_url + "/get_current_time")
@@ -309,4 +309,4 @@ def add_new_debit_card():
 
 
 if __name__ == "__main__":
-    app.run(port=5000, host="localhost")
+    app.run(port=5000, host="0.0.0.0")
