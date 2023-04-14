@@ -33,3 +33,13 @@ Start application
 
 1. cd agile-avengers/client/; npm run develop
 2. cd agile-avengers/server/; source venv/bin/activate; flask run
+
+## Starting server from kubernetes
+
+This project needs ingress to expose backend service outside. To install ingress, run the following
+
+`kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.7.0/deploy/static/provider/cloud/deploy.yaml`
+
+To learn more about ingress installation, you can refer [here](https://kubernetes.github.io/ingress-nginx/deploy)
+
+To start the server, go to `server/` and run `make build` to build the docker image. After building, run `make deploy`. Then, the backend service will be available at `http://localhost/backend/`

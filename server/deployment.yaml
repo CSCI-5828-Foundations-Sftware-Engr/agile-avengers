@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: master
-        image: agile_avengers:test
+        image: agile_avengers:dev
         # resources:
         #   requests:
         #     cpu: 100m
