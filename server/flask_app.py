@@ -20,7 +20,7 @@ from werkzeug.exceptions import HTTPException
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "./"))
 from config.constants import DB_CREDENTIALS
-from datamodel.models.userinfo import UserInfo, CreditCard,DebitCard,BillingInfo
+from datamodel.models.userinfo import UserInfo, CreditCard,DebitCard,BillingInfo,BankAccount
 from helpers.user_management import check_userinfo, create_new_user, user_login, user_logout
 
 
@@ -176,14 +176,14 @@ def delete_user_info(user_id):
 
 #route to add debit card and billing details using input from user
 
-@app.route(api_url + "/userinfo/debitcard/add", methods=['POST'])
+@app.route(api_url + "/debitcard/add", methods=['POST'])
 def add_debitcard():
     data = request.get_json()
     billing_address = data['billing_address']
     postal_code = data['postal_code']
     state = data['state']
     city = data['city']
-    billingaddress=BillingInfo(billing_info_id=billing_info_id,billing_address=billing_address,postal_code=postal_code,state=state,city=city)
+    billingaddress=BillingInfo(billing_address=billing_address,postal_code=postal_code,state=state,city=city)
     session.add(billingaddress)
     session.commit()
     billinginfo=session.query(BillingInfo).filter_by(billing_address=billing_address,postal_code=postal_code,state=state,city=city).first()
@@ -191,7 +191,8 @@ def add_debitcard():
     user_id = data['user_id']
     card_network = data['card_network']
     cvv = data['cvv']
-    billing_info_id = billinginfo['billing_info_id']
+    # billing_info_id = billingaddress.billing_info_id
+    billing_info_id = billinginfo.billing_info_id
     bank_account_number = data['bank_account_number']
     created_on = datetime.now()
     created_by = data['user_id']
@@ -205,14 +206,18 @@ def add_debitcard():
 
 #route to delete debit card and billing details
 
-@app.route(api_url + "/userinfo/debitcard/delete/<card_number>", methods=["DELETE"])
+@app.route(api_url + "/debitcard/delete/<card_number>", methods=["DELETE"])
 def delete_debitcard(card_number):
     debitcard = session.query(DebitCard).filter_by(card_number=card_number).first()
-    billingaddress=session.query(BillingInfo).filter_by(billing_info_id=debitcard['billing_info_id']).first()
+    # billing_info_id=debitcard.billing_info_id
+    # billingaddress=session.query(BillingInfo).filter_by(billing_info_id=billing_info_id).first()
     if debitcard:
-        session.delete(billingaddress)
         session.delete(debitcard)
-        session.commit()
+        session.commit()    
+    # if billingaddress:
+    #     session.delete(billingaddress)
+    #     session.commit()
+        
         return jsonify({"result": True})
     else:
         return make_response(jsonify({'message': 'User not found'}),403)
