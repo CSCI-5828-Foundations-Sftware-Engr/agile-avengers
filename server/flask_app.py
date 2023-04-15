@@ -33,10 +33,10 @@ app = Flask(
 
 
 
-api_url = "/api/v1/"
+api_url = "/v1/"
 CORS(app)
 
-engine = create_engine("postgresql://admin:password@localhost:5432/agile_avengers")
+engine = create_engine(f"postgresql://{DB_CREDENTIALS['USERNAME']}:{DB_CREDENTIALS['PASSWORD']}@{DB_CREDENTIALS['HOSTNAME']}:5432/{DB_CREDENTIALS['DB_NAME']}")
 Session = sessionmaker(bind=engine)
 session = Session()
 
@@ -192,7 +192,7 @@ def delete_user_info(user_id):
 
 
 
-base_route = f"/api/v1/auth"
+base_route = f"{api_url}/auth"
 
 
 @app.route(f"{base_route}/create", methods=["POST"])
