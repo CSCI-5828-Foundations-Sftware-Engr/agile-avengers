@@ -1,0 +1,28 @@
+FROM python:3.8.10
+
+COPY requirements.txt /app/requirements.txt
+
+RUN pip install -r /app/requirements.txt 
+
+# For some reason, keycloak installed from requirements.txt does not work.
+# Do not move the below two dependencies to requirements.txt
+
+RUN pip install keycloak-client==0.15.4
+
+RUN pip install python-keycloak==2.15.3
+
+COPY flask_app.py alembic.ini start.sh /app/
+
+COPY alembic /app/alembic
+
+COPY config /app/config
+
+COPY constants /app/constants
+
+COPY datamodel /app/datamodel
+
+COPY helpers /app/helpers
+
+WORKDIR /app
+
+ENTRYPOINT [ "bash",  "start.sh" ]

@@ -36,11 +36,11 @@ app = Flask(
 
 
 
-api_url = "/api/v1/"
+api_url = "/v1/"
 payment_route = f"{api_url}payment"
 CORS(app)
 
-engine = create_engine("postgresql://admin:password@localhost:5432/agile_avengers")
+engine = create_engine(f"postgresql://{DB_CREDENTIALS['USERNAME']}:{DB_CREDENTIALS['PASSWORD']}@{DB_CREDENTIALS['HOSTNAME']}:5432/{DB_CREDENTIALS['DB_NAME']}")
 Session = sessionmaker(bind=engine)
 session = Session()
 
@@ -74,7 +74,7 @@ def resource_not_found(e):
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
 def catch_all(path):
-    return render_template("index.html")
+    return jsonify({"Test": "ok"})
 
 
 @app.route(api_url + "/get_current_time")
@@ -196,7 +196,7 @@ def delete_user_info(user_id):
 
 
 
-base_route = f"/api/v1/auth"
+base_route = f"{api_url}/auth"
 
 
 @app.route(f"{base_route}/create", methods=["POST"])
@@ -453,9 +453,9 @@ def get_pending_requests(user_id):
         make_response(jsonify({"message": "Server Error"}), 500)
 
 
-@app.route(api_url + "/add_new_credit_card", methods=["POST"])
-def add_new_credit_card():
-    return {"status": "Success"}
+# @app.route(api_url + "/add_new_credit_card", methods=["POST"])
+# def add_new_credit_card():
+#     return {"status": "Success"}
 
 #route to add debit card and billing details using input from user
 
@@ -562,4 +562,4 @@ def delete_credit_card(card_number):
 
 
 if __name__ == "__main__":
-    app.run(port=5001, host="localhost")
+    app.run(port=5000, host="0.0.0.0")
