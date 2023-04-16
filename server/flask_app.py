@@ -453,9 +453,9 @@ def get_pending_requests(user_id):
         make_response(jsonify({"message": "Server Error"}), 500)
 
 
-@app.route(api_url + "/add_new_credit_card", methods=["POST"])
-def add_new_credit_card():
-    return {"status": "Success"}
+# @app.route(api_url + "/add_new_credit_card", methods=["POST"])
+# def add_new_credit_card():
+#     return {"status": "Success"}
 
 #route to add debit card and billing details using input from user
 
@@ -562,8 +562,4 @@ def delete_credit_card(card_number):
 
 
 if __name__ == "__main__":
-<<<<<<< HEAD
     app.run(port=5000, host="0.0.0.0")
-=======
-    app.run(port=5001, host="localhost")
->>>>>>> 2096ee5516cf227950124be4b470ee9973eed892
