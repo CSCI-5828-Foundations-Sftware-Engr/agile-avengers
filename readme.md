@@ -46,5 +46,6 @@ To start the server, go to `server/` and run `make build` to build the docker im
 
 ## Running unit tests
 
-1. `cd server`
-2. `make test` 
+1. `pip install pytest pytest-coverage`
+2. `cd server`
+3. `make test` 
