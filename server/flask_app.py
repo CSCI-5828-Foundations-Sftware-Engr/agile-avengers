@@ -230,7 +230,7 @@ def login():
     for key, value in token.items():
         resp.set_cookie(key, json.dumps(value))
     resp.set_cookie("auth_token", json.dumps(token))
-    return resp
+    return {"token": token}
 
 
 @app.route(f"{base_route}/logout", methods=["POST"])
@@ -255,21 +255,6 @@ def userinfo():
         return resp
 
     return make_response(jsonify({"message": "Unauthorized"}), 403)
-
-
-#   getAllPaymentMethods() {
-#     const url = `${instanceUrl}/api/v1/get_all_payment_methods`;
-#     return axios.get(url, config);
-#   },
-#   getPayeeList() {
-#     const url = `${instanceUrl}/api/v1/get_payee_list`;
-#     return axios.get(url, config);
-#   },
-#   makePayment(payload) {
-#     const url = `${instanceUrl}/api/v1/make_payment`;
-#     return axios.post(url, payload, config);
-#   }
-
 
 @app.route(f"{payment_route}/get_all_payment_methods/<user_id>", methods=["GET"])
 def get_all_payment_methods(user_id):
@@ -302,15 +287,6 @@ def get_all_payment_methods(user_id):
     except Exception as ex:
         traceback.print_exc()
         return make_response(jsonify({"message": "Server Error"}), 500)
-    # return {
-    #     "status": "Success",
-    #     "data": {
-    #         "visa - 2232": "1223",
-    #         "Mastercard - 8881": "1234",
-    #         "Bank Account - 1223": "9302",
-    #         "American Express - 9282": "2323",
-    #     },
-    # }
 
 
 @app.route(f"{payment_route}/get_payee_list", methods=["GET"])
@@ -328,7 +304,11 @@ def get_payee_list():
         traceback.print_exc()
         make_response(jsonify({"message": "Server Error"}), 500)
 
-    # return {"status": "Success", "data": {"aishwarya123": "123", "hemanth234": "234", "namratha345": "345"}}
+@app.route(f"{payment_route}/get_sender_list", methods=["GET"])
+def get_sender_list():
+    # print authorization token from header
+    print(request.headers.get('Authorization'))
+    return {"status": "Success", "data": {"aishwarya123": "123", "hemanth234": "234", "namratha345": "345"}}
 
 @app.route(f"{payment_route}/send", methods=["POST"])
 @app.route(f"{payment_route}/send/<transaction_id>", methods=["POST"])
@@ -555,7 +535,10 @@ def delete_credit_card(card_number):
     else:
         return make_response(jsonify({'message': 'Credit card not found'}),403)
 
-    
+
+@app.route(api_url + "/add_new_bank_account", methods=["POST"])
+def add_new_bank_account():
+    return {"status": "Success"}
 
 
 
