@@ -28,7 +28,19 @@ const Container = () => {
       <div className="position-relative">
         <ul className="nav nav-tabs">
           {/* <NavigationItem link="/">Home</NavigationItem> */}
-          <NavigationItem link="/payment">Payment</NavigationItem>
+          {isLoggedIn ? (
+            <>
+              <NavigationItem link="/payment">Payment</NavigationItem>
+              <NavigationItem link="/add_payment_method">
+                Add Payment Methods
+              </NavigationItem>     
+            </>     
+          ) : (
+            <>
+              <NavigationItem link="/login">Login</NavigationItem>
+              <NavigationItem link="/signup">Sign Up</NavigationItem>
+            </>
+          )}
         </ul>
       </div>
       <div className="body-content">

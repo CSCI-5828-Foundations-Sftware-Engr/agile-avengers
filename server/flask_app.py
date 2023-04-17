@@ -10,22 +10,19 @@ from datetime import datetime
 
 # import sqlalchemy
 import sqlalchemy as db
-from flask import Flask, abort, jsonify, make_response, render_template, request, Response
+from flask import Flask, Response, abort, jsonify, make_response, render_template, request
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import MetaData, create_engine
-from sqlalchemy.orm import Session
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import Session, sessionmaker
 from werkzeug.exceptions import HTTPException
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "./"))
 from config.constants import DB_CREDENTIALS
-from datamodel.models.userinfo import UserInfo, CreditCard, DebitCard, BillingInfo, BankAccount, Merchant
 from datamodel.models.payments import Transaction
+from datamodel.models.userinfo import BankAccount, BillingInfo, CreditCard, DebitCard, Merchant, UserInfo
 from helpers.user_management import check_userinfo, create_new_user, user_login, user_logout
-from helpers.validator import validate_transaction, user_exists
-
-
+from helpers.validator import user_exists, validate_transaction
 
 app = Flask(
     __name__,
@@ -201,6 +198,8 @@ base_route = f"{api_url}/auth"
 
 @app.route(f"{base_route}/create", methods=["POST"])
 def create_user():
+    print("Hello")
+    print(request.json)
     user_data = request.json
 
     # Add to userinfo table
