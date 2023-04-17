@@ -20,7 +20,9 @@ keycloak_connection = KeycloakOpenIDConnection(
     verify=True,
 )
 
-keycloak_admin = KeycloakAdmin(server_url=config.keycloak_url, connection=keycloak_connection)
+keycloak_admin = KeycloakAdmin(
+    server_url=config.keycloak_url, connection=keycloak_connection
+)
 
 client = keycloak_admin.create_client(
     skip_exists=True,

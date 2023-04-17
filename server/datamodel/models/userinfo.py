@@ -3,6 +3,7 @@ from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, F
 
 Base = declarative_base()
 
+
 class UserInfo(Base):
     __tablename__ = "user_info"
 
@@ -18,6 +19,7 @@ class UserInfo(Base):
     updated_on = Column(DateTime)
     updated_by = Column(String(30))
 
+
 class BankAccount(Base):
     __tablename__ = "bank_account"
 
@@ -31,7 +33,8 @@ class BankAccount(Base):
     created_by = Column(String(30))
     updated_on = Column(DateTime)
     updated_by = Column(String(30))
-    
+
+
 class BillingInfo(Base):
     __tablename__ = "billing_info"
 
@@ -40,6 +43,7 @@ class BillingInfo(Base):
     postal_code = Column(String(8))
     state = Column(String(30))
     city = Column(String(30))
+
 
 class DebitCard(Base):
     __tablename__ = "debit_card"
@@ -55,6 +59,7 @@ class DebitCard(Base):
     updated_on = Column(DateTime)
     updated_by = Column(String(30))
 
+
 class CreditCard(Base):
     __tablename__ = "credit_card"
 
@@ -68,6 +73,7 @@ class CreditCard(Base):
     created_by = Column(String(30))
     updated_on = Column(DateTime)
     updated_by = Column(String(30))
+
 
 class Merchant(Base):
     __tablename__ = "merchant"
