@@ -11,7 +11,7 @@ RUN pip install keycloak-client==0.15.4
 
 RUN pip install python-keycloak==2.15.3
 
-COPY flask_app.py alembic.ini start.sh /app/
+COPY flask_app.py alembic.ini start.sh db_queries.py /app/
 
 COPY alembic /app/alembic
 

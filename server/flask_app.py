@@ -1,29 +1,18 @@
 import json
 import logging
-import os
-import random
-import socket
-import string
-import sys
 import traceback
 from datetime import datetime
 
-# import sqlalchemy
-import sqlalchemy as db
-from flask import Flask, abort, jsonify, make_response, render_template, request, Response
+from flask import Flask, jsonify, make_response, request 
 from flask_cors import CORS
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import MetaData, create_engine
 from sqlalchemy.orm import Session
-from sqlalchemy.orm import sessionmaker
 from werkzeug.exceptions import HTTPException
 
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "./"))
-from config.constants import DB_CREDENTIALS
 from datamodel.models.userinfo import UserInfo, CreditCard, DebitCard, BillingInfo, BankAccount, Merchant
 from datamodel.models.payments import Transaction
 from helpers.user_management import check_userinfo, create_new_user, user_login, user_logout
 from helpers.validator import validate_transaction, user_exists
+from db_queries import session
 
 
 
@@ -39,10 +28,6 @@ app = Flask(
 api_url = "/v1/"
 payment_route = f"{api_url}payment"
 CORS(app)
-
-engine = create_engine(f"postgresql://{DB_CREDENTIALS['USERNAME']}:{DB_CREDENTIALS['PASSWORD']}@{DB_CREDENTIALS['HOSTNAME']}:5432/{DB_CREDENTIALS['DB_NAME']}")
-Session = sessionmaker(bind=engine)
-session = Session()
 
 if __name__ != "__main__":
     gunicorn_error_logger = logging.getLogger("gunicorn.error")
@@ -72,7 +57,6 @@ def resource_not_found(e):
 
 
 @app.route("/", defaults={"path": ""})
-@app.route("/<path:path>")
 def catch_all(path):
     return jsonify({"Test": "ok"})
 
@@ -114,18 +98,21 @@ def get_user_info(user_id):
 @app.route(api_url + "/users/create", methods=['POST'])
 def create_users():
     data = request.get_json()
-    user_name = data['user_name']
-    first_name = data['first_name']
-    last_name = data['last_name']
-    mobile_number = data['mobile_number']
-    email_id = data['email_id']
-    is_merchant = data['is_merchant']
-    created_on = datetime.now()
-    created_by = data['user_name']
-    updated_on = datetime.now()
-    updated_by = data['user_name']
-    user = UserInfo(user_name=user_name, first_name=first_name, last_name=last_name, mobile_number=mobile_number, email_id=email_id, is_merchant=is_merchant, created_on=created_on, created_by=created_by, updated_on=updated_on, updated_by=updated_by)
-    session.add(user)
+
+    user_info = session.query(UserInfo).filter(UserInfo.user_name == data["user_name"]).first()
+
+    if user_info is None:
+        return make_response(jsonify({"message": "user does not exist"}), 404)
+
+    user_info.first_name = data['first_name']
+    user_info.last_name = data['last_name']
+    user_info.mobile_number = data['mobile_number']
+    user_info.email_id = data['email_id']
+    user_info.is_merchant = data['is_merchant']
+    user_info.created_on = datetime.now()
+    user_info.created_by = data['user_name']
+    user_info.updated_on = datetime.now()
+    user_info.updated_by = data['user_name']
     session.commit()
     return make_response(jsonify({'message': 'User created successfully'}),200)
     
@@ -204,28 +191,37 @@ def create_user():
     user_data = request.json
 
     # Add to userinfo table
-    ui = UserInfo(user_id=user_data["username"])
+    ui = UserInfo(user_name=user_data["username"])
     try:
-        with Session() as session:
-            print("adding userinfo")
-            session.add(ui)
-            session.commit()
+        print("adding userinfo")
+        session.add(ui)
+
+        new_user = create_new_user(user_data["username"], user_data["password"])
+        if new_user is None:
+            print("None returned")
+            session.rollback()
+            return make_response(jsonify({"message": "user already exists"}), 409)
+
     except Exception as e:
-        print(e)
-        make_response(jsonify({"message": "Server Error"}), 500)
+        print(traceback.format_exc())
+        return make_response(jsonify({"message": "Server Error"}), 500)
 
-    new_user = create_new_user(user_data["username"], user_data["password"])
-    print(new_user)
-    if new_user is None:
-        return make_response(jsonify({"message": "user already exists"}), 409)
-
+    session.commit()
     return jsonify({"message": "user created"})
 
 
 @app.route(f"{base_route}/login", methods=["POST"])
 def login():
     user_data = request.json
+
+    if "username" not in user_data.keys() or "password" not in user_data.keys():
+        return make_response(jsonify({"message": "username or password missing"}), 400)
+    
     token = user_login(user_data["username"], user_data["password"])
+    
+    if token is None:
+        return make_response(jsonify({"message": "username or password incorrect"}), 401)
+
     resp = make_response(jsonify({"message": "logged in successfully"}), 200)
     for key, value in token.items():
         resp.set_cookie(key, json.dumps(value))
@@ -236,6 +232,10 @@ def login():
 @app.route(f"{base_route}/logout", methods=["POST"])
 def logout():
     token = request.cookies.get("refresh_token")
+    print(token)
+    if token is None:
+        return make_response(jsonify({"message": "refresh_token not set"}), 401)
+
     user_logout(token)
     return jsonify({"message": "logged out"})
 
@@ -244,6 +244,10 @@ def logout():
 def userinfo():
     access_token = request.cookies.get("access_token")
     refresh_token = request.cookies.get("refresh_token")
+    
+    if access_token is None or refresh_token is None:
+        return make_response(jsonify({"message": "access or refresh token empty"}), 401)
+
     auth_token = {"access_token": access_token, "refresh_token": refresh_token}
     token, userinfo = check_userinfo(auth_token)
 

@@ -65,7 +65,10 @@ def create_new_user(username, password, email=None, first_name=None, last_name=N
 
 
 def user_login(username, password):
-    return keycloak_openid.token(username, password)
+    try:
+        return keycloak_openid.token(username, password)
+    except keycloak.exceptions.KeycloakAuthenticationError:
+        return None
 
 
 def user_logout(token):

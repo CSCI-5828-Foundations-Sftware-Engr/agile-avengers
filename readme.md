@@ -43,3 +43,8 @@ This project needs ingress to expose backend service outside. To install ingress
 To learn more about ingress installation, you can refer [here](https://kubernetes.github.io/ingress-nginx/deploy)
 
 To start the server, go to `server/` and run `make build` to build the docker image. After building, run `make deploy`. Then, the backend service will be available at `http://localhost/backend/`
+
+## Running unit tests
+
+1. `cd server`
+2. `make test` 

@@ -7,7 +7,7 @@ class UserInfo(Base):
     __tablename__ = "user_info"
 
     user_id = Column(Integer, autoincrement=True, primary_key=True)
-    user_name = Column(String(30))
+    user_name = Column(String(30), unique=True)
     first_name = Column(String(30))
     last_name = Column(String(30))
     mobile_number = Column(String(10))
