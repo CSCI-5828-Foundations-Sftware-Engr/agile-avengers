@@ -4,7 +4,7 @@ from flask_app import app
 from unittest import mock
 
 
-class TestBlog:
+class TestAuth:
     def setup_class(self):
         Base.metadata.create_all(engine)
         self.session = session
@@ -112,6 +112,27 @@ class TestBlog:
 
         # Unset cookie by setting expires=0
         self.app_client.set_cookie("localhost", "refresh_token", "1", expires=0)
+
+
+class TestUserinfo:
+    def setup_class(self):
+        Base.metadata.create_all(engine)
+        self.session = session
+        self.app_client = app.test_client()
+        self.user_data = {
+            "user_name": "preetham",
+            "first_name": "Preetham",
+            "last_name": "Maiya",
+            "mobile_number": "1234566789",
+            "email_id": "prma6536@colorado.edu",
+            "is_merchant": False,
+            "created_by": "preetham",
+            "updated_by": "preetham",
+        }
+
+    def teardown_class(self):
+        self.session.rollback()
+        self.session.close()
 
     def test_create_userinfo(self):
         url = "/v1/users/create"

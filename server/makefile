@@ -12,4 +12,4 @@ delete:
 	kubectl delete ingress/backend
 
 test:
-	pytest tests/test_apis.py
+	pytest -v --cov-report term --cov=. tests/test_apis.py
