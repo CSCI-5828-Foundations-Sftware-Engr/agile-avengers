@@ -198,8 +198,6 @@ base_route = f"{api_url}/auth"
 
 @app.route(f"{base_route}/create", methods=["POST"])
 def create_user():
-    print("Hello")
-    print(request.json)
     user_data = request.json
 
     # Add to userinfo table
