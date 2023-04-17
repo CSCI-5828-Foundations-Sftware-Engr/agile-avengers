@@ -127,7 +127,7 @@ const RequestPayment = () => {
               --Select A Value--
             </option>
             {Object.keys(senderList).map(item => (
-              <option id={senderList[item]} value={selectedList[item]}>
+              <option id={senderList[item]} value={senderList[item]}>
                 {item}
               </option>
             ))}

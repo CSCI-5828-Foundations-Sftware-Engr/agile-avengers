@@ -12,6 +12,10 @@ const paymentMethodService = {
   addNewDebitCard(payload) {
     const url = `${instanceUrl}/api/v1/add_new_debit_card`;
     return axios.post(url, payload, config);
+  },
+  addNewBankAccount(payload) {
+    const url = `${instanceUrl}/api/v1/add_new_bank_account`;
+    return axios.post(url, payload, config);
   }
 };
 
