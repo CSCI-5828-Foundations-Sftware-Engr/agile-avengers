@@ -1,16 +1,28 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import Mandatory from "../../common/component/Mandatory";
 import SendPayment from "./SendPayment";
 import RequestPayment from "./RequestPayment";
+import { useHistory } from "react-router-dom";
+import { AuthContext } from "../Context/Authcontext";
+
+
 
 const NewPayment = () => {
   const [requestType, setRequestType] = useState("");
+  const history = useHistory();
+  const {isLoggedIn, setIsLoggedIn} = useContext(AuthContext);
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    if (!isLoggedIn) {
+      history.push("/login")
+    }
+  }, []);
 
   const handleChange = e => {
     setRequestType(e.target[e.target.options.selectedIndex].id);
   };
+
+
   return (
     <div className="container-flex">
       <div className="container">

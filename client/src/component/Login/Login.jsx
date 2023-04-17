@@ -2,6 +2,9 @@ import { faLess } from "@fortawesome/free-brands-svg-icons";
 import React, { useContext, useState } from "react";
 import Mandatory from "../../common/component/Mandatory";
 import { AuthContext } from "../Context/Authcontext";
+import { useHistory } from "react-router-dom";
+import Cookies from 'universal-cookie';
+
 
 const Login = () => {
   const [username, setUsername] = useState("");
@@ -18,9 +21,11 @@ const Login = () => {
     setPassword(event.target.value);
   };
 
+  const history = useHistory();
+
   const handleSubmit = (event) => {
     event.preventDefault();
-    fetch("/api/v1/auth/login", {
+    fetch("http://127.0.0.1:5000/api/v1/auth/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -34,6 +39,7 @@ const Login = () => {
         
         if (response.ok) {
           setIsLoggedIn(true);
+        
           return response.json();
         } else {
           throw new Error("Wrong credentials");
@@ -41,7 +47,12 @@ const Login = () => {
       })
       .then((data) => {
         // handle successful login
-        console.log(data.message);
+        // const cookies = new Cookies();
+        // cookies.set('access_token', data.token.access_token, { path: '/' });
+        // cookies.set('refresh_token', data.token.refresh_token, { path: '/' });
+        localStorage.setItem('access_token', data.token.access_token);
+        localStorage.setItem('refresh_token', data.token.refresh_token);
+        history.push("/payment");
       })
       .catch((error) => {
         setErrorMessage(error.message);
