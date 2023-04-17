@@ -3,7 +3,7 @@ import logging
 import traceback
 from datetime import datetime
 
-from flask import Flask, jsonify, make_response, request, render_template
+from flask import Flask, jsonify, make_response, request, render_template, Response
 from flask_cors import CORS
 from sqlalchemy.orm import Session
 from werkzeug.exceptions import HTTPException
@@ -16,7 +16,6 @@ from datamodel.models.userinfo import (
     BankAccount,
     Merchant,
 )
-
 from datamodel.models.payments import Transaction
 from helpers.user_management import (
     check_userinfo,
@@ -514,11 +513,21 @@ def add_new_debit_card():
     )
     session.add(billingaddress)
     session.commit()
+    billinginfo = (
+        session.query(BillingInfo)
+        .filter_by(
+            billing_address=billing_address,
+            postal_code=postal_code,
+            state=state,
+            city=city,
+        )
+        .first()
+    )
     card_number = data["card_number"]
     user_id = data["user_id"]
     card_network = data["card_network"]
     cvv = data["cvv"]
-    billing_info_id = billingaddress.billing_info_id
+    billing_info_id = billinginfo.billing_info_id
     a = (
         session.query(BankAccount)
         .filter_by(account_number=data["bank_account_number"])
@@ -563,7 +572,7 @@ def delete_debit_card(card_number):
     if debitcard:
         session.delete(debitcard)
         session.commit()
-    # if billingaddress:
+    if billingaddress:
         session.delete(billingaddress)
         session.commit()
 
