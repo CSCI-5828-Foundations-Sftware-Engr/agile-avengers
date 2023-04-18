@@ -26,8 +26,8 @@ from helpers.validator import user_exists, validate_transaction
 
 app = Flask(
     __name__,
-    static_folder="../client",
-    template_folder="../client",
+    static_folder="./client",
+    template_folder="./client",
     # static_url_path="",
 )
 
@@ -69,9 +69,8 @@ def resource_not_found(e):
 
 
 @app.route("/", defaults={"path": ""})
-@app.route("/<path:path>")
 def catch_all(path):
-    return jsonify({"Test": "ok"})
+    return render_template("index.html")
 
 
 @app.route(api_url + "/get_current_time")
@@ -299,7 +298,7 @@ def get_payee_list():
         return make_response(jsonify({"status": "Success", "data": payee_dict}), 200)
     except Exception as ex:
         traceback.print_exc()
-        make_response(jsonify({"message": "Server Error"}), 500)
+        return make_response(jsonify({"status": "Success","message": "Server Error", "data": {}}), 200)
 
 @app.route(f"{payment_route}/get_sender_list", methods=["GET"])
 def get_sender_list():

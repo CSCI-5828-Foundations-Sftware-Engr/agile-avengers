@@ -54,12 +54,16 @@ const NewPayment = () => {
                 Send
               </option>
               <option id="request" value="request">
-                request
+                Request
+              </option>
+              <option id="pendingPaymentRequests" value="pendingPaymentRequests">
+                Pending Payment Requests
               </option>
             </select>
           </div>
           {requestType === "send" ? <SendPayment /> : <></>}
           {requestType === "request" ? <RequestPayment /> : <></>}
+          {requestType === "pendingPaymentRequests" ? <PendingPaymentRequests /> : <></>}
         </div>
       </div>
     </div>
