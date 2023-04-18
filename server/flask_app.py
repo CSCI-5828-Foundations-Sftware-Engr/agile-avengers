@@ -221,7 +221,10 @@ def create_user():
     if new_user is None:
         return make_response(jsonify({"message": "user already exists"}), 409)
 
-    return jsonify({"message": "user created"})
+    response = make_response(jsonify({"message": "user created"}), 200)
+    response.headers.add('Access-Control-Allow-Origin', 'http://localhost:8081')    
+    
+    return response
 
 
 @app.route(f"{base_route}/login", methods=["POST"])
@@ -543,7 +546,14 @@ def add_new_bank_account():
     return {"status": "Success"}
 
 
-
+@app.before_request
+def basic_authentication():
+    if request.method == 'OPTIONS':
+        response = make_response()
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add("Access-Control-Allow-Headers", "*")
+        response.headers.add("Access-Control-Allow-Methods", "*")
+        return Response()
 
 
 if __name__ == "__main__":
