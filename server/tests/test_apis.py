@@ -205,4 +205,78 @@ class TestUserinfo:
         self.session.commit()
 
 
+class TestDebitCard():
+    def setup_class(self):
+        Base.metadata.create_all(engine)
+        self.session = session
+        self.app_client = app.test_client()
+        self.debitcard_data={
+            "card_number" : "1234567891234567",
+            "billing_address" : "2950 College Ave",
+            "postal_code" : "80303",
+            "state" : "Colorado",
+            "city" : "Boulder",
+            "user_id" : "1",
+            "card_network" : "Visa",
+            "cvv" : "111",
+            "billing_info_id":" ",
+            "bank_account_number" : " ",
+            "created_by": "aditi",
+            "updated_by": "aditi",
+        }
+
+    def teardown_class(self):
+        self.session.rollback()
+        self.session.close()
+
+    def test_create_debitcardinfo(self):
+        url = "/v1/debitcard/add"
+
+        ui = UserInfo(
+        user_name = "aditi",
+            )
+        self.session.add(ui)
+        self.session.commit()
+
+        ba = BankAccount(
+            account_number="123456789123",
+            user_id=ui.user_id,
+            )
+        self.session.add(ba)
+        self.session.commit()
+
+           
+        self.debitcard_data["user_id"]=ui.user_id
+        self.debitcard_data["bank_account_number"]=ba.account_number
+        
+
+        res = self.app_client.post(url, json=self.debitcard_data)
+
+        assert res.status_code == 200
+
+        cards = (
+            self.session.query(DebitCard).filter(DebitCard.card_number == "1234567891234567").all()
+        )
+        assert len(cards) == 1
+        assert cards[0].user_id == ui.user_id
+        assert cards[0].card_number == "1234567891234567"
+        assert cards[0].card_network == "Visa"
+        assert cards[0].cvv == "111"
+        assert cards[0].bank_account_number == ba.account_number
+        assert cards[0].created_by == str(ui.user_id)
+        assert cards[0].updated_by == str(ui.user_id)
+
+        self.session.query(DebitCard).filter(DebitCard.card_number == "1234567891234567").delete()
+        self.session.commit()
+
+        self.session.query(BillingInfo).filter(BillingInfo.billing_info_id == cards[0].billing_info_id).delete()
+        self.session.commit()
+
+        self.session.query(BankAccount).filter(BankAccount.account_number == ba.account_number).delete()
+        self.session.commit()
+
+        self.session.query(UserInfo).filter(UserInfo.user_id == ui.user_id).delete()
+        self.session.commit()
+    
+   
         
