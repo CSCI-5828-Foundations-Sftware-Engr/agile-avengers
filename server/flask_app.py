@@ -554,6 +554,30 @@ def delete_credit_card(card_number):
 def add_new_bank_account():
     return {"status": "Success"}
 
+@app.route(api_url + "/users/<user_id>/transactions", methods=["GET"])
+def get_transactions(user_id):
+ args = request.args
+ start_date = args.get("start_date", default="", type=str)
+ end_date = args.get("end_date", default="", type=str)
+ start_date = datetime.strptime(start_date, "%d%m%Y").date()
+ end_date = datetime.strptime(end_date, "%d%m%Y").date()
+ result = session.query(Transaction).filter_by(payer_id=user_id).filter(Transaction.created_on.between(start_date, end_date))
+ response = []
+ for r in result:
+    response.append({
+        'transaction_id': r.transaction_id,
+        'payee_id': r.payee_id, 
+        'transaction_amount': r.transaction_amount,
+        'transaction_method': r.transaction_method,
+        'transaction_method_id': r.transaction_method_id,
+        'is_completed': r.is_completed,
+        'created_on': r.created_on,
+        'created_by': r.created_by,
+        'updated_on': r.updated_on,
+        'updated_by': r.updated_by
+ })
+ return make_response(jsonify({"payer_id": user_id, "transactions": response}),200)
+
 
 @app.before_request
 def basic_authentication():
