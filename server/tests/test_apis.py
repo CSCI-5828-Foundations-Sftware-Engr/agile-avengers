@@ -200,13 +200,8 @@ class TestCreditCard():
         self.session.add(ui)
         self.session.commit()
 
-       
-
-
         self.creditcard_data["user_id"]=ui.user_id
         
-
-
         res = self.app_client.post(url, json=self.creditcard_data)
 
         assert res.status_code == 200
@@ -227,8 +222,6 @@ class TestCreditCard():
 
         self.session.query(BillingInfo).filter(BillingInfo.billing_info_id == cards[0].billing_info_id).delete()
         self.session.commit()
-
-        
 
         self.session.query(UserInfo).filter(UserInfo.user_id == ui.user_id).delete()
         self.session.commit()
