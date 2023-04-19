@@ -452,8 +452,9 @@ def request_payment():
             session.add(transaction)
             session.commit()
 
+            transaction_id = transaction.transaction_id
             return make_response(
-                jsonify({"message": "Transaction Request successful"}), 201
+                jsonify({"message": "Transaction Request successful", "id": transaction_id}), 201
             )
 
         else:

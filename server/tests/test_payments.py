@@ -10,61 +10,42 @@ class TestPayment:
         Base.metadata.create_all(engine)
         self.session = session
         self.app_client = app.test_client()
-        self.payer_data = {
-            "user_name": "preetham",
-            "first_name": "Preetham",
-            "last_name": "Maiya",
-            "mobile_number": "1234566789",
-            "email_id": "prma6536@colorado.edu",
-            "is_merchant": False,
-            "created_by": "preetham",
-            "updated_by": "preetham",
-        }
-        self.payee_data = {
-            "user_name": "ashutosh",
-            "first_name": "Ashutosh",
-            "last_name": "Gandhi",
-            "mobile_number": "1234566289",
-            "email_id": "asga5889@colorado.edu",
-            "is_merchant": False,
-            "created_by": "ashutosh",
-            "updated_by": "ashutosh",
-        }
         self.payer_id = None
         self.payee_id = None
+        self.transaction_id  = None
         self.base_url = "/v1/payment"
 
     def teardown_class(self):
+        self.cleanup_entires(self)
         self.session.rollback()
         self.session.close()
     
     def create_payer_payee_user(self):
         payer = UserInfo(
-            # user_id = 1, # @TODO this id may already exists
-            user_name = self.payer_data["user_name"],
-            first_name = self.payer_data["first_name"],
-            last_name = self.payer_data["last_name"],
-            mobile_number = self.payer_data["mobile_number"],
-            email_id = self.payer_data["email_id"],
-            is_merchant = self.payer_data["is_merchant"],
+            user_name = "preetham",
+            first_name = "Preetham",
+            last_name = "Maiya",
+            mobile_number = "1234566789",
+            email_id = "prma6536@colorado.edu",
+            is_merchant = False,
             created_on = datetime.now(),
-            created_by = self.payer_data["created_by"],
+            created_by = "preetham",
             updated_on = datetime.now(),
-            updated_by = self.payer_data["updated_by"],
+            updated_by = "preetham",
         )
 
         payee = UserInfo(
             # user_id = 2,
-            user_name = self.payee_data["user_name"],
-            first_name = self.payee_data["first_name"],
-            last_name = self.payee_data["last_name"],
-            mobile_number = self.payee_data["mobile_number"],
-            email_id = self.payee_data["email_id"],
-            is_merchant = self.payee_data["is_merchant"],
+            user_name = "ashutosh",
+            first_name = "Ashutosh",
+            last_name = "Gandhi",
+            mobile_number = "1234566289",
+            email_id = "asga5889@colorado.edu",
+            is_merchant = False,
             created_on = datetime.now(),
-            created_by = self.payee_data["created_by"],
+            created_by = "ashutosh",
             updated_on = datetime.now(),
-            updated_by = self.payee_data["updated_by"],
+            updated_by = "ashutosh",
         )
 
         self.session.add(payer)
@@ -121,7 +102,20 @@ class TestPayment:
         self.session.add(payee)
         self.session.commit()
     
+    def create_req_transaction(self):
+        transaction = Transaction(
+            payer_id = self.payer_id,
+            payee_id = self.payee_id,
+            transaction_amount = 100,
+            is_completed = False,
+            created_by = self.payee_id,
+            created_on = datetime.now()
+        )
+        self.session.add(transaction)
+        self.session.commit()
 
+        self.transaction_id = transaction.transaction_id
+    
     def cleanup_entires(self):
 
         # delete credit card
@@ -170,7 +164,6 @@ class TestPayment:
         self.assert_balance(res, "bank")
 
         transaction_id = res.json["id"]
-        # cleanup
         self.session.query(Transaction).filter(Transaction.transaction_id == transaction_id).delete()
         self.cleanup_entires()
     
@@ -196,7 +189,6 @@ class TestPayment:
         self.assert_balance(res, "debit")
        
         transaction_id = res.json["id"] 
-        # cleanup
         self.session.query(Transaction).filter(Transaction.transaction_id == transaction_id).delete()
         self.cleanup_entires()
     
@@ -222,7 +214,6 @@ class TestPayment:
         self.assert_balance(res, "credit")
        
         transaction_id = res.json["id"] 
-        # cleanup
         self.session.query(Transaction).filter(Transaction.transaction_id == transaction_id).delete()
         self.cleanup_entires()
     
@@ -236,7 +227,6 @@ class TestPayment:
         user_list = res.json["data"]
         assert len(user_list) == 2
 
-        # cleanup
         self.cleanup_entires()
 
     def test_payment_method_list(self):
@@ -252,11 +242,10 @@ class TestPayment:
         payment_list = res.json["data"]
         assert len(payment_list) == 3
 
-        # cleanup
         self.cleanup_entires()
     
     def test_payment_method_list_failure(self):
-        # create users and bank accounts and credit card
+        # create users
         self.create_payer_payee_user()
 
         url = f"{self.base_url}/get_all_payment_methods/0"
@@ -264,5 +253,287 @@ class TestPayment:
         assert res.status_code == 404 
         assert res.json == {"message": "User does not exists"}
 
-        # cleanup
+        self.cleanup_entires()
+
+    def test_invalid_payer(self):
+        url = f"{self.base_url}/send"
+        # create users
+        self.create_payer_payee_user()
+        
+        req = {
+            "payer_id": 0,
+            "payee_id": self.payee_id,
+            "transaction_amount": 100,
+            "transaction_method": "credit",
+            "transaction_method_id": "1234567891234568"
+        }
+
+        res = self.app_client.post(url, json=req)
+        assert res.status_code == 400
+        assert res.json == {"message": "Payer does not exists"}
+        
+        self.cleanup_entires()
+    
+    def test_invalid_payee(self):
+        url = f"{self.base_url}/send"
+        # create users
+        self.create_payer_payee_user()
+        
+        req = {
+            "payer_id": self.payer_id,
+            "payee_id": 0,
+            "transaction_amount": 100,
+            "transaction_method": "credit",
+            "transaction_method_id": "1234567891234568"
+        }
+
+        res = self.app_client.post(url, json=req)
+        assert res.status_code == 400
+        assert res.json == {"message": "Payee does not exists"}
+        
+        self.cleanup_entires()
+    
+    def test_insufficient_bank_balance(self):
+        url = f"{self.base_url}/send"
+
+        # create users and bank accounts
+        self.create_payer_payee_user()
+        self.create_bank_account(1000)
+
+        req = {
+            "payer_id": self.payer_id,
+            "payee_id": self.payee_id,
+            "transaction_amount": 5000,
+            "transaction_method": "bank",
+            "transaction_method_id": "123456789123423567"
+        }
+
+        res = self.app_client.post(url, json=req)
+        assert res.status_code == 400
+        assert res.json == {"message": "Insufficient funds, transaction cannot take place"}
+
+        self.cleanup_entires()
+    
+    def test_insufficient_bank_balance_debit(self):
+        url = f"{self.base_url}/send"
+
+        # create users and bank accounts and debit card
+        self.create_payer_payee_user()
+        self.create_bank_account(1000)
+        self.create_debit_card()
+
+        req = {
+            "payer_id": self.payer_id,
+            "payee_id": self.payee_id,
+            "transaction_amount": 5000,
+            "transaction_method": "debit",
+            "transaction_method_id": "1234567891234567"
+        }
+        
+        res = self.app_client.post(url, json=req)
+        assert res.status_code == 400
+        assert res.json == {"message": "Insufficient funds, transaction cannot take place"}
+
+        self.cleanup_entires()
+    
+    def test_insufficient_credit_limit(self):
+        url = f"{self.base_url}/send"
+
+        # create users and bank accounts and credit card
+        self.create_payer_payee_user()
+        self.create_bank_account(10000)
+        self.create_credit_card(2000)
+
+        req = {
+            "payer_id": self.payer_id,
+            "payee_id": self.payee_id,
+            "transaction_amount": 3000,
+            "transaction_method": "credit",
+            "transaction_method_id": "1234567891234568"
+        }
+
+        res = self.app_client.post(url, json=req)
+        assert res.status_code == 400
+        assert res.json == {"message": "Insufficient funds, transaction cannot take place"}
+
+        self.cleanup_entires()
+    
+    def test_invalid_method_id(self):
+        url = f"{self.base_url}/send"
+
+        # create users and bank accounts and credit card
+        self.create_payer_payee_user()
+        self.create_bank_account(10000)
+        self.create_credit_card(2000)
+        self.create_debit_card()
+
+        # invalid credit card
+        req = {
+            "payer_id": self.payer_id,
+            "payee_id": self.payee_id,
+            "transaction_amount": 3000,
+            "transaction_method": "credit",
+            "transaction_method_id": "12345678912"
+        }
+        res = self.app_client.post(url, json=req)
+        assert res.status_code == 400
+        assert res.json == {"message": "Transaction method is incorrect. No corresponding credit card account found."}
+
+        # invalid debit card 
+        req = {
+            "payer_id": self.payer_id,
+            "payee_id": self.payee_id,
+            "transaction_amount": 5000,
+            "transaction_method": "debit",
+            "transaction_method_id": "12345678912"
+        }
+        res = self.app_client.post(url, json=req)
+        assert res.status_code == 400
+        assert res.json == {"message": "Transaction method is incorrect. No corresponding debit card account found."}
+
+        # invalid bank account
+        req = {
+            "payer_id": self.payer_id,
+            "payee_id": self.payee_id,
+            "transaction_amount": 5000,
+            "transaction_method": "bank",
+            "transaction_method_id": "123456789123"
+        }
+
+        res = self.app_client.post(url, json=req)
+        assert res.status_code == 400
+        assert res.json == {"message": "Transaction method is incorrect. No corresponding bank account found."}
+        
+        self.cleanup_entires()
+    
+    def test_request_payment(self):
+        url = f"{self.base_url}/request"
+
+        # create users and bank accounts
+        self.create_payer_payee_user()
+        self.create_bank_account(10000)
+        
+        req = {
+            "requestor_id": self.payee_id,
+            "sender_id": self.payer_id,
+            "transaction_amount": 100
+        }
+        res = self.app_client.post(url, json=req)
+        assert res.status_code == 201
+        transaction_id = res.json["id"]
+        transaction = self.session.query(Transaction).filter(Transaction.transaction_id == transaction_id).first()
+        assert transaction != None # check if transaction is created
+        assert transaction.is_completed == False
+
+        self.session.query(Transaction).filter(Transaction.transaction_id == transaction_id).delete()
+        self.cleanup_entires()
+    
+    def test_pending_requests(self):
+        # create users and bank accounts
+        self.create_payer_payee_user()
+        self.create_bank_account(10000)
+        
+        url = f"{self.base_url}/pending_requests/{self.payer_id}"
+
+        transaction = Transaction(
+            payer_id = self.payer_id,
+            payee_id = self.payee_id,
+            transaction_amount = 100,
+            is_completed = False,
+            created_by = self.payee_id,
+            created_on = datetime.now()
+        )
+        self.session.add(transaction)
+        self.session.commit()
+
+        transaction_id = transaction.transaction_id
+        req = self.app_client.get(url)
+        assert req.status_code == 200
+        request_list = req.json["data"]
+        assert len(request_list) == 1
+        assert request_list[0]["requestor_id"] == self.payee_id
+        assert request_list[0]["transaction_id"] == transaction_id
+        assert request_list[0]["transaction_amount"] == 100
+        assert request_list[0]["requestor_name"] == "Ashutosh Gandhi"
+
+        self.session.query(Transaction).filter(Transaction.transaction_id == transaction_id).delete()
+        self.cleanup_entires()
+
+    
+    def test_transaction_completion(self):
+        # create users and bank accounts
+        self.create_payer_payee_user()
+        self.create_bank_account(10000)
+        self.create_credit_card(2000)
+        self.create_debit_card()
+        self.create_req_transaction()
+
+        url = f"{self.base_url}/send/{self.transaction_id}"
+        
+        # test transfer using bank account
+        req = {
+            "payer_id": self.payer_id,
+            "payee_id": self.payee_id,
+            "transaction_amount": 100,
+            "transaction_method": "bank",
+            "transaction_method_id": "123456789123423567"
+        }
+
+        res = self.app_client.post(url, json=req)
+        self.assert_balance(res, "bank") # assert balance updation
+        transaction = self.session.query(Transaction).filter(Transaction.transaction_id == self.transaction_id).first()
+        assert transaction.is_completed == True
+        assert int(transaction.updated_by) == self.payer_id
+
+        self.session.query(Transaction).filter(Transaction.transaction_id == self.transaction_id).delete()
+        self.cleanup_entires()
+    
+    def test_transaction_completion_credit(self):
+        # create users and bank accounts and credit card
+        self.create_payer_payee_user()
+        self.create_bank_account(10000)
+        self.create_credit_card(2000)
+        self.create_req_transaction()
+
+        url = f"{self.base_url}/send/{self.transaction_id}"
+        req = {
+            "payer_id": self.payer_id,
+            "payee_id": self.payee_id,
+            "transaction_amount": 100,
+            "transaction_method": "credit",
+            "transaction_method_id": "1234567891234568"
+        }
+        res = self.app_client.post(url, json=req)
+        self.assert_balance(res, "credit")
+        transaction = self.session.query(Transaction).filter(Transaction.transaction_id == self.transaction_id).first()
+        assert transaction.is_completed == True
+        assert int(transaction.updated_by) == self.payer_id
+
+        self.session.query(Transaction).filter(Transaction.transaction_id == self.transaction_id).delete()
+        self.cleanup_entires()
+    
+
+    def test_transaction_completion_debit(self):
+        # create users and bank accounts and debit card
+        self.create_payer_payee_user()
+        self.create_bank_account(10000)
+        self.create_debit_card()
+        self.create_req_transaction()
+        
+        url = f"{self.base_url}/send/{self.transaction_id}"
+        req = {
+            "payer_id": self.payer_id,
+            "payee_id": self.payee_id,
+            "transaction_amount": 100,
+            "transaction_method": "debit",
+            "transaction_method_id": "1234567891234567"
+        }
+
+        res = self.app_client.post(url, json=req)
+        self.assert_balance(res, "debit") # assert balance updation
+        transaction = self.session.query(Transaction).filter(Transaction.transaction_id == self.transaction_id).first()
+        assert transaction.is_completed == True
+        assert int(transaction.updated_by) == self.payer_id
+
+        self.session.query(Transaction).filter(Transaction.transaction_id == self.transaction_id).delete()
         self.cleanup_entires()

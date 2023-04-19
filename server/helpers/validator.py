@@ -25,6 +25,11 @@ def validate_transaction(transaction_detail): # @TODO Add validation of credit/d
         if not user_exists(payee_id):
             err_resp = {"message": "Payee does not exists"}
             return False, err_resp
+    
+        # self test
+        if payer_id == payee_id: # @TODO is this test required?
+            err_resp = {"message": "Can't transfer Money to self"}
+            return False, err_resp
 
         # payment method check
         if transaction_method == "bank":
