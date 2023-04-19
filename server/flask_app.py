@@ -107,23 +107,29 @@ def get_user_info(user_id):
     
 
 
-@app.route(api_url + "/users/create", methods=['POST'])
+@app.route(api_url + "/users/create", methods=["POST"])
 def create_users():
     data = request.get_json()
-    user_name = data['user_name']
-    first_name = data['first_name']
-    last_name = data['last_name']
-    mobile_number = data['mobile_number']
-    email_id = data['email_id']
-    is_merchant = data['is_merchant']
-    created_on = datetime.now()
-    created_by = data['user_name']
-    updated_on = datetime.now()
-    updated_by = data['user_name']
-    user = UserInfo(user_name=user_name, first_name=first_name, last_name=last_name, mobile_number=mobile_number, email_id=email_id, is_merchant=is_merchant, created_on=created_on, created_by=created_by, updated_on=updated_on, updated_by=updated_by)
-    session.add(user)
+
+    user_info = (
+        session.query(UserInfo).filter(UserInfo.user_name == data["user_name"]).first()
+    )
+
+    if user_info is None:
+        return make_response(jsonify({"message": "user does not exist"}), 404)
+
+    user_info.first_name = data["first_name"]
+    user_info.last_name = data["last_name"]
+    user_info.mobile_number = data["mobile_number"]
+    user_info.email_id = data["email_id"]
+    user_info.is_merchant = data["is_merchant"]
+    user_info.created_on = datetime.now()
+    user_info.created_by = data["user_name"]
+    user_info.updated_on = datetime.now()
+    user_info.updated_by = data["user_name"]
     session.commit()
-    return make_response(jsonify({'message': 'User created successfully'}),200)
+    return make_response(jsonify({"message": "User created successfully"}), 200)
+
     
 
 
