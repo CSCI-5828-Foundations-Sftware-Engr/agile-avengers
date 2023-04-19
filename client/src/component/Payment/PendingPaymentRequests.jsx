@@ -8,7 +8,7 @@ import { utils } from "../../common/utils";
 import requestService from "../../services/payment/requestService";
 import { showToast } from "../../common/component/ToastContainer";
 
-const RequestPayment = () => {
+const PendingPaymentRequests = () => {
   const emptyObject = { value: "", error: "" };
   const [sender, setSender] = useState({
     value: "--Select A Value--",
@@ -158,4 +158,4 @@ const RequestPayment = () => {
   );
 };
 
-export default RequestPayment;
+export default PendingPaymentRequests;

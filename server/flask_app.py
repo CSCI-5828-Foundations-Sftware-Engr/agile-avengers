@@ -29,8 +29,8 @@ from db_queries import session
 
 app = Flask(
     __name__,
-    static_folder="../client",
-    template_folder="../client",
+    static_folder="./client",
+    template_folder="./client",
     # static_url_path="",
 )
 
@@ -67,7 +67,7 @@ def resource_not_found(e):
 
 @app.route("/", defaults={"path": ""})
 def catch_all(path):
-    return jsonify({"Test": "ok"})
+    return render_template("index.html")
 
 
 @app.route(api_url + "/get_current_time")
@@ -106,10 +106,18 @@ def get_user_info(user_id):
 @app.route(api_url + "/users/create", methods=["POST"])
 def create_users():
     data = request.get_json()
-
-    user_info = (
-        session.query(UserInfo).filter(UserInfo.user_name == data["user_name"]).first()
-    )
+    
+    print(data["user_name"])
+    
+    try:
+        user_info = (
+        session.query(UserInfo).filter(UserInfo.user_name == data["user_name"]).first())
+    except Exception as e:
+        print(e)
+        return make_response(jsonify({"message": "user does not exist"}), 404)
+    
+    
+    print(user_info)
 
     if user_info is None:
         return make_response(jsonify({"message": "user does not exist"}), 404)
@@ -213,7 +221,10 @@ def create_user():
         return make_response(jsonify({"message": "Server Error"}), 500)
 
     session.commit()
-    return jsonify({"message": "user created"})
+
+    response = make_response(jsonify({"message": "user created"}), 200)
+    response.headers.add('Access-Control-Allow-Origin', 'http://localhost:8081')    
+    return response
 
 
 @app.route(f"{base_route}/login", methods=["POST"])
@@ -234,7 +245,7 @@ def login():
     for key, value in token.items():
         resp.set_cookie(key, json.dumps(value))
     resp.set_cookie("auth_token", json.dumps(token))
-    return resp
+    return {"token": token}
 
 
 @app.route(f"{base_route}/logout", methods=["POST"])
@@ -267,21 +278,6 @@ def userinfo():
         return resp
 
     return make_response(jsonify({"message": "Unauthorized"}), 403)
-
-
-#   getAllPaymentMethods() {
-#     const url = `${instanceUrl}/api/v1/get_all_payment_methods`;
-#     return axios.get(url, config);
-#   },
-#   getPayeeList() {
-#     const url = `${instanceUrl}/api/v1/get_payee_list`;
-#     return axios.get(url, config);
-#   },
-#   makePayment(payload) {
-#     const url = `${instanceUrl}/api/v1/make_payment`;
-#     return axios.post(url, payload, config);
-#   }
-
 
 @app.route(f"{payment_route}/get_all_payment_methods/<user_id>", methods=["GET"])
 def get_all_payment_methods(user_id):
@@ -325,15 +321,6 @@ def get_all_payment_methods(user_id):
     except Exception as ex:
         traceback.print_exc()
         return make_response(jsonify({"message": "Server Error"}), 500)
-    # return {
-    #     "status": "Success",
-    #     "data": {
-    #         "visa - 2232": "1223",
-    #         "Mastercard - 8881": "1234",
-    #         "Bank Account - 1223": "9302",
-    #         "American Express - 9282": "2323",
-    #     },
-    # }
 
 
 @app.route(f"{payment_route}/get_payee_list", methods=["GET"])
@@ -349,9 +336,13 @@ def get_payee_list():
         return make_response(jsonify({"status": "Success", "data": payee_dict}), 200)
     except Exception as ex:
         traceback.print_exc()
-        make_response(jsonify({"message": "Server Error"}), 500)
+        return make_response(jsonify({"status": "Success","message": "Server Error", "data": {}}), 200)
 
-    # return {"status": "Success", "data": {"aishwarya123": "123", "hemanth234": "234", "namratha345": "345"}}
+@app.route(f"{payment_route}/get_sender_list", methods=["GET"])
+def get_sender_list():
+    # print authorization token from header
+    print(request.headers.get('Authorization'))
+    return {"status": "Success", "data": {"aishwarya123": "123", "hemanth234": "234", "namratha345": "345"}}
 
 
 @app.route(f"{payment_route}/send", methods=["POST"])
@@ -682,6 +673,14 @@ def delete_bank_account(account_number):
     else:
         return make_response(jsonify({'message': 'Bank Account not found'}),404)
 
+@app.before_request
+def basic_authentication():
+    if request.method == 'OPTIONS':
+        response = make_response()
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add("Access-Control-Allow-Headers", "*")
+        response.headers.add("Access-Control-Allow-Methods", "*")
+        return Response()
 
 
 if __name__ == "__main__":

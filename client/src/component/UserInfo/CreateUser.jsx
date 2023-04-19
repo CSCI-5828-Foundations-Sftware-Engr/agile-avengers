@@ -1,12 +1,18 @@
 import React, { useState } from "react";
+import { useHistory } from "react-router-dom";
 import Mandatory from "../../common/component/Mandatory";
 
-const CreateUser = () => {
+const CreateUser = (props) => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [mobileNumber, setMobileNumber] = useState("");
+  const [emailId, setEmailId] = useState("");
   const [isMerchant, setIsMerchant] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const history = useHistory();
+  const queryParams = new URLSearchParams(props.location.search);
+  const username = queryParams.get('username');
+
 
   const handleFirstNameChange = (event) => {
     setFirstName(event.target.value);
@@ -17,7 +23,21 @@ const CreateUser = () => {
   };
 
   const handleMobileNumberChange = (event) => {
-    setMobileNumber(event.target.value);
+    const mobileNumberRegex = /^[1-9][0-9]{9}$/;
+    if (mobileNumberRegex.test(event.target.value)) {
+      setMobileNumber(event.target.value);
+    } else {
+      setErrorMessage("Invalid mobile number");
+    }
+  };
+
+  const handleEmailIdChange = (event) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (emailRegex.test(event.target.value)) {
+      setEmailId(event.target.value);
+    } else {
+      setErrorMessage("Invalid email address");
+    }
   };
 
   const handleIsMerchantChange = (event) => {
@@ -26,28 +46,36 @@ const CreateUser = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    fetch("/api/v1/users/create", {
+
+    if (!firstName || !lastName || !emailId || !username || !mobileNumber) {
+      setErrorMessage("Please fill in all required fields");
+      return;
+    }
+
+
+    fetch("http://127.0.0.1:5000/v1/users/create", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
+        user_name: username,
         first_name: firstName,
         last_name: lastName,
         mobile_number: mobileNumber,
-        is_merchant: isMerchant
+        email_id: emailId,
+        is_merchant: isMerchant,
       })
     })
       .then((response) => {
         if (response.ok) {
-          return response.json();
+          
+          history.push("/login?success=true");
+        } else if (response.status === 409) {
+          throw new Error("User already exists");
         } else {
-          throw new Error("Failed to create user");
+          throw new Error("Unable to create user");
         }
-      })
-      .then((data) => {
-        // handle successful user creation
-        console.log(data.message);
       })
       .catch((error) => {
         setErrorMessage(error.message);
@@ -58,13 +86,20 @@ const CreateUser = () => {
     <div className="container-flex">
       <div className="container">
         <br />
+        <div>
+        {errorMessage && (
+                <div className="alert alert-danger">{errorMessage}</div>
+              )}
+        </div>
         <br />
+        <br/>
+
         <div className="card">
+        <form onSubmit={handleSubmit}>
           <div className="card-header back-light-primary text-white">
-            Create Profile
+            Create Account
           </div>
-          <div className="card-body">
-            <form onSubmit={handleSubmit}>
+          
               <div className="form-group">
                 <label htmlFor="firstName">
                   <Mandatory>First Name</Mandatory>
@@ -94,14 +129,27 @@ const CreateUser = () => {
                   <Mandatory>Mobile Number</Mandatory>
                 </label>
                 <input
-                  type="text"
+                  type="tel"
                   className="form-control"
                   id="mobileNumber"
                   value={mobileNumber}
                   onChange={handleMobileNumberChange}
                 />
               </div>
-              <div className="form-check">
+              <div className="form-group">
+                <label htmlFor="emailId">
+                  <Mandatory>Email ID</Mandatory>
+                </label>
+                <input
+                  type="email"
+                  className="form-control"
+                  id="emailId"
+                  value={emailId}
+                  onChange={handleEmailIdChange}
+                />
+              </div>
+
+              <div className="form-group form-check">
                 <input
                   type="checkbox"
                   className="form-check-input"
@@ -118,18 +166,18 @@ const CreateUser = () => {
                   type="submit"
                   className="btn btn-primary float-right"
                 >
-                  Create Profile
+                  Create Account
                 </button>
               </div>
-              {errorMessage && (
-                <div className="alert alert-danger">{errorMessage}</div>
-              )}
+             
             </form>
           </div>
         </div>
       </div>
-      </div>
-      );
-    };
+  );
+};
 
 export default CreateUser;
+
+
+                 

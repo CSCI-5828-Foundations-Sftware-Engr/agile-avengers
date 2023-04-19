@@ -1,0 +1,10 @@
+version: "3.7"
+services:
+  frontend:
+    image: agile-avengers-frontend
+    container_name: agile-avengers-frontend
+    user: "1001:1001"
+    network_mode: "host"
+    deploy:
+      restart_policy:
+        condition: on-failure

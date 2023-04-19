@@ -1,5 +1,5 @@
 import * as yup from "yup";
-import YupLocale from "yup/lib/locale";
+// import YupLocale from "yup/lib/locale";
 
 export const creditCardSchema = yup.object().shape({
   cardName: yup.string().required("This field is required"),
