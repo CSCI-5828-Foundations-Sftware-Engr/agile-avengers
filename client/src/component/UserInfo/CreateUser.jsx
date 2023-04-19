@@ -12,8 +12,6 @@ const CreateUser = (props) => {
   const history = useHistory();
   const queryParams = new URLSearchParams(props.location.search);
   const username = queryParams.get('username');
-  console.log(username);
-
 
 
   const handleFirstNameChange = (event) => {
@@ -71,7 +69,8 @@ const CreateUser = (props) => {
     })
       .then((response) => {
         if (response.ok) {
-          history.push("/payment");
+          
+          history.push("/login?success=true");
         } else if (response.status === 409) {
           throw new Error("User already exists");
         } else {
