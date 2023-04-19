@@ -282,7 +282,7 @@ def userinfo():
 @app.route(f"{payment_route}/get_all_payment_methods/<user_id>", methods=["GET"])
 def get_all_payment_methods(user_id):
     try:
-        if user_exists(user_id, session):
+        if user_exists(user_id):
             method_dict = {}
 
             # get all bank accounts
@@ -309,7 +309,7 @@ def get_all_payment_methods(user_id):
                 for card in debit_cards:
                     method_dict[f"{card.card_network}_{card.card_number[-4:]}"] = {
                         "id": card.card_number,
-                        "method": "credit",
+                        "method": "debit",
                     }
             return make_response(
                 jsonify({"status": "Success", "data": method_dict}), 200
@@ -357,7 +357,7 @@ def make_payment(transaction_id=None):
 
     try:
         # validate the input
-        is_valid, err_resp = validate_transaction(data, session)
+        is_valid, err_resp = validate_transaction(data)
         if not is_valid:
             return make_response(jsonify(err_resp), 400)
 
@@ -416,13 +416,16 @@ def make_payment(transaction_id=None):
             bank_detail.account_balance -= transaction_amount
 
         # update the balance for payee
-        bank = session.query(BankAccount).filter_by(user_id=payee_id).first()
+        bank = session.query(BankAccount).filter_by(user_id=payee_id).first() # @TODO handle scenario when user has multiple bank accounts
         bank.account_balance += transaction_amount
 
         # commit the changes
         session.commit()
 
-        return make_response(jsonify({"message": "Transaction successful"}), 201)
+        if not transaction_id:
+            transaction_id = transaction.transaction_id
+
+        return make_response(jsonify({"message": "Transaction successful", "id": transaction_id}), 201)
 
     except Exception as ex:
         traceback.print_exc()
@@ -437,7 +440,7 @@ def request_payment():
     amount = data["transaction_amount"]
 
     try:
-        if user_exists(requestor_id, session) and user_exists(sender_id, session):
+        if user_exists(requestor_id) and user_exists(sender_id):
             transaction = Transaction(
                 payer_id=sender_id,
                 payee_id=requestor_id,
@@ -466,7 +469,7 @@ def get_pending_requests(user_id):
     try:
         if not user_id:
             return make_response(jsonify({"message": "User-id is required"}), 400)
-        if user_exists(user_id, session):
+        if user_exists(user_id):
             requests = []
             transactions = (
                 session.query(Transaction)
@@ -694,4 +697,4 @@ def basic_authentication():
 
 
 if __name__ == "__main__":
-    app.run(port=5000, host="0.0.0.0")
+    app.run(port=5001, host="0.0.0.0")

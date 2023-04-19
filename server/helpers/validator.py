@@ -5,9 +5,9 @@ import os
 # sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "./"))
 
 from datamodel.models.userinfo import UserInfo, BankAccount, CreditCard, DebitCard
+from db_queries import session, engine
 
-
-def validate_transaction(transaction_detail, db_session):
+def validate_transaction(transaction_detail): # @TODO Add validation of credit/debit card only being used to pay to merchant
     payer_id = transaction_detail["payer_id"]
     payee_id = transaction_detail["payee_id"]
     transaction_amount = transaction_detail["transaction_amount"]
@@ -17,21 +17,19 @@ def validate_transaction(transaction_detail, db_session):
     try:
         # payer check
         err_resp = {}
-        user = db_session.query(UserInfo).filter_by(user_id=payer_id).first()
-        if not user:
+        if not user_exists(payer_id):
             err_resp = {"message": "Payer does not exists"}
             return False, err_resp
 
         # payer check
-        user = db_session.query(UserInfo).filter_by(user_id=payee_id).first()
-        if not user:
+        if not user_exists(payee_id):
             err_resp = {"message": "Payee does not exists"}
             return False, err_resp
 
         # payment method check
         if transaction_method == "bank":
             method = (
-                db_session.query(BankAccount)
+                session.query(BankAccount)
                 .filter_by(account_number=transaction_method_id)
                 .first()
             )
@@ -46,7 +44,7 @@ def validate_transaction(transaction_detail, db_session):
                 }
         elif transaction_method == "credit":
             method = (
-                db_session.query(CreditCard)
+                session.query(CreditCard)
                 .filter_by(card_number=transaction_method_id)
                 .first()
             )
@@ -61,7 +59,7 @@ def validate_transaction(transaction_detail, db_session):
                 }
         elif transaction_method == "debit":
             method = (
-                db_session.query(DebitCard)
+                session.query(DebitCard)
                 .filter_by(card_number=transaction_method_id)
                 .first()
             )
@@ -71,7 +69,7 @@ def validate_transaction(transaction_detail, db_session):
                 }
                 return False, err_resp
             bank_detail = (
-                db_session.query(BankAccount)
+                session.query(BankAccount)
                 .filter_by(account_number=method.bank_account_number)
                 .first()
             )
@@ -92,8 +90,8 @@ def validate_transaction(transaction_detail, db_session):
         return False, {"message": "Internal Server error."}
 
 
-def user_exists(user_id, db_session):
-    user = db_session.query(UserInfo).filter_by(user_id=user_id).first()
+def user_exists(user_id):
+    user = session.query(UserInfo).filter_by(user_id=user_id).first()
     if user:
         return True
     return False
