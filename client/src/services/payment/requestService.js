@@ -1,10 +1,10 @@
 import axios from "axios";
+import { BACKEND_BASE_URL,BACKEND_API_URL } from "../../constants/backend";
 
 import config from "../header/headerConfig";
 
-const instanceUrl = "http://127.0.0.1:5000";
 const axiosInstance = axios.create({
-  baseURL: instanceUrl,
+  baseURL: BACKEND_BASE_URL,
 });
 
 const requestService = {
@@ -21,7 +21,7 @@ const requestService = {
         return Promise.reject(error);
       }
     );
-    return axiosInstance.get('/api/v1/get_sender_list');
+    return axiosInstance.get(`${BACKEND_API_URL}/payment/get_sender_list`);
   },
   makePayment(payload) {
     axiosInstance.interceptors.request.use(
@@ -36,7 +36,7 @@ const requestService = {
         return Promise.reject(error);
       }
     );
-    return axiosInstance.post('/api/v1/request_payment', payload);
+    return axiosInstance.post(`${BACKEND_API_URL}/request_payment', payload`);
   }
 };
 

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Mandatory from "../../common/component/Mandatory";
+import { BACKEND_API_URL } from "../../constants/backend";
 
 const Signup = () => {
   const [username, setUsername] = useState("");
@@ -30,8 +31,8 @@ const Signup = () => {
         return;
       }
     
-    
-    fetch("http://127.0.0.1:5000/api/v1/auth/create", {
+    // fetch("http://127.0.0.1:5000/api/v1/auth/create", {
+    fetch(`${BACKEND_API_URL}/auth/create`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"

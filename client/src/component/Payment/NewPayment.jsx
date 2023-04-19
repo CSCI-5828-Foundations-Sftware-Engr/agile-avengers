@@ -2,6 +2,7 @@ import React, { useEffect, useState, useContext } from "react";
 import Mandatory from "../../common/component/Mandatory";
 import SendPayment from "./SendPayment";
 import RequestPayment from "./RequestPayment";
+import PendingPaymentRequests from "./PendingPaymentRequests.jsx"
 import { useHistory } from "react-router-dom";
 import { AuthContext } from "../Context/Authcontext";
 
@@ -12,11 +13,11 @@ const NewPayment = () => {
   const history = useHistory();
   const {isLoggedIn, setIsLoggedIn} = useContext(AuthContext);
 
-  useEffect(() => {
-    if (!isLoggedIn) {
-      history.push("/login")
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (!isLoggedIn) {
+  //     history.push("/login")
+  //   }
+  // }, []);
 
   const handleChange = e => {
     setRequestType(e.target[e.target.options.selectedIndex].id);

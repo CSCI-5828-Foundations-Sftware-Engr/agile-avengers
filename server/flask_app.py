@@ -33,7 +33,7 @@ app = Flask(
 
 
 
-api_url = "/v1/"
+api_url = "/api/v1/"
 payment_route = f"{api_url}payment"
 CORS(app)
 
@@ -252,9 +252,15 @@ def userinfo():
 
     return make_response(jsonify({"message": "Unauthorized"}), 403)
 
-@app.route(f"{payment_route}/get_all_payment_methods/<user_id>", methods=["GET"])
-def get_all_payment_methods(user_id):
+@app.route(f"{payment_route}/get_all_payment_methods/", methods=["GET"])
+def get_all_payment_methods():
+# @app.route(f"{payment_route}/get_all_payment_methods/<user_id>", methods=["GET"])
+# def get_all_payment_methods(user_id):
     try:
+        return {
+            "status": "Success", 
+            "data": {"first_last_123": "123", "first_last_234": "234", "first_last_345": "345"}
+        }
         if user_exists(user_id, session):
             method_dict = {}
             
@@ -289,6 +295,10 @@ def get_all_payment_methods(user_id):
 def get_payee_list():
     payee_dict = {}
     try:
+        return {
+        "status": "Success", 
+        "data": {"first_last_123": "123", "first_last_234": "234", "first_last_345": "345"}
+    }
         users = session.query(UserInfo).all()
         for user in users:
             name = f"{user.first_name}_{user.last_name}"
@@ -298,7 +308,7 @@ def get_payee_list():
         return make_response(jsonify({"status": "Success", "data": payee_dict}), 200)
     except Exception as ex:
         traceback.print_exc()
-        return make_response(jsonify({"status": "Success","message": "Server Error", "data": {}}), 200)
+        return make_response(jsonify({"message": "Server Error"}), 500)
 
 @app.route(f"{payment_route}/get_sender_list", methods=["GET"])
 def get_sender_list():
