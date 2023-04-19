@@ -1,7 +1,8 @@
-from datamodel.models.userinfo import Base, UserInfo
+from datamodel.models.userinfo import Base, UserInfo, DebitCard, BankAccount,BillingInfo
 from db_queries import session, engine
 from flask_app import app
 from unittest import mock
+from datetime import datetime
 
 
 class TestAuth:
@@ -138,8 +139,8 @@ class TestUserinfo:
         url = "/v1/users/create"
 
         ui = UserInfo(user_name=self.user_data["user_name"])
-        session.add(ui)
-        session.commit()
+        self.session.add(ui)
+        self.session.commit()
 
         res = self.app_client.post(url, json=self.user_data)
 
@@ -160,3 +161,48 @@ class TestUserinfo:
 
         self.session.query(UserInfo).filter(UserInfo.user_name == "preetham").delete()
         self.session.commit()
+    
+    def test_delete_userinfo(self):
+        url = "/v1/userinfo/delete/"
+
+        ui = UserInfo(user_name=self.user_data["user_name"])
+        self.session.add(ui)
+        self.session.commit()
+
+
+        # ui= self.session.query(UserInfo).filter(UserInfo.user_name == self.user_data["user_name"]).first()
+        url+= str(ui.user_id)
+        res = self.app_client.delete(url)
+        assert res.status_code == 200
+
+
+        users = (
+            self.session.query(UserInfo).filter(UserInfo.user_name == "preetham").all()
+        )
+        assert len(users) == 0
+
+
+    def test_update_userinfo(self):
+        url = "/v1/userinfo/update/"
+
+        ui = UserInfo(user_name=self.user_data["user_name"])
+        self.session.add(ui)
+        self.session.commit()
+
+        self.user_data["mobile_number"]="1234567890"
+        url+= str(ui.user_id)
+        res = self.app_client.put(url, json=self.user_data)
+        assert res.status_code == 200
+        
+
+        users = (
+            self.session.query(UserInfo).filter(UserInfo.user_id == ui.user_id).all()
+        )
+        
+        assert users[0].mobile_number == "1234567890"
+
+        self.session.query(UserInfo).filter(UserInfo.user_name == "preetham").delete()
+        self.session.commit()
+
+
+        

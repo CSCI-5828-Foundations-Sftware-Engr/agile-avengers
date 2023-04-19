@@ -132,7 +132,7 @@ def create_users():
 
 @app.route(api_url + "/userinfo/update/<user_id>", methods=["PUT"])
 def update_user_info(user_id):
-    data = request.json()
+    data = request.get_json()
     user = session.query(UserInfo).filter_by(user_id=user_id).first()
     if user:
         user.first_name = data["first_name"]
@@ -522,21 +522,11 @@ def add_new_debit_card():
     )
     session.add(billingaddress)
     session.commit()
-    billinginfo = (
-        session.query(BillingInfo)
-        .filter_by(
-            billing_address=billing_address,
-            postal_code=postal_code,
-            state=state,
-            city=city,
-        )
-        .first()
-    )
     card_number = data["card_number"]
     user_id = data["user_id"]
     card_network = data["card_network"]
     cvv = data["cvv"]
-    billing_info_id = billinginfo.billing_info_id
+    billing_info_id = billingaddress.billing_info_id
     a = (
         session.query(BankAccount)
         .filter_by(account_number=data["bank_account_number"])
