@@ -36,7 +36,7 @@ const requestService = {
         return Promise.reject(error);
       }
     );
-    return axiosInstance.post(`${BACKEND_API_URL}/request_payment', payload`);
+    return axiosInstance.post(`${BACKEND_API_URL}/request_payment`, payload);
   }
 };
 
