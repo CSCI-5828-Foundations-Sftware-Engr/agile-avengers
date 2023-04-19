@@ -103,7 +103,7 @@ def get_user_info(user_id):
             }
         )
     else:
-        return make_response(jsonify({'message': 'User not found'}),403)
+        return make_response(jsonify({'message': 'User not found'}),404)
     
 
 
@@ -157,7 +157,7 @@ def update_user_info(user_id):
         )
 
     else:
-        return make_response(jsonify({'message': 'User not found'}),403)
+        return make_response(jsonify({'message': 'User not found'}),404)
 
 
 
@@ -187,7 +187,7 @@ def delete_user_info(user_id):
         session.commit()
         return make_response(jsonify({"message": "User deleted successfully"}),200)
     else:
-        return make_response(jsonify({'message': 'User not found'}),403)
+        return make_response(jsonify({'message': 'User not found'}),404)
 
 
 
@@ -303,15 +303,14 @@ def add_new_debit_card():
     billingaddress=BillingInfo(billing_address=billing_address,postal_code=postal_code,state=state,city=city)
     session.add(billingaddress)
     session.commit()
-    billinginfo=session.query(BillingInfo).filter_by(billing_address=billing_address,postal_code=postal_code,state=state,city=city).first()
     card_number = data['card_number']
     user_id = data['user_id']
     card_network = data['card_network']
     cvv = data['cvv']
-    billing_info_id = billinginfo.billing_info_id
+    billing_info_id = billing_address.billing_info_id
     a=session.query(BankAccount).filter_by(account_number=data['bank_account_number']).count()
     if a==0:
-        return jsonify({'message': 'Incorrect Bank Account number'},403)
+        return jsonify({'message': 'Incorrect Bank Account number'},404)
     bank_account_number = data['bank_account_number']
     created_on = datetime.now()
     created_by = data['user_id']
@@ -333,13 +332,12 @@ def delete_debit_card(card_number):
     if debitcard:
         session.delete(debitcard)
         session.commit()    
-    if billingaddress:
         session.delete(billingaddress)
         session.commit()
         
         return make_response(jsonify({"result": "Debit card deleted successfully"}),200)
     else:
-        return make_response(jsonify({'message': 'Debit card not found'}),403)
+        return make_response(jsonify({'message': 'Debit card not found'}),404)
 
 
 
@@ -387,11 +385,42 @@ def delete_credit_card(card_number):
         
         return make_response(jsonify({"result": "Credit card deleted successfully"}),200)
     else:
-        return make_response(jsonify({'message': 'Credit card not found'}),403)
+        return make_response(jsonify({'message': 'Credit card not found'}),404)
 
     
 
+#route to add bank account details using input from user
 
+@app.route(api_url + "/bankaccount/add", methods=['POST'])
+def add_new_bank_account():
+    data = request.get_json()
+    bank_account_number = data['bank_account_number']
+    user_id = data['user_id']
+    account_holders_name = data['account_holders_name']
+    account_balance = data['account_balance']
+    bank_name = data['bank_name']
+    routing_number = data['routing_number']
+    created_on = datetime.now()
+    created_by = data['user_id']
+    updated_on = datetime.now()
+    updated_by = data['user_id']
+    bankaccount = BankAccount(user_id = user_id,bank_account_number=bank_account_number, account_holders_name =account_holders_name, account_balance=account_balance, bank_name =bank_name , routing_number=routing_number, created_on=created_on, created_by=created_by, updated_on=updated_on, updated_by=updated_by)
+    session.add(bankaccount)
+    session.commit()
+    return make_response(jsonify({'message': 'Bank account details added successfully'}),200)
+
+
+#route to delete bank account details
+
+@app.route(api_url + "/bankaccount/delete/<bank_account_number>", methods=["DELETE"])
+def delete_bank_account(bank_account_number):
+    bankaccount = session.query(BankAccount).filter_by(bank_account_number=bank_account_number).first()
+    if bankaccount:
+        session.delete(bankaccount)
+        session.commit()    
+        return make_response(jsonify({"result": "Bank Account deleted successfully"}),200)
+    else:
+        return make_response(jsonify({'message': 'Bank Account not found'}),404)
 
 
 
