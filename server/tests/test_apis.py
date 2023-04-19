@@ -225,3 +225,34 @@ class TestCreditCard():
 
         self.session.query(UserInfo).filter(UserInfo.user_id == ui.user_id).delete()
         self.session.commit()
+
+
+    def test_delete_creditcardinfo(self):
+        url = "/v1/creditcard/delete/"
+
+        bi =BillingInfo(
+            billing_address = "2950 College Ave",
+            postal_code = "80303",
+            state = "Colorado",
+            city = "Boulder",
+        )
+        self.session.add(bi)
+        self.session.commit()
+
+        cc= CreditCard(
+            card_number=self.creditcard_data["card_number"],
+            billing_info_id=bi.billing_info_id
+            )
+        self.session.add(cc)
+        self.session.commit()
+
+
+        url+=self.creditcard_data["card_number"]
+        res = self.app_client.delete(url)
+        assert res.status_code == 200
+
+
+        users = (
+            self.session.query(CreditCard).filter(CreditCard.card_number == self.creditcard_data["card_number"]).all()
+        )
+        assert len(users) == 0
