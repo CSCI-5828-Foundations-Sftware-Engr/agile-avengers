@@ -310,5 +310,81 @@ class TestDebitCard():
         )
         assert len(users) == 0
 
+
+class TestBankAccount():
+    def setup_class(self):
+        Base.metadata.create_all(engine)
+        self.session = session
+        self.app_client = app.test_client()
+        self.bankaccount_data={
+            "account_number" : "123456789123",
+            "user_id" : "1",
+            "account_holders_name" : "Aditi Athreya",
+            "account_balance" : "1000",
+            "bank_name" : "Chase",
+            "routing_number" : "987654321",
+            "created_by": "aditi",
+            "updated_by": "aditi",
+        }
+
+    def teardown_class(self):
+        self.session.rollback()
+        self.session.close()
+
+    def test_create_bankaccountinfo(self):
+        url = "/v1/bankaccount/add"
+
+        ui = UserInfo(
+        user_name = "aditi",
+            )
+        self.session.add(ui)
+        self.session.commit()
+           
+        self.bankaccount_data["user_id"]=ui.user_id
+        
+        res = self.app_client.post(url, json=self.bankaccount_data)
+
+        assert res.status_code == 200
+
+        cards = (
+            self.session.query(BankAccount).filter(BankAccount.account_number == "123456789123").all()
+        )
+        assert len(cards) == 1
+        assert cards[0].user_id == ui.user_id
+        assert cards[0].account_number == "123456789123"
+        assert cards[0].account_holders_name == "Aditi Athreya"
+        assert cards[0].account_balance == 1000
+        assert cards[0].bank_name == "Chase"
+        assert cards[0].routing_number == "987654321"
+        assert cards[0].created_by == str(ui.user_id)
+        assert cards[0].updated_by == str(ui.user_id)
+
+        self.session.query(BankAccount).filter(BankAccount.account_number == "123456789123").delete()
+        self.session.commit()
+
+        self.session.query(UserInfo).filter(UserInfo.user_id == ui.user_id).delete()
+        self.session.commit()
+    
+
+
+    def test_delete_bankaccountinfo(self):
+        url = "/v1/bankaccount/delete/"
+
+
+        ba=BankAccount(account_number=self.bankaccount_data["account_number"])
+        self.session.add(ba)
+        self.session.commit()
+
+
+        url+=self.bankaccount_data["account_number"]
+        res = self.app_client.delete(url)
+        assert res.status_code == 200
+
+
+        users = (
+            self.session.query(BankAccount).filter(BankAccount.account_number==self.bankaccount_data["account_number"]).all()
+        )
+        assert len(users) == 0
+
    
         
