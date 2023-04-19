@@ -16,6 +16,7 @@ from datamodel.models.userinfo import (
     BankAccount,
     Merchant,
 )
+
 from datamodel.models.payments import Transaction
 from helpers.user_management import (
     check_userinfo,
