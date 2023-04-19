@@ -110,10 +110,18 @@ def get_user_info(user_id):
 @app.route(api_url + "/users/create", methods=["POST"])
 def create_users():
     data = request.get_json()
-
-    user_info = (
-        session.query(UserInfo).filter(UserInfo.user_name == data["user_name"]).first()
-    )
+    
+    print(data["user_name"])
+    
+    try:
+        user_info = (
+        session.query(UserInfo).filter(UserInfo.user_name == data["user_name"]).first())
+    except Exception as e:
+        print(e)
+        return make_response(jsonify({"message": "user does not exist"}), 404)
+    
+    
+    print(user_info)
 
     if user_info is None:
         return make_response(jsonify({"message": "user does not exist"}), 404)
@@ -206,22 +214,26 @@ def create_user():
     user_data = request.json
 
     # Add to userinfo table
-    ui = UserInfo(user_id=user_data["username"])
+    ui = UserInfo(user_name=user_data["username"])
     try:
-        with Session() as session:
-            print("adding userinfo")
-            session.add(ui)
-            session.commit()
+        print("adding userinfo")
+        session.add(ui)
+
+        new_user = create_new_user(user_data["username"], user_data["password"])
+        if new_user is None:
+            print("None returned")
+            session.rollback()
+            return make_response(jsonify({"message": "user already exists"}), 409)
+
     except Exception as e:
-        print(e)
-        make_response(jsonify({"message": "Server Error"}), 500)
+        print(traceback.format_exc())
+        return make_response(jsonify({"message": "Server Error"}), 500)
 
-    new_user = create_new_user(user_data["username"], user_data["password"])
-    print(new_user)
-    if new_user is None:
-        return make_response(jsonify({"message": "user already exists"}), 409)
+    session.commit()
 
-    return jsonify({"message": "user created"})
+    response = make_response(jsonify({"message": "user created"}), 200)
+    response.headers.add('Access-Control-Allow-Origin', 'http://localhost:8081')    
+    return response
 
 
 @app.route(f"{base_route}/login", methods=["POST"])
@@ -543,7 +555,14 @@ def add_new_bank_account():
     return {"status": "Success"}
 
 
-
+@app.before_request
+def basic_authentication():
+    if request.method == 'OPTIONS':
+        response = make_response()
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add("Access-Control-Allow-Headers", "*")
+        response.headers.add("Access-Control-Allow-Methods", "*")
+        return Response()
 
 
 if __name__ == "__main__":

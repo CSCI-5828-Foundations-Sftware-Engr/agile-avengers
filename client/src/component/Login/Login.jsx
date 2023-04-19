@@ -25,7 +25,7 @@ const Login = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    fetch("http://127.0.0.1:5000/api/v1/auth/login", {
+    fetch("http://127.0.0.1:5000/v1/auth/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"

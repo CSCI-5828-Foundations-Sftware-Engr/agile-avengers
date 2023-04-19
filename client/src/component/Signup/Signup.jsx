@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useHistory } from "react-router-dom";
 import Mandatory from "../../common/component/Mandatory";
 
 const Signup = () => {
@@ -6,6 +7,8 @@ const Signup = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const history = useHistory();
+
 
   const handleUsernameChange = (event) => {
     setUsername(event.target.value);
@@ -21,17 +24,14 @@ const Signup = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    if (!validateEmail(username)) {
-        setErrorMessage("Invalid email address");
-        return;
-    }
+   
     if (password !== confirmPassword) {
         setErrorMessage("Passwords do not match");
         return;
       }
     
     
-    fetch("http://127.0.0.1:5000/api/v1/auth/create", {
+    fetch("http://127.0.0.1:5000/v1/auth/create", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -43,7 +43,7 @@ const Signup = () => {
     })
       .then((response) => {
         if (response.ok) {
-          return response.json();
+            history.push(`/createuser?username=${username}`);
         } else if (response.status === 409) {
           throw new Error("User already exists");
         } else {
@@ -59,11 +59,7 @@ const Signup = () => {
       });
   };
 
-  const validateEmail = (email) => {
-    // basic email validation regex
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return regex.test(email);
-  };
+
 
   return (
     <div className="container-flex">
@@ -85,10 +81,10 @@ const Signup = () => {
             <form onSubmit={handleSubmit}>
               <div className="form-group">
                 <label htmlFor="username">
-                  <Mandatory>Email</Mandatory>
+                  <Mandatory>Username</Mandatory>
                 </label>
                 <input
-                  type="email"
+                  type="text"
                   className="form-control"
                   id="username"
                   value={username}
