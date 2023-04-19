@@ -162,7 +162,34 @@ class TestUserinfo:
         self.session.query(UserInfo).filter(UserInfo.user_name == "preetham").delete()
         self.session.commit()
 
+    def test_get_userinfo(self):
+        
+        url = "/v1/users/get/"
+        ui = UserInfo(user_name=self.user_data["user_name"], first_name=self.user_data["first_name"],last_name=self.user_data["last_name"],mobile_number=self.user_data["mobile_number"],email_id=self.user_data["email_id"],is_merchant=self.user_data["is_merchant"])
+        self.session.add(ui)
+        self.session.commit()
 
+        url += str(ui.user_id)
+        res = self.app_client.get(url)
+        
+        assert res.status_code == 200
+
+        users = (
+            self.session.query(UserInfo).filter(UserInfo.user_name == "preetham").all()
+        )
+
+        assert len(users) == 1
+        assert users[0].user_name == "preetham"
+        assert users[0].first_name == "Preetham"
+        assert users[0].last_name == "Maiya"
+        assert users[0].mobile_number == "1234566789"
+        assert users[0].email_id == "prma6536@colorado.edu"
+        assert users[0].is_merchant == False
+        # assert users[0].created_by == "preetham"
+        # assert users[0].updated_by == "preetham"
+
+        self.session.query(UserInfo).filter(UserInfo.user_name == "preetham").delete()
+        self.session.commit()
     
 
 
