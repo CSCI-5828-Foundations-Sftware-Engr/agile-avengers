@@ -1,7 +1,8 @@
-from datamodel.models.userinfo import Base, UserInfo
+from datamodel.models.userinfo import Base, UserInfo, CreditCard, BillingInfo, BankAccount
 from db_queries import session, engine
 from flask_app import app
 from unittest import mock
+from datetime import datetime
 
 
 class TestAuth:
@@ -159,4 +160,75 @@ class TestUserinfo:
         assert users[0].updated_by == "preetham"
 
         self.session.query(UserInfo).filter(UserInfo.user_name == "preetham").delete()
+        self.session.commit()
+
+
+    
+
+
+
+
+class TestCreditCard():
+    def setup_class(self):
+        Base.metadata.create_all(engine)
+        self.session = session
+        self.app_client = app.test_client()
+        self.creditcard_data={
+            "card_number" : "1234567891234566",
+            "billing_address" : "2950 College Ave",
+            "postal_code" : "80303",
+            "state" : "Colorado",
+            "city" : "Boulder",
+            "user_id" : "1",
+            "card_network" : "Visa",
+            "cvv" : "111",
+            "billing_info_id":" ",
+            "created_by": "johndoe",
+            "updated_by": "johndoe",
+        }
+
+    def teardown_class(self):
+        self.session.rollback()
+        self.session.close()
+
+    def test_create_creditcardinfo(self):
+        url = "/v1/creditcard/add"
+
+        ui = UserInfo(
+        user_name = "johndoe",
+            )
+        self.session.add(ui)
+        self.session.commit()
+
+       
+
+
+        self.creditcard_data["user_id"]=ui.user_id
+        
+
+
+        res = self.app_client.post(url, json=self.creditcard_data)
+
+        assert res.status_code == 200
+
+        cards = (
+            self.session.query(CreditCard).filter(CreditCard.card_number == "1234567891234566").all()
+        )
+        assert len(cards) == 1
+        assert cards[0].user_id == ui.user_id
+        assert cards[0].card_number == "1234567891234566"
+        assert cards[0].card_network == "Visa"
+        assert cards[0].cvv == "111"
+        assert cards[0].created_by == str(ui.user_id)
+        assert cards[0].updated_by == str(ui.user_id)
+
+        self.session.query(CreditCard).filter(CreditCard.card_number == "1234567891234566").delete()
+        self.session.commit()
+
+        self.session.query(BillingInfo).filter(BillingInfo.billing_info_id == cards[0].billing_info_id).delete()
+        self.session.commit()
+
+        
+
+        self.session.query(UserInfo).filter(UserInfo.user_id == ui.user_id).delete()
         self.session.commit()
