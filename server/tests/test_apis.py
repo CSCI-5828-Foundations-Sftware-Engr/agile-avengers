@@ -278,5 +278,37 @@ class TestDebitCard():
         self.session.query(UserInfo).filter(UserInfo.user_id == ui.user_id).delete()
         self.session.commit()
     
+
+
+    def test_delete_debitcardinfo(self):
+        url = "/v1/debitcard/delete/"
+
+        bi =BillingInfo(
+            billing_address = "2950 College Ave",
+            postal_code = "80303",
+            state = "Colorado",
+            city = "Boulder",
+        )
+        self.session.add(bi)
+        self.session.commit()
+
+        dc= DebitCard(
+            card_number=self.debitcard_data["card_number"],
+            billing_info_id=bi.billing_info_id
+            )
+        self.session.add(dc)
+        self.session.commit()
+
+
+        url+=self.debitcard_data["card_number"]
+        res = self.app_client.delete(url)
+        assert res.status_code == 200
+
+
+        users = (
+            self.session.query(DebitCard).filter(DebitCard.card_number == self.debitcard_data["card_number"]).all()
+        )
+        assert len(users) == 0
+
    
         

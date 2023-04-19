@@ -571,7 +571,7 @@ def delete_debit_card(card_number):
     if debitcard:
         session.delete(debitcard)
         session.commit()
-    if billingaddress:
+    # if billingaddress:
         session.delete(billingaddress)
         session.commit()
 
@@ -579,7 +579,7 @@ def delete_debit_card(card_number):
             jsonify({"result": "Debit card deleted successfully"}), 200
         )
     else:
-        return make_response(jsonify({"message": "Debit card not found"}), 403)
+        return make_response(jsonify({"message": "Debit card not found"}), 404)
 
 
 @app.route(api_url + "/creditcard/add", methods=["POST"])
