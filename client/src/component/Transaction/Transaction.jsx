@@ -55,39 +55,36 @@ const Transaction = () => {
       });
   };
 
-  // USer id
-  // Monthly expenses
-
   return (
     <div>
       <br />
-      <center>
-        <div className="card-header back-light-primary text-white">
+        <center>
+          <div className="card-header back-light-primary text-white">
               Transactions based on dates
         </div>
-      </center>
-      <br />
-      <form onSubmit={handleSubmit}>
-        <label>
-          Start Date: 
-          <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-        </label>
-        <label>
-          End Date: 
-          <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
-        </label>
-        <button type="submit" className="btn btn-primary">Submit</button>
-      </form>
-      <br/>
-      <BarChart width={730} height={500} data={transactions}>
-        <Bar dataKey="transaction_amount" fill="blue" />
-        <CartesianGrid stroke="#ccc" />
-        <XAxis dataKey="created_on"/>
-        <YAxis />
-        <Tooltip />
-        <Legend />
-      </BarChart>
-    </div>
+        </center>
+        <br />
+        <form onSubmit={handleSubmit}>
+          <label>
+            Start Date: 
+            <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+          </label>
+          <label>
+            End Date: 
+            <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+          </label>
+          <button type="submit" className="btn btn-primary">Submit</button>
+        </form>
+        <br/>
+        <BarChart width={1800} height={500} data={transactions}>
+          <Bar dataKey="transaction_amount" fill="blue" />
+          <CartesianGrid stroke="#ccc" />
+          <XAxis dataKey="created_on"/>
+          <YAxis />
+          <Tooltip cursor={false} />
+          <Legend />
+        </BarChart>
+        </div>
   );
 };
 
