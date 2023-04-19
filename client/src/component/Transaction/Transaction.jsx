@@ -21,6 +21,32 @@ const Transaction = () => {
         }
       })
       .then((data) => {
+        // Modify the created_on attribute to just have dd/mm/yy
+        data.transactions.forEach(function(transaction) {
+          var createdDate = new Date(transaction.created_on);
+          var formattedDate = createdDate.toLocaleDateString("en-US", {
+            year: "2-digit",
+            month: "2-digit",
+            day: "2-digit"
+          });
+          transaction.created_on = formattedDate;
+        });
+
+        // Sort the dates
+        data.transactions.sort(function(a, b) {
+          var dateA = new Date(a.created_on);
+          var dateB = new Date(b.created_on);
+        
+          // compare the dates
+          if (dateA < dateB) {
+            return -1;
+          } else if (dateA > dateB) {
+            return 1;
+          } else {
+            return 0;
+          }
+        });
+
         setTransactions(data.transactions);
       })
       .catch((error) => {
@@ -28,8 +54,8 @@ const Transaction = () => {
       });
   };
 
-  // Sort array based on date
   // USer id
+  // Monthly expenses
 
   return (
     <div>
@@ -42,21 +68,23 @@ const Transaction = () => {
       <br />
       <form onSubmit={handleSubmit}>
         <label>
-          Start Date:
+          Start Date: 
           <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
         </label>
         <label>
-          End Date:
+          End Date: 
           <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
         </label>
         <button type="submit" className="btn btn-primary">Submit</button>
       </form>
       <br/>
-      <BarChart width={600} height={600} data={transactions}>
+      <BarChart width={730} height={500} data={transactions}>
         <Bar dataKey="transaction_amount" fill="blue" />
         <CartesianGrid stroke="#ccc" />
-        <XAxis dataKey="created_on" />
+        <XAxis dataKey="created_on"/>
         <YAxis />
+        <Tooltip />
+        <Legend />
       </BarChart>
     </div>
   );
