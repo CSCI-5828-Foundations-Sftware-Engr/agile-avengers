@@ -1,5 +1,5 @@
 build:
-	docker build -t agile_avengers:dev .
+	docker build -t agile-avengers-frontend -f ../Dockerfile ..
 
 deploy:
 	kubectl apply -f deployment.yaml

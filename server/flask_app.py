@@ -16,6 +16,7 @@ from datamodel.models.userinfo import (
     BankAccount,
     Merchant,
 )
+
 from datamodel.models.payments import Transaction
 from helpers.user_management import (
     check_userinfo,
@@ -29,8 +30,8 @@ from db_queries import session
 
 app = Flask(
     __name__,
-    static_folder="../client",
-    template_folder="../client",
+    static_folder="./client",
+    template_folder="./client",
     # static_url_path="",
 )
 
@@ -67,7 +68,7 @@ def resource_not_found(e):
 
 @app.route("/", defaults={"path": ""})
 def catch_all(path):
-    return jsonify({"Test": "ok"})
+    return render_template("index.html")
 
 
 @app.route(api_url + "/get_current_time")
@@ -106,10 +107,18 @@ def get_user_info(user_id):
 @app.route(api_url + "/users/create", methods=["POST"])
 def create_users():
     data = request.get_json()
-
-    user_info = (
-        session.query(UserInfo).filter(UserInfo.user_name == data["user_name"]).first()
-    )
+    
+    print(data["user_name"])
+    
+    try:
+        user_info = (
+        session.query(UserInfo).filter(UserInfo.user_name == data["user_name"]).first())
+    except Exception as e:
+        print(e)
+        return make_response(jsonify({"message": "user does not exist"}), 404)
+    
+    
+    print(user_info)
 
     if user_info is None:
         return make_response(jsonify({"message": "user does not exist"}), 404)
@@ -132,7 +141,7 @@ def create_users():
 
 @app.route(api_url + "/userinfo/update/<user_id>", methods=["PUT"])
 def update_user_info(user_id):
-    data = request.json()
+    data = request.get_json()
     user = session.query(UserInfo).filter_by(user_id=user_id).first()
     if user:
         user.first_name = data["first_name"]
@@ -213,7 +222,10 @@ def create_user():
         return make_response(jsonify({"message": "Server Error"}), 500)
 
     session.commit()
-    return jsonify({"message": "user created"})
+
+    response = make_response(jsonify({"message": "user created"}), 200)
+    response.headers.add('Access-Control-Allow-Origin', 'http://localhost:8081')    
+    return response
 
 
 @app.route(f"{base_route}/login", methods=["POST"])
@@ -234,7 +246,7 @@ def login():
     for key, value in token.items():
         resp.set_cookie(key, json.dumps(value))
     resp.set_cookie("auth_token", json.dumps(token))
-    return resp
+    return {"token": token}
 
 
 @app.route(f"{base_route}/logout", methods=["POST"])
@@ -267,21 +279,6 @@ def userinfo():
         return resp
 
     return make_response(jsonify({"message": "Unauthorized"}), 403)
-
-
-#   getAllPaymentMethods() {
-#     const url = `${instanceUrl}/api/v1/get_all_payment_methods`;
-#     return axios.get(url, config);
-#   },
-#   getPayeeList() {
-#     const url = `${instanceUrl}/api/v1/get_payee_list`;
-#     return axios.get(url, config);
-#   },
-#   makePayment(payload) {
-#     const url = `${instanceUrl}/api/v1/make_payment`;
-#     return axios.post(url, payload, config);
-#   }
-
 
 @app.route(f"{payment_route}/get_all_payment_methods/<user_id>", methods=["GET"])
 def get_all_payment_methods(user_id):
@@ -325,15 +322,6 @@ def get_all_payment_methods(user_id):
     except Exception as ex:
         traceback.print_exc()
         return make_response(jsonify({"message": "Server Error"}), 500)
-    # return {
-    #     "status": "Success",
-    #     "data": {
-    #         "visa - 2232": "1223",
-    #         "Mastercard - 8881": "1234",
-    #         "Bank Account - 1223": "9302",
-    #         "American Express - 9282": "2323",
-    #     },
-    # }
 
 
 @app.route(f"{payment_route}/get_payee_list", methods=["GET"])
@@ -349,9 +337,13 @@ def get_payee_list():
         return make_response(jsonify({"status": "Success", "data": payee_dict}), 200)
     except Exception as ex:
         traceback.print_exc()
-        make_response(jsonify({"message": "Server Error"}), 500)
+        return make_response(jsonify({"status": "Success","message": "Server Error", "data": {}}), 200)
 
-    # return {"status": "Success", "data": {"aishwarya123": "123", "hemanth234": "234", "namratha345": "345"}}
+@app.route(f"{payment_route}/get_sender_list", methods=["GET"])
+def get_sender_list():
+    # print authorization token from header
+    print(request.headers.get('Authorization'))
+    return {"status": "Success", "data": {"aishwarya123": "123", "hemanth234": "234", "namratha345": "345"}}
 
 
 @app.route(f"{payment_route}/send", methods=["POST"])
@@ -522,21 +514,11 @@ def add_new_debit_card():
     )
     session.add(billingaddress)
     session.commit()
-    billinginfo = (
-        session.query(BillingInfo)
-        .filter_by(
-            billing_address=billing_address,
-            postal_code=postal_code,
-            state=state,
-            city=city,
-        )
-        .first()
-    )
     card_number = data["card_number"]
     user_id = data["user_id"]
     card_network = data["card_network"]
     cvv = data["cvv"]
-    billing_info_id = billinginfo.billing_info_id
+    billing_info_id = billingaddress.billing_info_id
     a = (
         session.query(BankAccount)
         .filter_by(account_number=data["bank_account_number"])
@@ -581,7 +563,7 @@ def delete_debit_card(card_number):
     if debitcard:
         session.delete(debitcard)
         session.commit()
-    if billingaddress:
+    # if billingaddress:
         session.delete(billingaddress)
         session.commit()
 
@@ -589,7 +571,7 @@ def delete_debit_card(card_number):
             jsonify({"result": "Debit card deleted successfully"}), 200
         )
     else:
-        return make_response(jsonify({"message": "Debit card not found"}), 403)
+        return make_response(jsonify({"message": "Debit card not found"}), 404)
 
 
 @app.route(api_url + "/creditcard/add", methods=["POST"])
@@ -656,6 +638,50 @@ def delete_credit_card(card_number):
         )
     else:
         return make_response(jsonify({"message": "Credit card not found"}), 403)
+
+
+
+#route to add bank account details using input from user
+
+@app.route(api_url + "/bankaccount/add", methods=['POST'])
+def add_new_bank_account():
+    data = request.get_json()
+    account_number = data['account_number']
+    user_id = data['user_id']
+    account_holders_name = data['account_holders_name']
+    account_balance = data['account_balance']
+    bank_name = data['bank_name']
+    routing_number = data['routing_number']
+    created_on = datetime.now()
+    created_by = data['user_id']
+    updated_on = datetime.now()
+    updated_by = data['user_id']
+    bankaccount = BankAccount(user_id = user_id,account_number=account_number, account_holders_name =account_holders_name, account_balance=account_balance, bank_name =bank_name , routing_number=routing_number, created_on=created_on, created_by=created_by, updated_on=updated_on, updated_by=updated_by)
+    session.add(bankaccount)
+    session.commit()
+    return make_response(jsonify({'message': 'Bank account details added successfully'}),200)
+
+
+#route to delete bank account details
+
+@app.route(api_url + "/bankaccount/delete/<account_number>", methods=["DELETE"])
+def delete_bank_account(account_number):
+    bankaccount = session.query(BankAccount).filter_by(account_number=account_number).first()
+    if bankaccount:
+        session.delete(bankaccount)
+        session.commit()    
+        return make_response(jsonify({"result": "Bank Account deleted successfully"}),200)
+    else:
+        return make_response(jsonify({'message': 'Bank Account not found'}),404)
+
+@app.before_request
+def basic_authentication():
+    if request.method == 'OPTIONS':
+        response = make_response()
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add("Access-Control-Allow-Headers", "*")
+        response.headers.add("Access-Control-Allow-Methods", "*")
+        return Response()
 
 
 if __name__ == "__main__":

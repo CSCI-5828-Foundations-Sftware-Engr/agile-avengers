@@ -1,15 +1,22 @@
 import React, { useContext } from "react";
 import NavigationItem from "../common/component/NavigationItem";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUser } from "@fortawesome/free-solid-svg-icons";
+import { faUser, faSignOutAlt } from "@fortawesome/free-solid-svg-icons"; // 1. Import the faSignOutAlt icon
 import { faFontAwesome } from "@fortawesome/free-brands-svg-icons";
 import { AuthContext } from "./Context/Authcontext";
 
 import Routes from "../Routes";
 
-
 const Container = () => {
   const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
+
+  // 2. Add a handleLogout function to handle the logout logic
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    localStorage.removeItem("access_token");
+    window.location.href = "/login";
+  };
+
   return (
     <div>
       <header>
@@ -27,8 +34,26 @@ const Container = () => {
       </header>
       <div className="position-relative">
         <ul className="nav nav-tabs">
-          {/* <NavigationItem link="/">Home</NavigationItem> */}
-          <NavigationItem link="/payment">Payment</NavigationItem>
+          
+          {isLoggedIn ? (
+            <>
+              <NavigationItem link="/payment">
+                Send or Request Payment
+              </NavigationItem>
+              <NavigationItem link="/add_payment_method">
+                Add Payment Methods
+              </NavigationItem>
+              {/* 4. Conditionally render the logout link on the right */}
+              <a onClick={handleLogout} className="ml-auto">
+                <FontAwesomeIcon icon={faSignOutAlt} /> Logout
+              </a>
+            </>
+          ) : (
+            <>
+              <NavigationItem link="/login">Login</NavigationItem>
+              <NavigationItem link="/signup">Sign Up</NavigationItem>
+            </>
+          )}
         </ul>
       </div>
       <div className="body-content">
@@ -37,7 +62,7 @@ const Container = () => {
       <footer>
         <div className="footer">
           <span>
-            <a className="link-white" href="mailto:hemanth@colorado.com">
+            <a className="link-white" href="mailto:agileavengers@gmail.com">
               Contact us
             </a>
           </span>

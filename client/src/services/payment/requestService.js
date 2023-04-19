@@ -3,19 +3,40 @@ import axios from "axios";
 import config from "../header/headerConfig";
 
 const instanceUrl = "http://127.0.0.1:5000";
+const axiosInstance = axios.create({
+  baseURL: instanceUrl,
+});
 
 const requestService = {
-  getUserPermissions() {
-    const url = `/api/v1/permission`;
-    return axios.get(url, config);
-  },
   getSenderList() {
-    const url = `${instanceUrl}/api/v1/get_sender_list`;
-    return axios.get(url, config);
+    axiosInstance.interceptors.request.use(
+      config => {
+        const token = localStorage.getItem('access_token');
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+      },
+      error => {
+        return Promise.reject(error);
+      }
+    );
+    return axiosInstance.get('/api/v1/get_sender_list');
   },
   makePayment(payload) {
-    const url = `${instanceUrl}/api/v1/request_payment`;
-    return axios.post(url, payload, config);
+    axiosInstance.interceptors.request.use(
+      config => {
+        const token = localStorage.getItem('access_token');
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+      },
+      error => {
+        return Promise.reject(error);
+      }
+    );
+    return axiosInstance.post('/api/v1/request_payment', payload);
   }
 };
 
