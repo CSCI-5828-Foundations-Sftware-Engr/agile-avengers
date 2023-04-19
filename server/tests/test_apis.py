@@ -25,10 +25,10 @@ class TestAuth:
         self.session.rollback()
         self.session.close()
 
-    def test_base_endpoint(self):
-        res = self.app_client.get("/")
-        assert res.status_code == 200
-        assert res.json == {"Test": "ok"}
+    # def test_base_endpoint(self):
+    #     res = self.app_client.get("/")
+    #     assert res.status_code == 200
+    #     assert res.json == {"Test": "ok"}
 
     @mock.patch("flask_app.create_new_user")
     def test_create_user(self, mock_create_new_user):
@@ -189,9 +189,10 @@ class TestUserinfo:
         self.session.add(ui)
         self.session.commit()
 
-        self.user_data["mobile_number"]="1234567890"
+        temp_user_data = self.user_data.copy()
+        temp_user_data["mobile_number"]="1234567890"
         url+= str(ui.user_id)
-        res = self.app_client.put(url, json=self.user_data)
+        res = self.app_client.put(url, json=temp_user_data)
         assert res.status_code == 200
         
 

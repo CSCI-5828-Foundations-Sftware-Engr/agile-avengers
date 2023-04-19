@@ -3,7 +3,7 @@ import logging
 import traceback
 from datetime import datetime
 
-from flask import Flask, jsonify, make_response, request
+from flask import Flask, jsonify, make_response, request, render_template
 from flask_cors import CORS
 from sqlalchemy.orm import Session
 from werkzeug.exceptions import HTTPException
