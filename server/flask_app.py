@@ -394,7 +394,7 @@ def delete_credit_card(card_number):
 @app.route(api_url + "/bankaccount/add", methods=['POST'])
 def add_new_bank_account():
     data = request.get_json()
-    bank_account_number = data['bank_account_number']
+    account_number = data['account_number']
     user_id = data['user_id']
     account_holders_name = data['account_holders_name']
     account_balance = data['account_balance']
@@ -404,7 +404,7 @@ def add_new_bank_account():
     created_by = data['user_id']
     updated_on = datetime.now()
     updated_by = data['user_id']
-    bankaccount = BankAccount(user_id = user_id,bank_account_number=bank_account_number, account_holders_name =account_holders_name, account_balance=account_balance, bank_name =bank_name , routing_number=routing_number, created_on=created_on, created_by=created_by, updated_on=updated_on, updated_by=updated_by)
+    bankaccount = BankAccount(user_id = user_id,account_number=account_number, account_holders_name =account_holders_name, account_balance=account_balance, bank_name =bank_name , routing_number=routing_number, created_on=created_on, created_by=created_by, updated_on=updated_on, updated_by=updated_by)
     session.add(bankaccount)
     session.commit()
     return make_response(jsonify({'message': 'Bank account details added successfully'}),200)
@@ -412,9 +412,9 @@ def add_new_bank_account():
 
 #route to delete bank account details
 
-@app.route(api_url + "/bankaccount/delete/<bank_account_number>", methods=["DELETE"])
-def delete_bank_account(bank_account_number):
-    bankaccount = session.query(BankAccount).filter_by(bank_account_number=bank_account_number).first()
+@app.route(api_url + "/bankaccount/delete/<account_number>", methods=["DELETE"])
+def delete_bank_account(account_number):
+    bankaccount = session.query(BankAccount).filter_by(account_number=account_number).first()
     if bankaccount:
         session.delete(bankaccount)
         session.commit()    
