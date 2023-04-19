@@ -194,7 +194,7 @@ def delete_user_info(user_id):
         session.commit()
         return make_response(jsonify({"message": "User deleted successfully"}), 200)
     else:
-        return make_response(jsonify({"message": "User not found"}), 403)
+        return make_response(jsonify({"message": "User not found"}), 404)
 
 
 base_route = f"{api_url}/auth"
@@ -517,28 +517,18 @@ def add_new_debit_card():
     )
     session.add(billingaddress)
     session.commit()
-    billinginfo = (
-        session.query(BillingInfo)
-        .filter_by(
-            billing_address=billing_address,
-            postal_code=postal_code,
-            state=state,
-            city=city,
-        )
-        .first()
-    )
     card_number = data["card_number"]
     user_id = data["user_id"]
     card_network = data["card_network"]
     cvv = data["cvv"]
-    billing_info_id = billinginfo.billing_info_id
+    billing_info_id = billingaddress.billing_info_id
     a = (
         session.query(BankAccount)
         .filter_by(account_number=data["bank_account_number"])
         .count()
     )
     if a == 0:
-        return jsonify({"message": "Incorrect Bank Account number"}, 403)
+        return jsonify({"message": "Incorrect Bank Account number"}, 404)
     bank_account_number = data["bank_account_number"]
     created_on = datetime.now()
     created_by = data["user_id"]
@@ -576,7 +566,7 @@ def delete_debit_card(card_number):
     if debitcard:
         session.delete(debitcard)
         session.commit()
-    if billingaddress:
+    # if billingaddress:
         session.delete(billingaddress)
         session.commit()
 
@@ -650,7 +640,7 @@ def delete_credit_card(card_number):
             jsonify({"result": "Credit card deleted successfully"}), 200
         )
     else:
-        return make_response(jsonify({"message": "Credit card not found"}), 403)
+        return make_response(jsonify({"message": "Credit card not found"}), 404)
 
 
 
@@ -698,4 +688,4 @@ def basic_authentication():
 
 
 if __name__ == "__main__":
-    app.run(port=5001, host="0.0.0.0")
+    app.run(port=5000, host="0.0.0.0")

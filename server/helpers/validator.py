@@ -1,13 +1,17 @@
-import traceback
-import sys
 import os
+import sys
+import traceback
+
+from datamodel.models.userinfo import BankAccount, CreditCard, DebitCard, UserInfo
+from db_queries import engine, session
 
 # sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "./"))
 
-from datamodel.models.userinfo import UserInfo, BankAccount, CreditCard, DebitCard
-from db_queries import session, engine
 
-def validate_transaction(transaction_detail): # @TODO Add validation of credit/debit card only being used to pay to merchant
+
+def validate_transaction(
+    transaction_detail,
+):  # @TODO Add validation of credit/debit card only being used to pay to merchant
     payer_id = transaction_detail["payer_id"]
     payee_id = transaction_detail["payee_id"]
     transaction_amount = transaction_detail["transaction_amount"]
@@ -25,9 +29,9 @@ def validate_transaction(transaction_detail): # @TODO Add validation of credit/d
         if not user_exists(payee_id):
             err_resp = {"message": "Payee does not exists"}
             return False, err_resp
-    
+
         # self test
-        if payer_id == payee_id: # @TODO is this test required?
+        if payer_id == payee_id:  # @TODO is this test required?
             err_resp = {"message": "Can't transfer Money to self"}
             return False, err_resp
 
