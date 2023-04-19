@@ -11,8 +11,9 @@ const Transaction = () => {
     event.preventDefault();
     let [yearS, monthS, dayS] =  startDate.split('-');
     let [yearE, monthE, dayE] =  endDate.split('-');
+    let userid = localStorage.getItem("user_id")
 
-    fetch(`http://127.0.0.1:5000/v1/users/1/transactions?start_date=${dayS}${monthS}${yearS}&end_date=${dayE}${monthE}${yearE}`)
+    fetch(`http://127.0.0.1:5000/v1/users/${userid}/transactions?start_date=${dayS}${monthS}${yearS}&end_date=${dayE}${monthE}${yearE}`)
       .then((response) => {
         if (response.ok) {
           return response.json();

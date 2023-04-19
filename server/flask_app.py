@@ -244,7 +244,10 @@ def login():
     for key, value in token.items():
         resp.set_cookie(key, json.dumps(value))
     resp.set_cookie("auth_token", json.dumps(token))
-    return {"token": token}
+    # Call to db and get user id for a user name and store it to local storage
+    ui = session.query(UserInfo).filter_by(user_name=user_data["username"]).first()
+    print(ui.user_id)
+    return {"token": token, "user_id": ui.user_id}
 
 
 @app.route(f"{base_route}/logout", methods=["POST"])
