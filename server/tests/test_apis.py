@@ -134,7 +134,7 @@ class TestUserinfo:
     def teardown_class(self):
         self.session.rollback()
         self.session.close()
-
+    
     def test_create_userinfo(self):
         url = "/v1/users/create"
 
