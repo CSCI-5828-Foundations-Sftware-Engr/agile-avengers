@@ -13,27 +13,12 @@ const BankAccount = () => {
   const [routingNumber, setRoutingNumber] = useState(emptyObject);
   const [accountNumber, setAccountNumber] = useState(emptyObject);
   const [bankName, setBankName] = useState(emptyObject);
-  const [billingFirstName, setBillingFirstName] = useState(emptyObject);
-  const [billingLastName, setBillingLastName] = useState(emptyObject);
-  const [billingAddress, setBillingAddress] = useState(emptyObject);
-  const [billingMoreAddressDetails, setBillingMoreAddressDetails] =
-    useState(emptyObject);
-  const [billingCity, setBillingCity] = useState(emptyObject);
-  const [billingState, setBillingState] = useState(emptyObject);
-  const [billingPostalCode, setBillingPostalCode] = useState(emptyObject);
   const setterFunctionMap = {
     accountType: setAccountType,
     accountName: setAccountName,
     routingNumber: setRoutingNumber,
     accountNumber: setAccountNumber,
     bankName: setBankName,
-    billingFirstName: setBillingFirstName,
-    billingLastName: setBillingLastName,
-    billingAddress: setBillingAddress,
-    billingMoreAddressDetails: setBillingMoreAddressDetails,
-    billingCity: setBillingCity,
-    billingState: setBillingState,
-    billingPostalCode: setBillingPostalCode
   };
   useEffect(() => {}, []);
 
@@ -56,13 +41,6 @@ const BankAccount = () => {
       routingNumber,
       accountNumber,
       bankName,
-      billingFirstName,
-      billingLastName,
-      billingAddress,
-      billingMoreAddressDetails,
-      billingCity,
-      billingState,
-      billingPostalCode
     };
 
     // eslint-disable-next-line no-restricted-syntax
@@ -83,21 +61,10 @@ const BankAccount = () => {
       .validate(objectToValidate, { abortEarly: false })
       .then(() => {
         const payloadToPost = {
-          cardDetails: {
             accountType,
             accountNumber,
             routingNumber,
             bankName
-          },
-          billingDetails: {
-            billingFirstName,
-            billingLastName,
-            billingAddress,
-            billingMoreAddressDetails,
-            billingCity,
-            billingState,
-            billingPostalCode
-          }
         };
         paymentMethodService.addNewBankAccount(payloadToPost).then(data => {
           console.log("This is the data");
@@ -194,123 +161,6 @@ const BankAccount = () => {
         />
         <div className="error-message">{bankName.error}</div>
       </div>
-
-      
-      <h4 htmlFor="billingFirstName" className="font-weight-bold">
-        <u>Billing Details</u>
-      </h4>
-      <div className="form-group">
-        <label htmlFor="billingFirstName">
-          <Mandatory>First Name</Mandatory>
-        </label>
-        <input
-          placeholder="Donald"
-          type="text"
-          className="form-control"
-          name="billingFirstName"
-          id="billingFirstName"
-          value={billingFirstName.value}
-          onChange={e => handleTextChange(e, setBillingFirstName)}
-        />
-        <div className="error-message">{billingFirstName.error}</div>
-      </div>
-
-      <div className="form-group">
-        <label htmlFor="billingLastName">
-          <Mandatory>Last Name</Mandatory>
-        </label>
-        <input
-          placeholder="Trump"
-          type="text"
-          className="form-control"
-          name="billingLastName"
-          id="billingLastName"
-          value={billingLastName.value}
-          onChange={e => handleTextChange(e, setBillingLastName)}
-        />
-        <div className="error-message">{billingLastName.error}</div>
-      </div>
-
-      <div className="form-group">
-        <label htmlFor="billingAddress">
-          <Mandatory>Address</Mandatory>
-        </label>
-        <input
-          placeholder="1100 S. Ocean Blvd, Palm Beach"
-          type="text"
-          className="form-control"
-          name="billingAddress"
-          id="billingAddress"
-          value={billingAddress.value}
-          onChange={e => handleTextChange(e, setBillingAddress)}
-        />
-        <div className="error-message">{billingAddress.error}</div>
-      </div>
-
-      <div className="form-group">
-        <label htmlFor="billingMoreAddressDetails">
-          Additional Address Details
-        </label>
-        <input
-          placeholder="Optional - Company, C/O, Apt, Suite, Unit"
-          type="text"
-          className="form-control"
-          name="billingMoreAddressDetails"
-          id="billingMoreAddressDetails"
-          value={billingMoreAddressDetails.value}
-          onChange={e => handleTextChange(e, setBillingMoreAddressDetails)}
-        />
-        <div className="error-message">{billingMoreAddressDetails.error}</div>
-      </div>
-
-      <div className="form-group">
-        <label htmlFor="billingCity">
-          <Mandatory>City</Mandatory>
-        </label>
-        <input
-          placeholder="Palm Beach"
-          type="text"
-          className="form-control"
-          name="billingCity"
-          id="billingCity"
-          value={billingCity.value}
-          onChange={e => handleTextChange(e, setBillingCity)}
-        />
-        <div className="error-message">{billingCity.error}</div>
-      </div>
-
-      <div className="form-group">
-        <label htmlFor="billingState">
-          <Mandatory>State</Mandatory>
-        </label>
-        <input
-          placeholder="FL"
-          type="text"
-          className="form-control"
-          name="billingState"
-          id="billingState"
-          value={billingState.value}
-          onChange={e => handleTextChange(e, setBillingState)}
-        />
-        <div className="error-message">{billingState.error}</div>
-      </div>
-
-      <div className="form-group">
-        <label htmlFor="billingPostalCode">
-          <Mandatory>Postal Code</Mandatory>
-        </label>
-        <input
-          placeholder="33480"
-          type="text"
-          className="form-control"
-          name="billingPostalCode"
-          id="billingPostalCode"
-          value={billingPostalCode.value}
-          onChange={e => handleTextChange(e, setBillingPostalCode)}
-        />
-        <div className="error-message">{billingPostalCode.error}</div>
-      </div>
-
       <div className="floatright">
         <Button onClick={validateSubmission}>Save</Button>
       </div>
