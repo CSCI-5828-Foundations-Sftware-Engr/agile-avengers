@@ -15,6 +15,10 @@ const sendService = {
   makePayment(payload) {
     const url = `${BACKEND_API_URL}/payment/send`;
     return axios.post(url, payload, config);
+  },
+  makeTransactionPayment(payload,transactionId) {
+    const url = `${BACKEND_API_URL}/payment/send/${transactionId}`;
+    return axios.post(url, payload, config);
   }
 };
 
