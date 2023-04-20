@@ -17,7 +17,7 @@ const RequestPayment = () => {
   const [amountToRequest, setAmountToRequest] = useState(emptyObject);
   const [senderList, setSenderList] = useState({});
   const setterFunctionMap = {
-    ender: setSender,
+    sender: setSender,
     amountToRequest: setAmountToRequest
   };
   const validateSubmission = () => {
@@ -49,7 +49,6 @@ const RequestPayment = () => {
           transaction_amount: amountToRequest.value
         };
         requestService.requestPayment(payloadToPost).then(data => {
-          debugger;
           showToast({
             type: "success",
             message: "Payment request has been created successfully"
