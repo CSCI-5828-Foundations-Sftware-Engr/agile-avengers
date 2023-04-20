@@ -49,6 +49,7 @@ jobs:
           name: Deploy keycloak
           command: |
             cd keycloak
+            make delete || true
             make deploy
       - run:
           name: Deploy Postgres
