@@ -2,13 +2,17 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
 import Mandatory from "../../common/component/Mandatory";
+import showToast from "../../common/component/ToastContainer";
 import { creditCardSchema } from "../../common/schema";
 import { utils } from "../../common/utils";
 import paymentMethodService from "../../services/payment/paymentMethodService";
 
 const CreditCard = () => {
   const emptyObject = { value: "", error: "" };
-  const [cardType, setCardType] = useState(emptyObject);
+  const [cardType, setCardType] = useState({
+    value: "--Select A Value--",
+    error: ""
+  });
   const [cardName, setCardName] = useState(emptyObject);
   const [cardNumber, setCardNumber] = useState(emptyObject);
   const [expirationDate, setExpirationDate] = useState(emptyObject);
@@ -16,8 +20,6 @@ const CreditCard = () => {
   const [billingFirstName, setBillingFirstName] = useState(emptyObject);
   const [billingLastName, setBillingLastName] = useState(emptyObject);
   const [billingAddress, setBillingAddress] = useState(emptyObject);
-  const [billingMoreAddressDetails, setBillingMoreAddressDetails] =
-    useState(emptyObject);
   const [billingCity, setBillingCity] = useState(emptyObject);
   const [billingState, setBillingState] = useState(emptyObject);
   const [billingPostalCode, setBillingPostalCode] = useState(emptyObject);
@@ -30,7 +32,6 @@ const CreditCard = () => {
     billingFirstName: setBillingFirstName,
     billingLastName: setBillingLastName,
     billingAddress: setBillingAddress,
-    billingMoreAddressDetails: setBillingMoreAddressDetails,
     billingCity: setBillingCity,
     billingState: setBillingState,
     billingPostalCode: setBillingPostalCode
@@ -59,7 +60,6 @@ const CreditCard = () => {
       billingFirstName,
       billingLastName,
       billingAddress,
-      billingMoreAddressDetails,
       billingCity,
       billingState,
       billingPostalCode
@@ -71,7 +71,7 @@ const CreditCard = () => {
     )) {
       if (
         (variableName === "cardType" &&
-          variableValue.value !== "notselected" &&
+          variableValue.value !== "--Select A Value--" &&
           variableValue.value !== "") ||
         (variableName !== "cardType" && variableValue.value !== "")
       ) {
@@ -83,26 +83,32 @@ const CreditCard = () => {
       .validate(objectToValidate, { abortEarly: false })
       .then(() => {
         const payloadToPost = {
-          cardDetails: {
-            cardNumber,
-            cardName,
-            cardType,
-            expirationDate,
-            securityCode
-          },
-          billingDetails: {
-            billingFirstName,
-            billingLastName,
-            billingAddress,
-            billingMoreAddressDetails,
-            billingCity,
-            billingState,
-            billingPostalCode
-          }
+          billing_address:billingAddress.value,
+          postal_code:billingPostalCode.value,
+          state:billingState.value,
+          city:billingCity.value,
+          card_number:cardNumber.value,
+          user_id:localStorage.getItem('user_id'),
+          card_network:cardType.value,
+          cvv:securityCode.value
         };
         paymentMethodService.addNewCreditCard(payloadToPost).then(data => {
-          console.log("This is the data");
-          console.log(data);
+          showToast({
+            type: "success",
+            message: "Credit card has been successfully added"
+          });
+          for (const [variableName, setterFunction] of Object.entries(
+            setterFunctionMap
+          )) {
+            if (variableName === "cardType") {
+              setterFunction({
+                value: "--Select A Value--",
+                error: ""
+              });
+            } else {
+              setterFunction(emptyObject);
+            }
+          }
         });
       })
       .catch(e => {
@@ -247,7 +253,6 @@ const CreditCard = () => {
         />
         <div className="error-message">{billingLastName.error}</div>
       </div>
-
       <div className="form-group">
         <label htmlFor="billingAddress">
           <Mandatory>Address</Mandatory>
@@ -263,23 +268,6 @@ const CreditCard = () => {
         />
         <div className="error-message">{billingAddress.error}</div>
       </div>
-
-      <div className="form-group">
-        <label htmlFor="billingMoreAddressDetails">
-          Additional Address Details
-        </label>
-        <input
-          placeholder="Optional - Company, C/O, Apt, Suite, Unit"
-          type="text"
-          className="form-control"
-          name="billingMoreAddressDetails"
-          id="billingMoreAddressDetails"
-          value={billingMoreAddressDetails.value}
-          onChange={e => handleTextChange(e, setBillingMoreAddressDetails)}
-        />
-        <div className="error-message">{billingMoreAddressDetails.error}</div>
-      </div>
-
       <div className="form-group">
         <label htmlFor="billingCity">
           <Mandatory>City</Mandatory>
