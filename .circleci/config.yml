@@ -26,6 +26,28 @@ jobs:
           command: |
             cd client
             npm install
+  test-backend:
+    docker:
+      - image: cimg/python:3.8.10
+      - image: cimg/postgres:10.1
+    steps:
+      - checkout
+      - run:
+          name: Create Database
+          command: |
+            psql -c "create database agile_avengers"
+      - run:
+          name: Install dependencies
+          command: |
+            pip install -r server/requirements.txt
+            pip install keycloak-client==0.15.4
+            pip install python-keycloak==2.15.3
+            pip install pytest pytest-coverage
+      - run:
+          name: Run tests
+          command: |
+            cd server
+            make test
 workflows:
   test_my_app:
     jobs:
