@@ -35,6 +35,7 @@ jobs:
       - run:
           name: Create Database
           command: |
+            apt-get install -y postgresql-client
             psql -c "create database agile_avengers"
       - run:
           name: Install dependencies
