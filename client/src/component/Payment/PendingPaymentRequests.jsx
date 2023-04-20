@@ -29,7 +29,32 @@ const PendingPaymentRequests = () => {
     paymentMethod: setPaymentMethod
   };
   const rejectPaymentRequest = () =>{
-    pendingRequestsService.cancelPendingRequest(pendingRequestsList[pendingRequestSelected.value].transaction_id).then().catch();
+    pendingRequestsService.cancelPendingRequest(pendingRequestsList[pendingRequestSelected.value].transaction_id).then(data=>{
+      showToast({
+        type: "success",
+        message: "Payment request has been created successfully"
+      });
+      for (const [variableName, setterFunction] of Object.entries(
+        setterFunctionMap
+      )) {
+        if (variableName === "pendingRequestSelected" || variableName=="paymentMethod") {
+          setterFunction({
+            value: "--Select A Value--",
+            error: ""
+          });
+        } else {
+          setterFunction(emptyObject);
+        }
+      }
+      pendingRequestsService.pendingRequests().then(data=>{
+        const finalListOfPendingRequests = [];
+        data.data.data.forEach(indvTransaction=>{
+          const uniqueIdentifier = indvTransaction["requestor_name"] + " - " +indvTransaction["transaction_id"];
+          finalListOfPendingRequests[uniqueIdentifier]=indvTransaction;
+        });
+        setPendingRequestsList(finalListOfPendingRequests);
+      });
+    }).catch();
   }
   const validateSubmission = () => {
     const objectToValidate = {};
@@ -46,6 +71,7 @@ const PendingPaymentRequests = () => {
           variableValue.value !== "--Select A Value--" &&
           variableValue.value !== "") ||
         ((variableName !== "pendingRequestSelected") &&
+        variableValue.value !== "--Select A Value--" &&
           variableValue.value !== "")
       ) {
         objectToValidate[variableName] = variableValue.value;
@@ -56,11 +82,13 @@ const PendingPaymentRequests = () => {
       .validate(objectToValidate, { abortEarly: false })
       .then(() => {
         const payloadToPost = {
-          paymentMethod: paymentMethod.value,
-          payee: payee.value,
-          transaction_id: pendingRequestsList[pendingRequestSelected.value].transaction_id
+          payer_id: localStorage.getItem('user_id'),
+          payee_id: pendingRequestsList[pendingRequestSelected.value].requestor_id,
+          transaction_method_id: paymentMethods[paymentMethod.value].id,
+          transaction_method: paymentMethods[paymentMethod.value].method,
+          transaction_amount: pendingRequestsList[pendingRequestSelected.value].transaction_amount
         };
-        sendService.makePayment(payloadToPost).then(data => {
+        sendService.makeTransactionPayment(payloadToPost,pendingRequestsList[pendingRequestSelected.value].transaction_id).then(data => {
           showToast({
             type: "success",
             message: "Payment request has been created successfully"
@@ -129,7 +157,7 @@ const PendingPaymentRequests = () => {
             id="pendingRequestSelected"
             style={{ width: "100%" }}
             onChange={e => handleDropDownChange(e, setPendingRequestSelected)}
-            selected={pendingRequestSelected.value}
+            value={pendingRequestSelected.value}
           >
             <option
               id="notselected"
@@ -199,7 +227,7 @@ const PendingPaymentRequests = () => {
                   --Select A Value--
                 </option>
                 {Object.keys(paymentMethods).map(item => (
-                  <option id={paymentMethods[item]} value={paymentMethods[item]}>
+                  <option id={item} value={item}>
                     {item}
                   </option>
                 ))}

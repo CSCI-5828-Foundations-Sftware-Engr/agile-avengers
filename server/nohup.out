@@ -1,0 +1,2 @@
+error: Service backend-svc does not have a service port 5005
+error: unable to forward port because pod is not running. Current status=Pending

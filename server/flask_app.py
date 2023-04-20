@@ -54,6 +54,7 @@ def resource_not_found(e):
 
 
 @app.route("/", defaults={"path": ""})
+@app.route("/<path:path>")
 def catch_all(path):
     return render_template("index.html")
 
@@ -200,7 +201,7 @@ def create_user():
     session.commit()
 
     response = make_response(jsonify({"message": "user created"}), 200)
-    response.headers.add('Access-Control-Allow-Origin', 'http://localhost:8081')    
+    # response.headers.add('Access-Control-Allow-Origin', 'http://localhost:8081')    
     return response
 
 
@@ -301,15 +302,15 @@ def get_all_payment_methods(user_id):
         return make_response(jsonify({"message": "Server Error"}), 500)
 
 
-@app.route(f"{payment_route}/get_payee_list", methods=["GET"])
-def get_payee_list():
+@app.route(f"{payment_route}/get_payee_list/<user_id>", methods=["GET"])
+def get_payee_list(user_id):
     payee_dict = {}
     try:
     #     return {
     #     "status": "Success", 
     #     "data": {"first_last_123": "123", "first_last_234": "234", "first_last_345": "345"}
     # }
-        users = session.query(UserInfo).all()
+        users = session.query(UserInfo).filter(UserInfo.user_id!=user_id).all()
         for user in users:
             name = f"{user.first_name}_{user.last_name}"
             user_id = user.user_id
@@ -376,14 +377,14 @@ def make_payment(transaction_id=None):
                 .filter_by(account_number=transaction_method_id)
                 .first()
             )
-            method.account_balance -= transaction_amount
+            method.account_balance -= float(transaction_amount)
         elif transaction_method == "credit":
             method = (
                 session.query(CreditCard)
                 .filter_by(card_number=transaction_method_id)
                 .first()
             )
-            method.credit_limit -= transaction_amount
+            method.credit_limit -= float(transaction_amount)
         else:
             method = (
                 session.query(DebitCard)
@@ -395,11 +396,11 @@ def make_payment(transaction_id=None):
                 .filter_by(account_number=method.bank_account_number)
                 .first()
             )
-            bank_detail.account_balance -= transaction_amount
+            bank_detail.account_balance -= float(transaction_amount)
 
         # update the balance for payee
         bank = session.query(BankAccount).filter_by(user_id=payee_id).first() # @TODO handle scenario when user has multiple bank accounts
-        bank.account_balance += transaction_amount
+        bank.account_balance += float(transaction_amount)
 
         # commit the changes
         session.commit()
@@ -496,9 +497,21 @@ def get_pending_requests(user_id):
         make_response(jsonify({"message": "Server Error"}), 500)
 
 
-@app.route(f"{payment_route}/cancel_pending_request", methods=["POST"])
-def cancel_pending_request():
-    transaction_id_to_delete = request.args["transaction_id"]
+@app.route(f"{payment_route}/cancel_pending_request/<transaction_id>", methods=["DELETE"])
+def cancel_pending_request(transaction_id):
+    try:
+        transaction_id_to_delete = session.query(Transaction).filter_by(transaction_id=transaction_id).first()
+        if transaction_id_to_delete:
+            session.delete(transaction_id_to_delete)
+            session.commit()
+            return make_response(
+                jsonify({"result": "Transaction deleted successfully"}), 200
+            )
+        else:
+            return make_response(jsonify({"message": "Unable to delete transaction"}), 404)
+    except Exception as ex:
+        traceback.print_exc()
+        return make_response(jsonify({"message": "Unable to delete transaction"}), 404)
 
 # @app.route(api_url + "/add_new_credit_card", methods=["POST"])
 # def add_new_credit_card():

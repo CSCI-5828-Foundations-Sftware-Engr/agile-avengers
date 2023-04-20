@@ -58,7 +58,6 @@ const SendPayment = () => {
           transaction_method: paymentMethods[paymentMethod.value].method,
           transaction_amount: amountToSend.value,
         };
-        debugger;
         sendService.makePayment(payloadToPost).then(data => {
           showToast({
             type: "success",
