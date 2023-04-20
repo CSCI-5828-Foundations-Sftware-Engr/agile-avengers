@@ -48,6 +48,7 @@ jobs:
       - run:
           name: Deploy keycloak
           command: |
+            sudo apt-get install wget
             cd keycloak
             make deploy
       - run:
