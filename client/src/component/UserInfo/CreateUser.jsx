@@ -23,21 +23,11 @@ const CreateUser = (props) => {
   };
 
   const handleMobileNumberChange = (event) => {
-    const mobileNumberRegex = /^[1-9][0-9]{9}$/;
-    if (mobileNumberRegex.test(event.target.value)) {
       setMobileNumber(event.target.value);
-    } else {
-      setErrorMessage("Invalid mobile number");
-    }
   };
 
   const handleEmailIdChange = (event) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (emailRegex.test(event.target.value)) {
       setEmailId(event.target.value);
-    } else {
-      setErrorMessage("Invalid email address");
-    }
   };
 
   const handleIsMerchantChange = (event) => {
@@ -51,6 +41,16 @@ const CreateUser = (props) => {
       setErrorMessage("Please fill in all required fields");
       return;
     }
+
+    if (!validateEmail(emailId)) {
+      setErrorMessage("Invalid email address");
+      return;
+    }
+    if (!validateMobileNumber(mobileNumber)) {
+      setErrorMessage("Invalid mobile number");
+      return;
+    }
+
 
 
     fetch("http://127.0.0.1:5000/v1/users/create", {
@@ -80,6 +80,16 @@ const CreateUser = (props) => {
       .catch((error) => {
         setErrorMessage(error.message);
       });
+  };
+
+  const validateEmail = (email) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+  };
+
+  const validateMobileNumber = (mobileNumber) => {
+    const regex = /^\d{10}$/;
+    return regex.test(mobileNumber);
   };
 
   return (
