@@ -30,13 +30,12 @@ jobs:
     docker:
       - image: cimg/python:3.8.10
       - image: cimg/postgres:10.17
+        environment:
+          POSTGRES_USER: admin
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: agile_avengers
     steps:
       - checkout
-      - run:
-          name: Create Database
-          command: |
-            apt-get install -y postgresql-client
-            psql -c "create database agile_avengers"
       - run:
           name: Install dependencies
           command: |
