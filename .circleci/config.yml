@@ -44,12 +44,16 @@ jobs:
             pip install python-keycloak==2.15.3
             pip install pytest pytest-coverage
       - run:
+          name: Run alembic
+          command: |
+            cd server
+            python -m alembic upgrade head
+      - run:
           name: Run tests
           command: |
             cd server
-            pytest -v --junitxml=test-results/junit.xml tests
-      - store_test_results:
-          path: test-results
+            make test
+            pytest -v --cov-report term --cov=. tests
 workflows:
   test_my_app:
     jobs:
