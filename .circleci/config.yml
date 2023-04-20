@@ -37,6 +37,10 @@ jobs:
       #     service-account-email: circleci-agile-avengers@agile-avengers-aish.iam.gserviceaccount.com
       #     project-id: agile-avengers-aish
       #     cluster-name: agile-avengers
+      - setup_remote_docker:
+          version: 20.10.14
+          docker_layer_caching: true
+
       - run:
           name: Authenticate with GKE
           command: | 
