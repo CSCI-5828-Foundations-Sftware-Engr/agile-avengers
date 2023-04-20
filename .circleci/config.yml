@@ -52,7 +52,9 @@ jobs:
           name: Run tests
           command: |
             cd server
-            make test
+            pytest -v --junitxml=test-results/junit.xml tests
+      - store_test_results:
+          path: test-results
 workflows:
   test_my_app:
     jobs:
