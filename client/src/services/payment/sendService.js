@@ -5,7 +5,7 @@ import config from "../header/headerConfig";
 
 const sendService = {
   getAllPaymentMethods() {
-    const url = `${BACKEND_API_URL}/payment/get_all_payment_methods`;
+    const url = `${BACKEND_API_URL}/payment/get_all_payment_methods/${localStorage.getItem('user_id')}`;
     return axios.get(url, config);
   },
   getPayeeList() {
