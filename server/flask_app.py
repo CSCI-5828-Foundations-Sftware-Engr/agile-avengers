@@ -35,7 +35,7 @@ app = Flask(
 )
 
 
-api_url = "/v1/"
+api_url = "/api/v1/"
 payment_route = f"{api_url}payment"
 CORS(app)
 
