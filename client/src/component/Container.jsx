@@ -24,7 +24,7 @@ const Container = () => {
         <div className="header">
           <div className="easy-pay-logo-container float-left">
             <img
-              src={require('../images/easy-pay-logo-blue.png')}
+              src={require('../../4afe8ce2522dde0549b6c0944a5dc0a0.png')}
               alt="Easy Pay Logo"
             />
           </div>
