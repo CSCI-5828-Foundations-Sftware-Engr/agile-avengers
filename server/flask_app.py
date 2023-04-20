@@ -201,7 +201,7 @@ def create_user():
     session.commit()
 
     response = make_response(jsonify({"message": "user created"}), 200)
-    response.headers.add('Access-Control-Allow-Origin', 'http://localhost:8081')    
+    # response.headers.add('Access-Control-Allow-Origin', 'http://localhost:8081')    
     return response
 
 
