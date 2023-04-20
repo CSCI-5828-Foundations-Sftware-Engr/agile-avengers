@@ -3,6 +3,10 @@ import { BACKEND_BASE_URL,BACKEND_API_URL } from "../../constants/backend";
 
 import config from "../header/headerConfig";
 
+<<<<<<< Updated upstream
+=======
+const instanceUrl = "http://127.0.0.1/api";
+>>>>>>> Stashed changes
 const axiosInstance = axios.create({
   baseURL: BACKEND_BASE_URL,
 });

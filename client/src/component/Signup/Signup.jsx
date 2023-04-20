@@ -31,8 +31,13 @@ const Signup = () => {
         return;
       }
     
+<<<<<<< Updated upstream
     // fetch("http://127.0.0.1:5000/api/v1/auth/create", {
     fetch(`${BACKEND_API_URL}/auth/create`, {
+=======
+    
+    fetch("http://127.0.0.1/api/v1/auth/create", {
+>>>>>>> Stashed changes
       method: "POST",
       headers: {
         "Content-Type": "application/json"

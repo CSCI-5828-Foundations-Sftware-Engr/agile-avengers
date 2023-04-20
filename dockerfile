@@ -21,7 +21,7 @@ RUN pip install keycloak-client==0.15.4
 
 RUN pip install python-keycloak==2.15.3
 
-COPY server/flask_app.py server/alembic.ini server/start.sh /app/
+COPY server/flask_app.py server/alembic.ini server/start.sh server/db_queries.py /app/
 
 COPY server/alembic /app/alembic
 
