@@ -15,13 +15,9 @@ const RequestPayment = () => {
     error: ""
   });
   const [amountToRequest, setAmountToRequest] = useState(emptyObject);
-  
-
   const [senderList, setSenderList] = useState({});
-  
-
   const setterFunctionMap = {
-    ender: setSender,
+    sender: setSender,
     amountToRequest: setAmountToRequest
   };
   const validateSubmission = () => {
@@ -36,7 +32,7 @@ const RequestPayment = () => {
     )) {
       if (
         ((variableName === "sender" || variableName === "amountToRequest") &&
-          variableValue.value !== "notselected" &&
+          variableValue.value !== "--Select A Value--" &&
           variableValue.value !== "") ||
         ((variableName !== "sender" || variableName !== "amountToRequest") &&
           variableValue.value !== "")
@@ -47,12 +43,12 @@ const RequestPayment = () => {
     requestPaymentSchema
       .validate(objectToValidate, { abortEarly: false })
       .then(() => {
-        // alert("Success");
         const payloadToPost = {
-          sender: sender.value,
-          amountToRequest: amountToRequest.value
+          requestor_id:localStorage.getItem('user_id'),
+          sender_id: sender.value,
+          transaction_amount: amountToRequest.value
         };
-        sendService.makeRequest(payloadToPost).then(data => {
+        requestService.requestPayment(payloadToPost).then(data => {
           showToast({
             type: "success",
             message: "Payment request has been created successfully"
@@ -61,7 +57,6 @@ const RequestPayment = () => {
             setterFunctionMap
           )) {
             if (variableName === "sender") {
-              // debugger;
               setterFunction({
                 value: "--Select A Value--",
                 error: ""
@@ -71,8 +66,6 @@ const RequestPayment = () => {
             }
           }
         });
-        // window.location.reload();
-        // });
       })
       .catch(e => {
         const errorObject = utils.processValidationError(e);
@@ -116,7 +109,7 @@ const RequestPayment = () => {
             id="sender"
             style={{ width: "100%" }}
             onChange={e => handleDropDownChange(e, setSender)}
-            selected={sender.value}
+            value={sender.value}
           >
             <option
               id="notselected"

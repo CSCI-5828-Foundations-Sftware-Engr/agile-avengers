@@ -5,15 +5,15 @@ import config from "../header/headerConfig";
 
 const paymentMethodService = {
   addNewCreditCard(payload) {
-    const url = `${BACKEND_API_URL}/add_new_credit_card`;
+    const url = `${BACKEND_API_URL}/creditcard/add`;
     return axios.post(url, payload, config);
   },
   addNewDebitCard(payload) {
-    const url = `${BACKEND_API_URL}/add_new_debit_card`;
+    const url = `${BACKEND_API_URL}/debitcard/add`;
     return axios.post(url, payload, config);
   },
   addNewBankAccount(payload) {
-    const url = `${BACKEND_API_URL}/add_new_bank_account`;
+    const url = `${BACKEND_API_URL}/bankaccount/add`;
     return axios.post(url, payload, config);
   }
 };
