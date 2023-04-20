@@ -331,17 +331,19 @@ def get_payee_list():
         traceback.print_exc()
         return make_response(jsonify({"message": "Server Error"}), 500)
 
-@app.route(f"{payment_route}/get_sender_list", methods=["GET"])
-def get_sender_list():
-    # print authorization token from header
-    print(request.headers.get('Authorization'))
-    return {"status": "Success", "data": {"aishwarya123": "123", "hemanth234": "234", "namratha345": "345"}}
+# @app.route(f"{payment_route}/get_sender_list", methods=["GET"])
+# def get_sender_list():
+#     # print authorization token from header
+#     print(request.headers.get('Authorization'))
+#     return {"status": "Success", "data": {"aishwarya123": "123", "hemanth234": "234", "namratha345": "345"}}
 
 
 @app.route(f"{payment_route}/send", methods=["POST"])
 @app.route(f"{payment_route}/send/<transaction_id>", methods=["POST"])
 def make_payment(transaction_id=None):
     data = request.get_json()
+    print("This is the data")
+    print(data)
     payer_id = data["payer_id"]
     payee_id = data["payee_id"]
     transaction_method = data["transaction_method"]
