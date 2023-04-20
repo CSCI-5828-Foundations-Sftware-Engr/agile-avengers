@@ -5,7 +5,7 @@ node_modules/*
 *.log
 server/venv/*
 server/log_folders/*/*
-
+server/.coverage
 client/bundle.js
 client/node_modules/
 client/coverage/
