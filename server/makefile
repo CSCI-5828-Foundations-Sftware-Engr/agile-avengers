@@ -6,7 +6,7 @@ deploy:
 	kubectl apply -f service.yaml
 	kubectl apply -f ingress.yaml
 	sleep 60
-	nohup kubectl port-forward --address 0.0.0.0 service/backend-svc 5000:5005 &
+	nohup kubectl port-forward --address 0.0.0.0 service/backend-svc 5000:5000 &
 
 delete:
 	kubectl delete deployment/backend
