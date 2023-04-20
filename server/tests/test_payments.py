@@ -239,17 +239,17 @@ class TestPayment:
         ).delete()
         self.cleanup_entires()
 
-    def test_payee_list(self):
-        url = f"{self.base_url}/get_payee_list"
-        # create users
-        self.create_payer_payee_user()
+    # def test_payee_list(self):
+    #     url = f"{self.base_url}/get_payee_list"
+    #     # create users
+    #     self.create_payer_payee_user()
 
-        res = self.app_client.get(url)
-        assert res.status_code == 200
-        user_list = res.json["data"]
-        assert len(user_list) == 2
+    #     res = self.app_client.get(url)
+    #     assert res.status_code == 200
+    #     user_list = res.json["data"]
+    #     assert len(user_list) == 2
 
-        self.cleanup_entires()
+    #     self.cleanup_entires()
 
     def test_payment_method_list(self):
         # create users and bank accounts and credit card

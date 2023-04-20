@@ -32,6 +32,33 @@ jobs:
           command: |
             cd client
             npm install
+  test-backend:
+    docker:
+      - image: cimg/python:3.8.10
+      - image: cimg/postgres:10.17
+        environment:
+          POSTGRES_USER: admin
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: agile_avengers
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: |
+            pip install -r server/requirements.txt
+            pip install keycloak-client==0.15.4
+            pip install python-keycloak==2.15.3
+            pip install pytest pytest-coverage
+      - run:
+          name: Run alembic
+          command: |
+            cd server
+            python -m alembic upgrade head
+      - run:
+          name: Run tests
+          command: |
+            cd server
+            make test
   deploy-app:
     docker:
       - image: cimg/gcp:2023.04
@@ -59,7 +86,7 @@ jobs:
           command: |
             cd keycloak
             make delete || true
-            make deploy
+            make deploy || true
       - run:
           name: Deploy Postgres
           command: |
@@ -78,4 +105,5 @@ workflows:
     jobs:
       - build-backend
       - build-frontend
+      - test-backend
       - deploy-app

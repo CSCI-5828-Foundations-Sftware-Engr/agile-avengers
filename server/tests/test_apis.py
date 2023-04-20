@@ -1,9 +1,14 @@
+import sys
+from unittest.mock import Mock
+sys.modules['helpers.user_management'] = Mock()
+
 from datetime import datetime
 from unittest import mock
 
 from datamodel.models.userinfo import BankAccount, Base, BillingInfo, CreditCard, DebitCard, UserInfo
 from db_queries import engine, session
 from flask_app import app
+
 
 
 class TestAuth:
@@ -31,8 +36,11 @@ class TestAuth:
     #     assert res.status_code == 200
     #     assert res.json == {"Test": "ok"}
 
+    @mock.patch("flask_app.check_userinfo")
+    @mock.patch("flask_app.user_login")
+    @mock.patch("flask_app.user_logout")
     @mock.patch("flask_app.create_new_user")
-    def test_create_user(self, mock_create_new_user):
+    def test_create_user(self, mock_create_new_user, mock_user_logout, mock_user_login, mock_check_userinfo):
         url = "/v1/auth/create"
         data = {"username": "preetham", "password": "password"}
 
@@ -60,8 +68,11 @@ class TestAuth:
         )
         assert len(users) == 0
 
+    @mock.patch("flask_app.check_userinfo")
+    @mock.patch("flask_app.user_logout")
+    @mock.patch("flask_app.create_new_user")
     @mock.patch("flask_app.user_login")
-    def test_login(self, mock_user_login):
+    def test_login(self, mock_user_login, mock_create_new_user, mock_user_logout, mock_check_userinfo):
         url = "/v1/auth/login"
         data = {"username": "preetham", "password": "password"}
 
@@ -81,8 +92,11 @@ class TestAuth:
         self.session.commit()
 
 
+    @mock.patch("flask_app.check_userinfo")
+    @mock.patch("flask_app.create_new_user")
+    @mock.patch("flask_app.user_login")
     @mock.patch("flask_app.user_logout")
-    def test_logout(self, mock_user_logout):
+    def test_logout(self, mock_user_logout, mock_user_login, mock_create_new_user, mock_check_userinfo):
         url = "/v1/auth/logout"
 
         # mock_user_login.return_value = {"access_token": "1", "refersh_token": "2"}
