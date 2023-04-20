@@ -77,7 +77,7 @@ const Transaction = () => {
           <button type="submit" className="btn btn-primary">Submit</button>
         </form>
         <br/>
-        <BarChart width={1800} height={500} data={transactions}>
+        <BarChart width={1500} height={500} data={transactions}>
           <Bar dataKey="transaction_amount" fill="blue" />
           <CartesianGrid stroke="#ccc" />
           <XAxis dataKey="created_on"/>
