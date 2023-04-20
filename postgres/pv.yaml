@@ -6,10 +6,10 @@ metadata:
     type: local  # Sets PV's type to local
     app: postgres
 spec:
-  storageClassName: manual
+  storageClassName: standard
   capacity:
     storage: 5Gi # Sets PV Volume
   accessModes:
     - ReadWriteMany
   hostPath:
-    path: "/mnt/data"
+    path: "/var/lib/data"
