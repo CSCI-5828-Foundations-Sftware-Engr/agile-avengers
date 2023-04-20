@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
+import { BACKEND_API_URL } from "../../constants/backend";
 
 const Transaction = () => {
   const [transactions, setTransactions] = useState([]);
@@ -13,7 +14,7 @@ const Transaction = () => {
     let [yearE, monthE, dayE] =  endDate.split('-');
     let userid = localStorage.getItem("user_id")
 
-    fetch(`http://127.0.0.1:5000/v1/users/${userid}/transactions?start_date=${dayS}${monthS}${yearS}&end_date=${dayE}${monthE}${yearE}`)
+    fetch(`${BACKEND_API_URL}/users/${userid}/transactions?start_date=${dayS}${monthS}${yearS}&end_date=${dayE}${monthE}${yearE}`)
       .then((response) => {
         if (response.ok) {
           return response.json();
