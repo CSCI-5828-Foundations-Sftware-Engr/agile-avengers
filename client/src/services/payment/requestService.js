@@ -9,34 +9,12 @@ const axiosInstance = axios.create({
 
 const requestService = {
   getSenderList() {
-    axiosInstance.interceptors.request.use(
-      config => {
-        const token = localStorage.getItem('access_token');
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-      },
-      error => {
-        return Promise.reject(error);
-      }
-    );
-    return axiosInstance.get(`${BACKEND_API_URL}/payment/get_sender_list`);
+    const url = `${BACKEND_API_URL}/payment/get_payee_list/${localStorage.getItem('user_id')}`;
+    return axios.get(url, config);
   },
-  makePayment(payload) {
-    axiosInstance.interceptors.request.use(
-      config => {
-        const token = localStorage.getItem('access_token');
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-      },
-      error => {
-        return Promise.reject(error);
-      }
-    );
-    return axiosInstance.post(`${BACKEND_API_URL}/request_payment`, payload);
+  requestPayment(payload) {
+    const url = `${BACKEND_API_URL}/payment/request`;
+    return axios.post(url, payload, config);
   }
 };
 

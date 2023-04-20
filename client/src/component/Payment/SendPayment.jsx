@@ -40,7 +40,7 @@ const SendPayment = () => {
     )) {
       if (
         ((variableName === "paymentMethod" || variableName === "payee") &&
-          variableValue.value !== "notselected" &&
+          variableValue.value !== "--Select A Value--" &&
           variableValue.value !== "") ||
         ((variableName !== "paymentMethod" || variableName !== "payee") &&
           variableValue.value !== "")
@@ -51,11 +51,12 @@ const SendPayment = () => {
     sendPaymentSchema
       .validate(objectToValidate, { abortEarly: false })
       .then(() => {
-        // alert("Success");
         const payloadToPost = {
-          paymentMethod: paymentMethod.value,
-          payee: payee.value,
-          amountToSend: amountToSend.value
+          payer_id: localStorage.getItem('user_id'),
+          payee_id: payee.value,
+          transaction_method_id: paymentMethods[paymentMethod.value].id,
+          transaction_method: paymentMethods[paymentMethod.value].method,
+          transaction_amount: amountToSend.value,
         };
         sendService.makePayment(payloadToPost).then(data => {
           showToast({
@@ -66,7 +67,6 @@ const SendPayment = () => {
             setterFunctionMap
           )) {
             if (variableName === "paymentMethod" || variableName === "payee") {
-              // debugger;
               setterFunction({
                 value: "--Select A Value--",
                 error: ""
@@ -124,7 +124,7 @@ const SendPayment = () => {
             id="payee"
             style={{ width: "100%" }}
             onChange={e => handleDropDownChange(e, setPayee)}
-            selected={payee.value}
+            value={payee.value}
           >
             <option
               id="notselected"
@@ -166,13 +166,13 @@ const SendPayment = () => {
           id="paymentMethod"
           style={{ width: "100%" }}
           onChange={e => handleDropDownChange(e, setPaymentMethod)}
-          selected={paymentMethod.value}
+          value={paymentMethod.value}
         >
           <option id="notselected" value="--Select A Value--" disabled selected>
             --Select A Value--
           </option>
           {Object.keys(paymentMethods).map(item => (
-            <option id={paymentMethods[item]} value={paymentMethods[item]}>
+            <option id={item} value={item}>
               {item}
             </option>
           ))}
