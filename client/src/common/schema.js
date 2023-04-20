@@ -21,7 +21,6 @@ export const creditCardSchema = yup.object().shape({
   billingFirstName: yup.string().required("This field is required"),
   billingLastName: yup.string().required("This field is required"),
   billingAddress: yup.string().required("This field is required"),
-  billingMoreAddressDetails: yup.string(),
   billingCity: yup.string().required("This field is required"),
   billingState: yup.string().required("This field is required"),
   billingPostalCode: yup
@@ -51,7 +50,6 @@ export const debitCardSchema = yup.object().shape({
   billingFirstName: yup.string().required("This field is required"),
   billingLastName: yup.string().required("This field is required"),
   billingAddress: yup.string().required("This field is required"),
-  billingMoreAddressDetails: yup.string(),
   billingCity: yup.string().required("This field is required"),
   billingState: yup.string().required("This field is required"),
   billingPostalCode: yup

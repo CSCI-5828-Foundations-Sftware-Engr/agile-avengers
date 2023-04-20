@@ -9,7 +9,10 @@ import paymentMethodService from "../../services/payment/paymentMethodService";
 
 const BankAccount = () => {
   const emptyObject = { value: "", error: "" };
-  const [accountType, setAccountType] = useState(emptyObject);
+  const [accountType, setAccountType] = useState({
+    value: "--Select A Value--",
+    error: ""
+  });
   const [accountName, setAccountName] = useState(emptyObject);
   const [routingNumber, setRoutingNumber] = useState(emptyObject);
   const [accountNumber, setAccountNumber] = useState(emptyObject);
@@ -53,7 +56,7 @@ const BankAccount = () => {
     )) {
       if (
         (variableName === "accountType" &&
-          variableValue.value !== "notselected" &&
+          variableValue.value !== "--Select A Value--" &&
           variableValue.value !== "") ||
         (variableName !== "accountType" && variableValue.value !== "")
       ) {
@@ -89,8 +92,6 @@ const BankAccount = () => {
               setterFunction(emptyObject);
             }
           }
-          // console.log("This is the data");
-          // console.log(data);
         });
       })
       .catch(e => {

@@ -606,7 +606,7 @@ def add_new_credit_card():
     user_id = request.json.get("user_id")
     card_network = request.json.get("card_network")
     cvv = request.json.get("cvv")
-    credit_limit = request.json.get("credit_limit")
+    credit_limit = random.randint(1000, 2000)
     created_by = user_id
     updated_by = user_id
     created_on = datetime.now()
