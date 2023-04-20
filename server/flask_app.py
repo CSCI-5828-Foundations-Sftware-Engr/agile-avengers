@@ -3,7 +3,7 @@ import logging
 import traceback
 from datetime import datetime
 
-from flask import Flask, jsonify, make_response, request, render_template
+from flask import Flask, jsonify, make_response, request, render_template, Response
 from flask_cors import CORS
 from sqlalchemy.orm import Session
 from werkzeug.exceptions import HTTPException
@@ -16,7 +16,6 @@ from datamodel.models.userinfo import (
     BankAccount,
     Merchant,
 )
-
 from datamodel.models.payments import Transaction
 from helpers.user_management import (
     check_userinfo,
@@ -195,7 +194,7 @@ def delete_user_info(user_id):
         session.commit()
         return make_response(jsonify({"message": "User deleted successfully"}), 200)
     else:
-        return make_response(jsonify({"message": "User not found"}), 403)
+        return make_response(jsonify({"message": "User not found"}), 404)
 
 
 base_route = f"{api_url}/auth"
@@ -283,7 +282,7 @@ def userinfo():
 @app.route(f"{payment_route}/get_all_payment_methods/<user_id>", methods=["GET"])
 def get_all_payment_methods(user_id):
     try:
-        if user_exists(user_id, session):
+        if user_exists(user_id):
             method_dict = {}
 
             # get all bank accounts
@@ -310,7 +309,7 @@ def get_all_payment_methods(user_id):
                 for card in debit_cards:
                     method_dict[f"{card.card_network}_{card.card_number[-4:]}"] = {
                         "id": card.card_number,
-                        "method": "credit",
+                        "method": "debit",
                     }
             return make_response(
                 jsonify({"status": "Success", "data": method_dict}), 200
@@ -358,7 +357,7 @@ def make_payment(transaction_id=None):
 
     try:
         # validate the input
-        is_valid, err_resp = validate_transaction(data, session)
+        is_valid, err_resp = validate_transaction(data)
         if not is_valid:
             return make_response(jsonify(err_resp), 400)
 
@@ -417,13 +416,16 @@ def make_payment(transaction_id=None):
             bank_detail.account_balance -= transaction_amount
 
         # update the balance for payee
-        bank = session.query(BankAccount).filter_by(user_id=payee_id).first()
+        bank = session.query(BankAccount).filter_by(user_id=payee_id).first() # @TODO handle scenario when user has multiple bank accounts
         bank.account_balance += transaction_amount
 
         # commit the changes
         session.commit()
 
-        return make_response(jsonify({"message": "Transaction successful"}), 201)
+        if not transaction_id:
+            transaction_id = transaction.transaction_id
+
+        return make_response(jsonify({"message": "Transaction successful", "id": transaction_id}), 201)
 
     except Exception as ex:
         traceback.print_exc()
@@ -438,7 +440,7 @@ def request_payment():
     amount = data["transaction_amount"]
 
     try:
-        if user_exists(requestor_id, session) and user_exists(sender_id, session):
+        if user_exists(requestor_id) and user_exists(sender_id):
             transaction = Transaction(
                 payer_id=sender_id,
                 payee_id=requestor_id,
@@ -450,8 +452,9 @@ def request_payment():
             session.add(transaction)
             session.commit()
 
+            transaction_id = transaction.transaction_id
             return make_response(
-                jsonify({"message": "Transaction Request successful"}), 201
+                jsonify({"message": "Transaction Request successful", "id": transaction_id}), 201
             )
 
         else:
@@ -467,7 +470,7 @@ def get_pending_requests(user_id):
     try:
         if not user_id:
             return make_response(jsonify({"message": "User-id is required"}), 400)
-        if user_exists(user_id, session):
+        if user_exists(user_id):
             requests = []
             transactions = (
                 session.query(Transaction)
@@ -525,7 +528,7 @@ def add_new_debit_card():
         .count()
     )
     if a == 0:
-        return jsonify({"message": "Incorrect Bank Account number"}, 403)
+        return jsonify({"message": "Incorrect Bank Account number"}, 404)
     bank_account_number = data["bank_account_number"]
     created_on = datetime.now()
     created_by = data["user_id"]
@@ -637,7 +640,7 @@ def delete_credit_card(card_number):
             jsonify({"result": "Credit card deleted successfully"}), 200
         )
     else:
-        return make_response(jsonify({"message": "Credit card not found"}), 403)
+        return make_response(jsonify({"message": "Credit card not found"}), 404)
 
 
 

@@ -1,8 +1,9 @@
-from datamodel.models.userinfo import Base, UserInfo, CreditCard, BillingInfo, BankAccount, DebitCard
-from db_queries import session, engine
-from flask_app import app
-from unittest import mock
 from datetime import datetime
+from unittest import mock
+
+from datamodel.models.userinfo import BankAccount, Base, BillingInfo, CreditCard, DebitCard, UserInfo
+from db_queries import engine, session
+from flask_app import app
 
 
 class TestAuth:
@@ -134,7 +135,7 @@ class TestUserinfo:
     def teardown_class(self):
         self.session.rollback()
         self.session.close()
-    
+
     def test_create_userinfo(self):
         url = "/v1/users/create"
 
@@ -161,7 +162,7 @@ class TestUserinfo:
 
         self.session.query(UserInfo).filter(UserInfo.user_name == "preetham").delete()
         self.session.commit()
-    
+
     def test_delete_userinfo(self):
         url = "/v1/userinfo/delete/"
 
@@ -169,18 +170,15 @@ class TestUserinfo:
         self.session.add(ui)
         self.session.commit()
 
-
         # ui= self.session.query(UserInfo).filter(UserInfo.user_name == self.user_data["user_name"]).first()
-        url+= str(ui.user_id)
+        url += str(ui.user_id)
         res = self.app_client.delete(url)
         assert res.status_code == 200
-
 
         users = (
             self.session.query(UserInfo).filter(UserInfo.user_name == "preetham").all()
         )
         assert len(users) == 0
-
 
     def test_update_userinfo(self):
         url = "/v1/userinfo/update/"
@@ -190,32 +188,36 @@ class TestUserinfo:
         self.session.commit()
 
         temp_user_data = self.user_data.copy()
-        temp_user_data["mobile_number"]="1234567890"
-        url+= str(ui.user_id)
+        temp_user_data["mobile_number"] = "1234567890"
+        url += str(ui.user_id)
         res = self.app_client.put(url, json=temp_user_data)
         assert res.status_code == 200
-        
 
         users = (
             self.session.query(UserInfo).filter(UserInfo.user_id == ui.user_id).all()
         )
-        
+
         assert users[0].mobile_number == "1234567890"
 
         self.session.query(UserInfo).filter(UserInfo.user_name == "preetham").delete()
         self.session.commit()
-    
 
     def test_get_userinfo(self):
-        
         url = "/v1/users/get/"
-        ui = UserInfo(user_name=self.user_data["user_name"], first_name=self.user_data["first_name"],last_name=self.user_data["last_name"],mobile_number=self.user_data["mobile_number"],email_id=self.user_data["email_id"],is_merchant=self.user_data["is_merchant"])
+        ui = UserInfo(
+            user_name=self.user_data["user_name"],
+            first_name=self.user_data["first_name"],
+            last_name=self.user_data["last_name"],
+            mobile_number=self.user_data["mobile_number"],
+            email_id=self.user_data["email_id"],
+            is_merchant=self.user_data["is_merchant"],
+        )
         self.session.add(ui)
         self.session.commit()
 
         url += str(ui.user_id)
         res = self.app_client.get(url)
-        
+
         assert res.status_code == 200
 
         users = (
@@ -236,22 +238,22 @@ class TestUserinfo:
         self.session.commit()
 
 
-class TestDebitCard():
+class TestDebitCard:
     def setup_class(self):
         Base.metadata.create_all(engine)
         self.session = session
         self.app_client = app.test_client()
-        self.debitcard_data={
-            "card_number" : "1234567891234567",
-            "billing_address" : "2950 College Ave",
-            "postal_code" : "80303",
-            "state" : "Colorado",
-            "city" : "Boulder",
-            "user_id" : "1",
-            "card_network" : "Visa",
-            "cvv" : "111",
-            "billing_info_id":" ",
-            "bank_account_number" : " ",
+        self.debitcard_data = {
+            "card_number": "1234567891234567",
+            "billing_address": "2950 College Ave",
+            "postal_code": "80303",
+            "state": "Colorado",
+            "city": "Boulder",
+            "user_id": "1",
+            "card_network": "Visa",
+            "cvv": "111",
+            "billing_info_id": " ",
+            "bank_account_number": " ",
             "created_by": "aditi",
             "updated_by": "aditi",
         }
@@ -264,29 +266,29 @@ class TestDebitCard():
         url = "/v1/debitcard/add"
 
         ui = UserInfo(
-        user_name = "aditi",
-            )
+            user_name="aditi",
+        )
         self.session.add(ui)
         self.session.commit()
 
         ba = BankAccount(
             account_number="123456789123",
             user_id=ui.user_id,
-            )
+        )
         self.session.add(ba)
         self.session.commit()
 
-           
-        self.debitcard_data["user_id"]=ui.user_id
-        self.debitcard_data["bank_account_number"]=ba.account_number
-        
+        self.debitcard_data["user_id"] = ui.user_id
+        self.debitcard_data["bank_account_number"] = ba.account_number
 
         res = self.app_client.post(url, json=self.debitcard_data)
 
         assert res.status_code == 200
 
         cards = (
-            self.session.query(DebitCard).filter(DebitCard.card_number == "1234567891234567").all()
+            self.session.query(DebitCard)
+            .filter(DebitCard.card_number == "1234567891234567")
+            .all()
         )
         assert len(cards) == 1
         assert cards[0].user_id == ui.user_id
@@ -297,63 +299,67 @@ class TestDebitCard():
         assert cards[0].created_by == str(ui.user_id)
         assert cards[0].updated_by == str(ui.user_id)
 
-        self.session.query(DebitCard).filter(DebitCard.card_number == "1234567891234567").delete()
+        self.session.query(DebitCard).filter(
+            DebitCard.card_number == "1234567891234567"
+        ).delete()
         self.session.commit()
 
-        self.session.query(BillingInfo).filter(BillingInfo.billing_info_id == cards[0].billing_info_id).delete()
+        self.session.query(BillingInfo).filter(
+            BillingInfo.billing_info_id == cards[0].billing_info_id
+        ).delete()
         self.session.commit()
 
-        self.session.query(BankAccount).filter(BankAccount.account_number == ba.account_number).delete()
+        self.session.query(BankAccount).filter(
+            BankAccount.account_number == ba.account_number
+        ).delete()
         self.session.commit()
 
         self.session.query(UserInfo).filter(UserInfo.user_id == ui.user_id).delete()
         self.session.commit()
-    
-
 
     def test_delete_debitcardinfo(self):
         url = "/v1/debitcard/delete/"
 
-        bi =BillingInfo(
-            billing_address = "2950 College Ave",
-            postal_code = "80303",
-            state = "Colorado",
-            city = "Boulder",
+        bi = BillingInfo(
+            billing_address="2950 College Ave",
+            postal_code="80303",
+            state="Colorado",
+            city="Boulder",
         )
         self.session.add(bi)
         self.session.commit()
 
-        dc= DebitCard(
+        dc = DebitCard(
             card_number=self.debitcard_data["card_number"],
-            billing_info_id=bi.billing_info_id
-            )
+            billing_info_id=bi.billing_info_id,
+        )
         self.session.add(dc)
         self.session.commit()
 
-
-        url+=self.debitcard_data["card_number"]
+        url += self.debitcard_data["card_number"]
         res = self.app_client.delete(url)
         assert res.status_code == 200
 
-
         users = (
-            self.session.query(DebitCard).filter(DebitCard.card_number == self.debitcard_data["card_number"]).all()
+            self.session.query(DebitCard)
+            .filter(DebitCard.card_number == self.debitcard_data["card_number"])
+            .all()
         )
         assert len(users) == 0
 
 
-class TestBankAccount():
+class TestBankAccount:
     def setup_class(self):
         Base.metadata.create_all(engine)
         self.session = session
         self.app_client = app.test_client()
-        self.bankaccount_data={
-            "account_number" : "123456789123",
-            "user_id" : "1",
-            "account_holders_name" : "Aditi Athreya",
-            "account_balance" : "1000",
-            "bank_name" : "Chase",
-            "routing_number" : "987654321",
+        self.bankaccount_data = {
+            "account_number": "123456789123",
+            "user_id": "1",
+            "account_holders_name": "Aditi Athreya",
+            "account_balance": "1000",
+            "bank_name": "Chase",
+            "routing_number": "987654321",
             "created_by": "aditi",
             "updated_by": "aditi",
         }
@@ -366,19 +372,21 @@ class TestBankAccount():
         url = "/v1/bankaccount/add"
 
         ui = UserInfo(
-        user_name = "aditi",
-            )
+            user_name="aditi",
+        )
         self.session.add(ui)
         self.session.commit()
-           
-        self.bankaccount_data["user_id"]=ui.user_id
-        
+
+        self.bankaccount_data["user_id"] = ui.user_id
+
         res = self.app_client.post(url, json=self.bankaccount_data)
 
         assert res.status_code == 200
 
         cards = (
-            self.session.query(BankAccount).filter(BankAccount.account_number == "123456789123").all()
+            self.session.query(BankAccount)
+            .filter(BankAccount.account_number == "123456789123")
+            .all()
         )
         assert len(cards) == 1
         assert cards[0].user_id == ui.user_id
@@ -390,48 +398,50 @@ class TestBankAccount():
         assert cards[0].created_by == str(ui.user_id)
         assert cards[0].updated_by == str(ui.user_id)
 
-        self.session.query(BankAccount).filter(BankAccount.account_number == "123456789123").delete()
+        self.session.query(BankAccount).filter(
+            BankAccount.account_number == "123456789123"
+        ).delete()
         self.session.commit()
 
         self.session.query(UserInfo).filter(UserInfo.user_id == ui.user_id).delete()
         self.session.commit()
-    
-
 
     def test_delete_bankaccountinfo(self):
         url = "/v1/bankaccount/delete/"
 
-
-        ba=BankAccount(account_number=self.bankaccount_data["account_number"])
+        ba = BankAccount(account_number=self.bankaccount_data["account_number"])
         self.session.add(ba)
         self.session.commit()
 
-
-        url+=self.bankaccount_data["account_number"]
+        url += self.bankaccount_data["account_number"]
         res = self.app_client.delete(url)
         assert res.status_code == 200
 
-
         users = (
-            self.session.query(BankAccount).filter(BankAccount.account_number==self.bankaccount_data["account_number"]).all()
+            self.session.query(BankAccount)
+            .filter(
+                BankAccount.account_number == self.bankaccount_data["account_number"]
+            )
+            .all()
         )
         assert len(users) == 0
 
-class TestCreditCard():
+
+class TestCreditCard:
     def setup_class(self):
         Base.metadata.create_all(engine)
         self.session = session
         self.app_client = app.test_client()
-        self.creditcard_data={
-            "card_number" : "1234567891234566",
-            "billing_address" : "2950 College Ave",
-            "postal_code" : "80303",
-            "state" : "Colorado",
-            "city" : "Boulder",
-            "user_id" : "1",
-            "card_network" : "Visa",
-            "cvv" : "111",
-            "billing_info_id":" ",
+        self.creditcard_data = {
+            "card_number": "1234567891234566",
+            "billing_address": "2950 College Ave",
+            "postal_code": "80303",
+            "state": "Colorado",
+            "city": "Boulder",
+            "user_id": "1",
+            "card_network": "Visa",
+            "cvv": "111",
+            "billing_info_id": " ",
             "created_by": "johndoe",
             "updated_by": "johndoe",
         }
@@ -444,19 +454,21 @@ class TestCreditCard():
         url = "/v1/creditcard/add"
 
         ui = UserInfo(
-        user_name = "johndoe",
-            )
+            user_name="johndoe",
+        )
         self.session.add(ui)
         self.session.commit()
 
-        self.creditcard_data["user_id"]=ui.user_id
-        
+        self.creditcard_data["user_id"] = ui.user_id
+
         res = self.app_client.post(url, json=self.creditcard_data)
 
         assert res.status_code == 200
 
         cards = (
-            self.session.query(CreditCard).filter(CreditCard.card_number == "1234567891234566").all()
+            self.session.query(CreditCard)
+            .filter(CreditCard.card_number == "1234567891234566")
+            .all()
         )
         assert len(cards) == 1
         assert cards[0].user_id == ui.user_id
@@ -466,42 +478,45 @@ class TestCreditCard():
         assert cards[0].created_by == str(ui.user_id)
         assert cards[0].updated_by == str(ui.user_id)
 
-        self.session.query(CreditCard).filter(CreditCard.card_number == "1234567891234566").delete()
+        self.session.query(CreditCard).filter(
+            CreditCard.card_number == "1234567891234566"
+        ).delete()
         self.session.commit()
 
-        self.session.query(BillingInfo).filter(BillingInfo.billing_info_id == cards[0].billing_info_id).delete()
+        self.session.query(BillingInfo).filter(
+            BillingInfo.billing_info_id == cards[0].billing_info_id
+        ).delete()
         self.session.commit()
 
         self.session.query(UserInfo).filter(UserInfo.user_id == ui.user_id).delete()
         self.session.commit()
 
-
     def test_delete_creditcardinfo(self):
         url = "/v1/creditcard/delete/"
 
-        bi =BillingInfo(
-            billing_address = "2950 College Ave",
-            postal_code = "80303",
-            state = "Colorado",
-            city = "Boulder",
+        bi = BillingInfo(
+            billing_address="2950 College Ave",
+            postal_code="80303",
+            state="Colorado",
+            city="Boulder",
         )
         self.session.add(bi)
         self.session.commit()
 
-        cc= CreditCard(
+        cc = CreditCard(
             card_number=self.creditcard_data["card_number"],
-            billing_info_id=bi.billing_info_id
-            )
+            billing_info_id=bi.billing_info_id,
+        )
         self.session.add(cc)
         self.session.commit()
 
-
-        url+=self.creditcard_data["card_number"]
+        url += self.creditcard_data["card_number"]
         res = self.app_client.delete(url)
         assert res.status_code == 200
 
-
         users = (
-            self.session.query(CreditCard).filter(CreditCard.card_number == self.creditcard_data["card_number"]).all()
+            self.session.query(CreditCard)
+            .filter(CreditCard.card_number == self.creditcard_data["card_number"])
+            .all()
         )
         assert len(users) == 0
