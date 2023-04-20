@@ -40,8 +40,8 @@ jobs:
       - run:
           name: Authenticate with GKE
           command: | 
-          echo $GOOGLE_APPLICATION_CREDENTIALS > /tmp/key.json
-          gcloud auth activate-service-account --key-file=/tmp/key.json
+            echo $GOOGLE_APPLICATION_CREDENTIALS > /tmp/key.json
+            gcloud auth activate-service-account --key-file=/tmp/key.json
       - run:
           name: Set Kubernetes context
           command: gcloud container clusters get-credentials agile-avengers --zone us-central1 --project gile-avengers-aish
