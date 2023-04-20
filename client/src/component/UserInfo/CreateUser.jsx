@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
 import Mandatory from "../../common/component/Mandatory";
+import { BACKEND_API_URL } from "../../constants/backend";
 
 const CreateUser = (props) => {
   const [firstName, setFirstName] = useState("");
@@ -52,8 +53,8 @@ const CreateUser = (props) => {
     }
 
 
-
-    fetch("http://127.0.0.1/api/v1/users/create", {
+    fetch(`${BACKEND_API_URL}/users/create`, {
+    // fetch("http://127.0.0.1:5000/v1/users/create", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -109,7 +110,7 @@ const CreateUser = (props) => {
           <div className="card-header back-light-primary text-white">
             Create Account
           </div>
-          
+          <div className="card-body">
               <div className="form-group">
                 <label htmlFor="firstName">
                   <Mandatory>First Name</Mandatory>
@@ -179,7 +180,7 @@ const CreateUser = (props) => {
                   Create Account
                 </button>
               </div>
-             
+             </div>
             </form>
           </div>
         </div>

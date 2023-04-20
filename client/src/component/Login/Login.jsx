@@ -28,12 +28,8 @@ const Login = (props) => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-<<<<<<< Updated upstream
     fetch(`${BACKEND_API_URL}/auth/login`, {
     // fetch("http://127.0.0.1:5000/api/v1/auth/login", {
-=======
-    fetch("http://127.0.0.1/api/v1/auth/login", {
->>>>>>> Stashed changes
       method: "POST",
       headers: {
         "Content-Type": "application/json"

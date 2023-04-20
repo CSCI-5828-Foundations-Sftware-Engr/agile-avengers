@@ -110,8 +110,7 @@ def create_users():
     print(data["user_name"])
     
     try:
-        user_info = (
-        session.query(UserInfo).filter(UserInfo.user_name == data["user_name"]).first())
+        user_info = session.query(UserInfo).filter(UserInfo.user_name == data["user_name"]).first()
     except Exception as e:
         print(e)
         return make_response(jsonify({"message": "user does not exist"}), 404)
