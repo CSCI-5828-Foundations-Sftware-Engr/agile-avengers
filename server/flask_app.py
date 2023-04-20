@@ -252,15 +252,15 @@ def userinfo():
 
     return make_response(jsonify({"message": "Unauthorized"}), 403)
 
-@app.route(f"{payment_route}/get_all_payment_methods/", methods=["GET"])
-def get_all_payment_methods():
-# @app.route(f"{payment_route}/get_all_payment_methods/<user_id>", methods=["GET"])
-# def get_all_payment_methods(user_id):
+# @app.route(f"{payment_route}/get_all_payment_methods/", methods=["GET"])
+# def get_all_payment_methods():
+@app.route(f"{payment_route}/get_all_payment_methods/<user_id>", methods=["GET"])
+def get_all_payment_methods(user_id):
     try:
-        return {
-            "status": "Success", 
-            "data": {"first_last_123": "123", "first_last_234": "234", "first_last_345": "345"}
-        }
+        # return {
+        #     "status": "Success", 
+        #     "data": {"first_last_123": "123", "first_last_234": "234", "first_last_345": "345"}
+        # }
         if user_exists(user_id, session):
             method_dict = {}
             
@@ -295,10 +295,10 @@ def get_all_payment_methods():
 def get_payee_list():
     payee_dict = {}
     try:
-        return {
-        "status": "Success", 
-        "data": {"first_last_123": "123", "first_last_234": "234", "first_last_345": "345"}
-    }
+    #     return {
+    #     "status": "Success", 
+    #     "data": {"first_last_123": "123", "first_last_234": "234", "first_last_345": "345"}
+    # }
         users = session.query(UserInfo).all()
         for user in users:
             name = f"{user.first_name}_{user.last_name}"
@@ -412,7 +412,23 @@ def request_payment():
 
 @app.route(f"{payment_route}/pending_requests/<user_id>", methods=["GET"])
 def get_pending_requests(user_id):
+# @app.route(f"{payment_route}/pending_requests", methods=["GET"])
+# def get_pending_requests():
     try:
+        # return {
+        #     "message": "Success", "data":[{
+        #             "requestor_id": 123,
+        #             "requestor_name": "First last",
+        #             "transaction_amount": 1000,
+        #             "transaction_id": 1234
+        #         },
+        #         {
+        #             "requestor_id": 234,
+        #             "requestor_name": "First last 2000",
+        #             "transaction_amount": 2000,
+        #             "transaction_id": 5678
+        #         }]
+        # }
         if not user_id:
             return make_response(jsonify({"message": "User-id is required"}), 400)
         if user_exists(user_id, session):
@@ -438,6 +454,10 @@ def get_pending_requests(user_id):
         traceback.print_exc()
         make_response(jsonify({"message": "Server Error"}), 500)
 
+
+@app.route(f"{payment_route}/cancel_pending_request", methods=["POST"])
+def cancel_pending_request():
+    transaction_id_to_delete = request.args["transaction_id"]
 
 # @app.route(api_url + "/add_new_credit_card", methods=["POST"])
 # def add_new_credit_card():
