@@ -65,6 +65,10 @@ class TestAuth:
         url = "/v1/auth/login"
         data = {"username": "preetham", "password": "password"}
 
+        ui = UserInfo(user_name=data["username"])
+        self.session.add(ui)
+        self.session.commit()
+
         mock_user_login.return_value = {"access_token": "1", "refersh_token": "2"}
         res = self.app_client.post(url, json=data)
         assert res.status_code == 200
@@ -72,6 +76,10 @@ class TestAuth:
         mock_user_login.return_value = None
         res = self.app_client.post(url, json=data)
         assert res.status_code == 401
+
+        self.session.query(UserInfo).filter(UserInfo.user_name == "preetham").delete()
+        self.session.commit()
+
 
     @mock.patch("flask_app.user_logout")
     def test_logout(self, mock_user_logout):
