@@ -5,8 +5,6 @@ deploy:
 	kubectl apply -f deployment.yaml
 	kubectl apply -f service.yaml
 	kubectl apply -f ingress.yaml
-	sleep 5
-	kubectl port-forward service/backend-svc 8081:8081
 
 delete:
 	kubectl delete deployment/backend
