@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
 import Mandatory from "../../common/component/Mandatory";
+import { BACKEND_API_URL } from "../../constants/backend";
 
 const CreateUser = (props) => {
   const [firstName, setFirstName] = useState("");
@@ -23,21 +24,11 @@ const CreateUser = (props) => {
   };
 
   const handleMobileNumberChange = (event) => {
-    const mobileNumberRegex = /^[1-9][0-9]{9}$/;
-    if (mobileNumberRegex.test(event.target.value)) {
       setMobileNumber(event.target.value);
-    } else {
-      setErrorMessage("Invalid mobile number");
-    }
   };
 
   const handleEmailIdChange = (event) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (emailRegex.test(event.target.value)) {
       setEmailId(event.target.value);
-    } else {
-      setErrorMessage("Invalid email address");
-    }
   };
 
   const handleIsMerchantChange = (event) => {
@@ -52,8 +43,18 @@ const CreateUser = (props) => {
       return;
     }
 
+    if (!validateEmail(emailId)) {
+      setErrorMessage("Invalid email address");
+      return;
+    }
+    if (!validateMobileNumber(mobileNumber)) {
+      setErrorMessage("Invalid mobile number");
+      return;
+    }
 
-    fetch("http://127.0.0.1:5000/v1/users/create", {
+
+    fetch(`${BACKEND_API_URL}/users/create`, {
+    // fetch("http://127.0.0.1:5000/v1/users/create", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -82,6 +83,16 @@ const CreateUser = (props) => {
       });
   };
 
+  const validateEmail = (email) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+  };
+
+  const validateMobileNumber = (mobileNumber) => {
+    const regex = /^\d{10}$/;
+    return regex.test(mobileNumber);
+  };
+
   return (
     <div className="container-flex">
       <div className="container">
@@ -99,7 +110,7 @@ const CreateUser = (props) => {
           <div className="card-header back-light-primary text-white">
             Create Account
           </div>
-          
+          <div className="card-body">
               <div className="form-group">
                 <label htmlFor="firstName">
                   <Mandatory>First Name</Mandatory>
@@ -169,7 +180,7 @@ const CreateUser = (props) => {
                   Create Account
                 </button>
               </div>
-             
+             </div>
             </form>
           </div>
         </div>

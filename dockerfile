@@ -12,7 +12,7 @@ RUN apt-get update -y && \
     npm i -g webpack webpack-cli
 
 COPY client /app/client
-RUN npm install --no-optional --development  && npm cache clean --force && cd /app/client 
+RUN cd /app/client && npm install --no-optional --development  && npm cache clean --force && cd /app/client 
 
 # For some reason, keycloak installed from requirements.txt does not work.
 # Do not move the below two dependencies to requirements.txt
@@ -21,13 +21,11 @@ RUN pip install keycloak-client==0.15.4
 
 RUN pip install python-keycloak==2.15.3
 
-COPY server/flask_app.py server/alembic.ini server/start.sh /app/
+COPY server/flask_app.py server/alembic.ini server/start.sh server/db_queries.py /app/
 
 COPY server/alembic /app/alembic
 
 COPY server/config /app/config
-
-COPY server/constants /app/constants
 
 COPY server/datamodel /app/datamodel
 

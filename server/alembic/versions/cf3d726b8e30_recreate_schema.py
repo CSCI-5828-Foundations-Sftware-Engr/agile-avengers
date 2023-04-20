@@ -1,8 +1,8 @@
-"""Create all tables
+"""Recreate schema
 
-Revision ID: bb9221304ebf
+Revision ID: cf3d726b8e30
 Revises: 
-Create Date: 2023-04-18 17:55:09.123950
+Create Date: 2023-04-19 17:40:23.220749
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'bb9221304ebf'
+revision = 'cf3d726b8e30'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -38,7 +38,8 @@ def upgrade():
     sa.Column('created_by', sa.String(length=30), nullable=True),
     sa.Column('updated_on', sa.DateTime(), nullable=True),
     sa.Column('updated_by', sa.String(length=30), nullable=True),
-    sa.PrimaryKeyConstraint('user_id')
+    sa.PrimaryKeyConstraint('user_id'),
+    sa.UniqueConstraint('user_name')
     )
     op.create_table('bank_account',
     sa.Column('account_number', sa.String(length=30), nullable=False),
