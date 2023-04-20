@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
 import Mandatory from "../../common/component/Mandatory";
+import showToast from "../../common/component/ToastContainer";
 import { bankAccountSchema } from "../../common/schema";
 import { utils } from "../../common/utils";
 import paymentMethodService from "../../services/payment/paymentMethodService";
@@ -12,6 +13,7 @@ const BankAccount = () => {
   const [accountName, setAccountName] = useState(emptyObject);
   const [routingNumber, setRoutingNumber] = useState(emptyObject);
   const [accountNumber, setAccountNumber] = useState(emptyObject);
+  const [accountHolderName, setAccountHolderName] = useState(emptyObject);
   const [bankName, setBankName] = useState(emptyObject);
   const setterFunctionMap = {
     accountType: setAccountType,
@@ -19,6 +21,7 @@ const BankAccount = () => {
     routingNumber: setRoutingNumber,
     accountNumber: setAccountNumber,
     bankName: setBankName,
+    accountHolderName: setAccountHolderName
   };
   useEffect(() => {}, []);
 
@@ -40,6 +43,7 @@ const BankAccount = () => {
       accountName,
       routingNumber,
       accountNumber,
+      accountHolderName,
       bankName,
     };
 
@@ -61,14 +65,32 @@ const BankAccount = () => {
       .validate(objectToValidate, { abortEarly: false })
       .then(() => {
         const payloadToPost = {
-            accountType,
-            accountNumber,
-            routingNumber,
-            bankName
+            account_number:accountNumber.value,
+            user_id:localStorage.getItem("user_id"),
+            account_holders_name:accountHolderName.value,
+            bank_name: bankName.value,
+            routing_number:routingNumber.value
         };
         paymentMethodService.addNewBankAccount(payloadToPost).then(data => {
-          console.log("This is the data");
-          console.log(data);
+          showToast({
+            type: "success",
+            message: "Bank account has been successfully added"
+          });
+          for (const [variableName, setterFunction] of Object.entries(
+            setterFunctionMap
+          )) {
+            if (variableName === "accountType") {
+              // debugger;
+              setterFunction({
+                value: "--Select A Value--",
+                error: ""
+              });
+            } else {
+              setterFunction(emptyObject);
+            }
+          }
+          // console.log("This is the data");
+          // console.log(data);
         });
       })
       .catch(e => {
@@ -89,12 +111,15 @@ const BankAccount = () => {
         <u>Bank Account Details</u>
       </h4>
       <div>
+        <label htmlFor="accountType">
+          <Mandatory>Account Type</Mandatory>
+        </label>
         <select
           className="form-control"
           id="accountType"
           style={{ width: "100%" }}
           onChange={e => handleDropDownChange(e, setAccountType)}
-          selected={accountType.value}
+          value={accountType.value}
         >
           <option id="notselected" value="--Select A Value--" disabled selected>
             --Select A Value--
@@ -110,9 +135,21 @@ const BankAccount = () => {
         <div className="error-message">{accountType.error}</div>
         <br />
       </div>
-
-
-      
+      <div className="form-group">
+        <label htmlFor="accountHolderName">
+          <Mandatory>Account Holder Name</Mandatory>
+        </label>
+        <input
+          placeholder="Donal Trump"
+          type="text"
+          className="form-control"
+          name="accountHolderName"
+          id="accountHolderName"
+          value={accountHolderName.value}
+          onChange={e => handleTextChange(e, setAccountHolderName)}
+        />
+        <div className="error-message">{accountHolderName.error}</div>
+      </div>      
       <div className="form-group">
         <label htmlFor="accountNumber">
           <Mandatory>Account Number</Mandatory>
@@ -134,7 +171,7 @@ const BankAccount = () => {
           <Mandatory>Routing Number</Mandatory>
         </label>
         <input
-          placeholder="021000021"
+          placeholder="1234567"
           type="number"
           className="form-control"
           name="routingNumber"
@@ -144,8 +181,6 @@ const BankAccount = () => {
         />
         <div className="error-message">{routingNumber.error}</div>
       </div>
-
-
       <div className="form-group">
         <label htmlFor="bankName">
           <Mandatory>Bank Name</Mandatory>

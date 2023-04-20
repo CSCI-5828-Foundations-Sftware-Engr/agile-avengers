@@ -1,31 +1,19 @@
 import json
 import logging
+import random
 import traceback
 from datetime import datetime
 
-from flask import Flask, jsonify, make_response, request, render_template, Response
+from flask import Flask, Response, jsonify, make_response, render_template, request
 from flask_cors import CORS
 from sqlalchemy.orm import Session
 from werkzeug.exceptions import HTTPException
 
-from datamodel.models.userinfo import (
-    UserInfo,
-    CreditCard,
-    DebitCard,
-    BillingInfo,
-    BankAccount,
-    Merchant,
-)
 from datamodel.models.payments import Transaction
-from helpers.user_management import (
-    check_userinfo,
-    create_new_user,
-    user_login,
-    user_logout,
-)
-from helpers.validator import validate_transaction, user_exists
+from datamodel.models.userinfo import BankAccount, BillingInfo, CreditCard, DebitCard, Merchant, UserInfo
 from db_queries import session
-
+from helpers.user_management import check_userinfo, create_new_user, user_login, user_logout
+from helpers.validator import user_exists, validate_transaction
 
 app = Flask(
     __name__,
@@ -677,7 +665,7 @@ def add_new_bank_account():
     account_number = data['account_number']
     user_id = data['user_id']
     account_holders_name = data['account_holders_name']
-    account_balance = data['account_balance']
+    account_balance = random.randint(1000, 2000)
     bank_name = data['bank_name']
     routing_number = data['routing_number']
     created_on = datetime.now()

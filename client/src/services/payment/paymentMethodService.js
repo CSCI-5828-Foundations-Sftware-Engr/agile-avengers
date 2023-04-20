@@ -13,7 +13,7 @@ const paymentMethodService = {
     return axios.post(url, payload, config);
   },
   addNewBankAccount(payload) {
-    const url = `${BACKEND_API_URL}/add_new_bank_account`;
+    const url = `${BACKEND_API_URL}/bankaccount/add`;
     return axios.post(url, payload, config);
   }
 };

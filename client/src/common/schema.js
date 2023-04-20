@@ -64,7 +64,6 @@ export const debitCardSchema = yup.object().shape({
 
 export const bankAccountSchema = yup.object().shape({
   accountType: yup.string().required("This field is required"),
-  
   accountNumber: yup
     .number()
     .min(100000000, "Not a valid Account number")
@@ -73,7 +72,8 @@ export const bankAccountSchema = yup.object().shape({
     .typeError(
       "Account Number cannot be left empty and has to contain 9 digit Account number"
     ),
-    routingNumber: yup
+  accountHolderName: yup.string().required("This field is required"),
+  routingNumber: yup
     .number()
     .min(1000000, "Not a valid routing number")
     .max(9999999, "Not a valid routing number")
@@ -81,19 +81,7 @@ export const bankAccountSchema = yup.object().shape({
     .typeError(
       "Routing Number cannot be left empty and has to contain 7 digit routing number"
     ),
-  
-    bankName: yup.string().required("This field is required"),
-  billingFirstName: yup.string().required("This field is required"),
-  billingLastName: yup.string().required("This field is required"),
-  billingAddress: yup.string().required("This field is required"),
-  billingMoreAddressDetails: yup.string(),
-  billingCity: yup.string().required("This field is required"),
-  billingState: yup.string().required("This field is required"),
-  billingPostalCode: yup
-    .number()
-    .min(10000, "Not a valid card number")
-    .max(100000, "Not a valid card number")
-    .required("This field is required")
+  bankName: yup.string().required("This field is required"),
 });
 
 
