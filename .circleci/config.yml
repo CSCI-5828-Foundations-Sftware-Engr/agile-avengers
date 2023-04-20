@@ -3,6 +3,7 @@ version: 2.1
 orbs:
   python: circleci/python@2.1.1
   node: circleci/node@5.1.0
+  gcp-gke: circleci/gcp-gke@2.0.0
 
 jobs:
   build-backend:
@@ -26,42 +27,42 @@ jobs:
           command: |
             cd client
             npm install
+  deploy-app:
+    executor: gcp-gke/default
+    working_directory: ~/repo/CSCI-5828-Foundations-Sftware-Engr/agile-avengers/
+    steps:
+      - checkout
+      - gcp-gke/configure-access:
+          service-account-email: circleci-agile-avengers@agile-avengers-aish.iam.gserviceaccount.com
+          project-id: agile-avengers-aish
+          cluster-name: agile-avengers
+      - run:
+          name: Authenticate with GKE
+          command: gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
+      - run:
+          name: Set Kubernetes context
+          command: gcloud container clusters get-credentials agile-avengers --zone us-central1 --project gile-avengers-aish
+      - run:
+          name: Deploy keycloak
+          command: |
+            cd keycloak
+            make deploy
+      - run:
+          name: Deploy Postgres
+          command: |
+            cd postgres
+            make deploy
+      - run:
+          name: Deploy Service
+          command: |
+            cd server
+            make build
+            make delete || true
+            make deploy
+
 workflows:
   test_my_app:
     jobs:
       - build-backend
       - build-frontend
-#       - run:
-#           name: Build and tag Docker image
-#           command: |
-#             docker build -t agile-avengers .
-
-
-
-# version: 2.1
-# jobs:
-#   build:
-#     docker:
-#       - image: circleci/python:3.8.6
-#     working_directory: ~/repo/CSCI-5828-Foundations-Sftware-Engr/agile-avengers/
-#     steps:
-#       - checkout
-#       - run: python3 -m venv venv
-#       - run: . venv/bin/activate
-#       - run: pip install --upgrade pip
-#       - run: cd server && pip install -r requirements.txt
-#       - run: cd client && npm install && npm run build
-#       - run: docker build -t agile-avengers .
-#   deploy:
-#     docker:
-#       - image: google/cloud-sdk:alpine
-#     working_directory: /app
-#     steps:
-#       - checkout
-#       - run: echo $GCLOUD_SERVICE_KEY | base64 -d > key.json
-#       - run: gcloud auth activate-service-account --key-file=key.json
-#       - run: gcloud config set project myproject
-#       - run: gcloud auth configure-docker
-#       - run: docker tag myapp gcr.io/myproject/myapp:$CIRCLE_SHA1
-#       - run: docker push gcr.io/myproject/myapp:$CIRCLE_SHA1
-#       - run: gcloud run deploy myapp --image gcr.io/myproject/myapp:$CIRCLE_SHA1 --platform managed --allow-unauthenticated
+      - deploy-app
