@@ -47,7 +47,7 @@ def validate_transaction(
                     "message": "Transaction method is incorrect. No corresponding bank account found."
                 }
                 return False, err_resp
-            if method.account_balance - transaction_amount <= 0:
+            if method.account_balance - float(transaction_amount) <= 0:
                 err_resp = {
                     "message": "Insufficient funds, transaction cannot take place"
                 }

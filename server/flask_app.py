@@ -376,14 +376,14 @@ def make_payment(transaction_id=None):
                 .filter_by(account_number=transaction_method_id)
                 .first()
             )
-            method.account_balance -= transaction_amount
+            method.account_balance -= float(transaction_amount)
         elif transaction_method == "credit":
             method = (
                 session.query(CreditCard)
                 .filter_by(card_number=transaction_method_id)
                 .first()
             )
-            method.credit_limit -= transaction_amount
+            method.credit_limit -= float(transaction_amount)
         else:
             method = (
                 session.query(DebitCard)
@@ -395,11 +395,11 @@ def make_payment(transaction_id=None):
                 .filter_by(account_number=method.bank_account_number)
                 .first()
             )
-            bank_detail.account_balance -= transaction_amount
+            bank_detail.account_balance -= float(transaction_amount)
 
         # update the balance for payee
         bank = session.query(BankAccount).filter_by(user_id=payee_id).first() # @TODO handle scenario when user has multiple bank accounts
-        bank.account_balance += transaction_amount
+        bank.account_balance += float(transaction_amount)
 
         # commit the changes
         session.commit()
