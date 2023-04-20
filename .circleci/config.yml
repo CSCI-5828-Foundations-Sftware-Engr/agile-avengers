@@ -28,14 +28,15 @@ jobs:
             cd client
             npm install
   deploy-app:
-    executor: gcp-gke/default
+    docker:
+      - image: google/cloud-sdk
     working_directory: ~/repo/CSCI-5828-Foundations-Sftware-Engr/agile-avengers/
     steps:
       - checkout
-      - gcp-gke/configure-access:
-          service-account-email: circleci-agile-avengers@agile-avengers-aish.iam.gserviceaccount.com
-          project-id: agile-avengers-aish
-          cluster-name: agile-avengers
+      # - gcp-gke/configure-access:
+      #     service-account-email: circleci-agile-avengers@agile-avengers-aish.iam.gserviceaccount.com
+      #     project-id: agile-avengers-aish
+      #     cluster-name: agile-avengers
       - run:
           name: Authenticate with GKE
           command: gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
