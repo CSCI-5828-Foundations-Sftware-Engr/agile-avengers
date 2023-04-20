@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: master
-        image: agile-avengers-frontend
+        image: aishwarya09031997/agile-avengers-frontend
         imagePullPolicy: Never
         # resources:
         #   requests:

@@ -12,11 +12,15 @@ jobs:
     working_directory: ~/repo/CSCI-5828-Foundations-Sftware-Engr/agile-avengers/
     steps:
       - checkout
+      - setup_remote_docker:
+          version: 20.10.14
+          docker_layer_caching: true
       - run:
           command: |
             cd server
-            pip install --upgrade pip
-            pip install -r requirements.txt
+            make build
+            docker tag agile-avengers-frontend aishwarya09031997/agile-avengers-frontend:latest
+            docker push aishwarya09031997/agile-avengers-frontend:latest
   build-frontend:
     executor:
       name: node/default
@@ -53,7 +57,7 @@ jobs:
           name: Deploy keycloak
           command: |
             cd keycloak
-            make delete || true
+            # make delete || true
             make deploy
       - run:
           name: Deploy Postgres
