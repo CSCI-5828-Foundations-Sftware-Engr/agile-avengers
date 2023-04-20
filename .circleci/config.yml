@@ -29,7 +29,7 @@ jobs:
             npm install
   deploy-app:
     docker:
-      - image: google/cloud-sdk
+      - image: cimg/gcp:2023.04
     working_directory: ~/repo/CSCI-5828-Foundations-Sftware-Engr/agile-avengers/
     steps:
       - checkout
@@ -48,7 +48,6 @@ jobs:
       - run:
           name: Deploy keycloak
           command: |
-            sudo apt-get install wget
             cd keycloak
             make deploy
       - run:
