@@ -1,5 +1,5 @@
 import { faLess } from "@fortawesome/free-brands-svg-icons";
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import Mandatory from "../../common/component/Mandatory";
 import { AuthContext } from "../Context/Authcontext";
 import { useHistory } from "react-router-dom";
@@ -7,11 +7,13 @@ import Cookies from 'universal-cookie';
 import { BACKEND_API_URL } from "../../constants/backend";
 
 
-const Login = () => {
+const Login = (props) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const {isLoggedIn, setIsLoggedIn} = useContext(AuthContext);
+  const queryParams = new URLSearchParams(props.location.search);
+  const success = queryParams.get('success');
 
 
   const handleUsernameChange = (event) => {
@@ -54,6 +56,7 @@ const Login = () => {
         // cookies.set('refresh_token', data.token.refresh_token, { path: '/' });
         localStorage.setItem('access_token', data.token.access_token);
         localStorage.setItem('refresh_token', data.token.refresh_token);
+        localStorage.setItem('user_id', data.user_id);
         history.push("/payment");
       })
       .catch((error) => {
@@ -68,6 +71,9 @@ const Login = () => {
         {errorMessage && (
                 <div className="alert alert-danger">{errorMessage}</div>
               )}
+        {success && (
+                <div className="alert alert-success">{"Account created successfully"}</div>
+            )}
         <br />
         <br />
         <div className="card">

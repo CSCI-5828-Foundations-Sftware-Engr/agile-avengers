@@ -13,11 +13,11 @@ const NewPayment = () => {
   const history = useHistory();
   const {isLoggedIn, setIsLoggedIn} = useContext(AuthContext);
 
-  // useEffect(() => {
-  //   if (!isLoggedIn) {
-  //     history.push("/login")
-  //   }
-  // }, []);
+  useEffect(() => {
+    if (!isLoggedIn) {
+      history.push("/login")
+    }
+  }, []);
 
   const handleChange = e => {
     setRequestType(e.target[e.target.options.selectedIndex].id);
