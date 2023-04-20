@@ -5,7 +5,7 @@ import config from "../header/headerConfig";
 
 const pendingRequestsService = {
   pendingRequests() {
-    const url = `${BACKEND_API_URL}/payment/pending_requests`;
+    const url = `${BACKEND_API_URL}/payment/pending_requests/${localStorage.getItem('user_id')}`;
     return axios.get(url, config);
   },
   cancelPendingRequest(transaction_id) {

@@ -14,6 +14,7 @@ const Container = () => {
   const handleLogout = () => {
     setIsLoggedIn(false);
     localStorage.removeItem("access_token");
+    localStorage.removeItem("user_id");
     window.location.href = "/login";
   };
 
@@ -23,12 +24,12 @@ const Container = () => {
         <div className="header">
           <div className="easy-pay-logo-container float-left">
             <img
-              src={`${window.location.origin}/client/easy-pay-logo.png`}
+              src={require('../images/easy-pay-logo-blue.png')}
               alt="Easy Pay Logo"
             />
           </div>
           <span className="center-text header-title header-heading">
-            <FontAwesomeIcon icon={faFontAwesome} /> Easy Pay
+            Easy Pay
           </span>
         </div>
       </header>
