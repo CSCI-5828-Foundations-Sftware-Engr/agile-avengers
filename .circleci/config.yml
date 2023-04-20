@@ -20,8 +20,8 @@ jobs:
             cd server
             make build
             echo "$DOCKER_PASSWORD" | docker login -u aishwarya09031997 --password-stdin
-            docker tag agile-avengers-frontend aishwarya09031997/agile-avengers-frontend:latest
-            docker push aishwarya09031997/agile-avengers-frontend:latest
+            docker tag agile-avengers-frontend aishwarya09031997/agile-avengers-frontend:v1
+            docker push aishwarya09031997/agile-avengers-frontend:v1
   build-frontend:
     executor:
       name: node/default
