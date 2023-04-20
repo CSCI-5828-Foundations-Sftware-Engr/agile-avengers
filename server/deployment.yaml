@@ -15,7 +15,6 @@ spec:
       containers:
       - name: master
         image: aishwarya09031997/agile-avengers-frontend
-        imagePullPolicy: Never
         # resources:
         #   requests:
         #     cpu: 100m
