@@ -2,6 +2,7 @@ import React, { useEffect, useState, useContext } from "react";
 import Mandatory from "../../common/component/Mandatory";
 import SendPayment from "./SendPayment";
 import RequestPayment from "./RequestPayment";
+import PendingPaymentRequests from "./PendingPaymentRequests.jsx"
 import { useHistory } from "react-router-dom";
 import { AuthContext } from "../Context/Authcontext";
 

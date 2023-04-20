@@ -116,3 +116,9 @@ export const requestPaymentSchema = yup.object().shape({
     .max(99999999, "Enter an amount less than 99999999")
     .required("This field is required"),
 });
+
+
+export const pendingPaymentSchema = yup.object().shape({
+  paymentMethod: yup.string().required("This field is required"),
+  pendingRequestSelected: yup.string().required("This field is required")
+});
