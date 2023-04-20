@@ -12,7 +12,8 @@ RUN apt-get update -y && \
     npm i -g webpack webpack-cli
 
 COPY client /app/client
-RUN cd /app/client && npm install --no-optional --development  && npm cache clean --force && cd /app/client 
+
+RUN cd /app/client && npm install --no-optional --development  && npm cache clean --force && cd /app/client && npm run webpack
 
 # For some reason, keycloak installed from requirements.txt does not work.
 # Do not move the below two dependencies to requirements.txt
