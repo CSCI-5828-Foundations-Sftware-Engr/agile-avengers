@@ -44,6 +44,9 @@ const Container = () => {
               <NavigationItem link="/add_payment_method">
                 Add Payment Methods
               </NavigationItem>
+              <NavigationItem link="/transaction">
+                Transactions
+              </NavigationItem>
               {/* 4. Conditionally render the logout link on the right */}
               <a onClick={handleLogout} className="ml-auto">
                 <FontAwesomeIcon icon={faSignOutAlt} /> Logout

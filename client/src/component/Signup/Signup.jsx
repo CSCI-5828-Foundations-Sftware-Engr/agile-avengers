@@ -64,12 +64,13 @@ const Signup = () => {
 
   return (
     <div className="container-flex">
+      
       <div className="container">
       <br />
       <div>
-        {errorMessage && (
-          <div className="alert alert-danger">{errorMessage}</div>
-        )}
+              {errorMessage && (
+                <div className="alert alert-danger">{errorMessage}</div>
+              )}
         </div>
         <br />
         <br />

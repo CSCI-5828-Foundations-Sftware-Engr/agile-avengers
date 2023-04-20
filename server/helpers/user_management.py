@@ -20,7 +20,9 @@ keycloak_connection = KeycloakOpenIDConnection(
     verify=True,
 )
 
-keycloak_admin = KeycloakAdmin(server_url=config.keycloak_url, connection=keycloak_connection)
+keycloak_admin = KeycloakAdmin(
+    server_url=config.keycloak_url, connection=keycloak_connection
+)
 
 client = keycloak_admin.create_client(
     skip_exists=True,
@@ -65,7 +67,10 @@ def create_new_user(username, password, email=None, first_name=None, last_name=N
 
 
 def user_login(username, password):
-    return keycloak_openid.token(username, password)
+    try:
+        return keycloak_openid.token(username, password)
+    except keycloak.exceptions.KeycloakAuthenticationError:
+        return None
 
 
 def user_logout(token):

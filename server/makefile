@@ -10,3 +10,6 @@ delete:
 	kubectl delete deployment/backend
 	kubectl delete service/backend-svc
 	kubectl delete ingress/backend
+
+test:
+	pytest -v --cov-report term --cov=. tests

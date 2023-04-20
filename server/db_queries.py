@@ -11,7 +11,6 @@ from sqlalchemy.orm import sessionmaker
 from config.constants import DB_CREDENTIALS
 
 
-
 # connecting to postgres database
 DATABASE_URI = "postgresql://{}:{}@{}/{}".format(
     DB_CREDENTIALS["USERNAME"],
