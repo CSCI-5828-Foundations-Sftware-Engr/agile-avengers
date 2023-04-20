@@ -44,7 +44,7 @@ jobs:
             gcloud auth activate-service-account --key-file=/tmp/key.json
       - run:
           name: Set Kubernetes context
-          command: gcloud container clusters get-credentials agile-avengers --zone us-central1 --project gile-avengers-aish
+          command: gcloud container clusters get-credentials agile-avengers --zone us-central1 --project agile-avengers-aish
       - run:
           name: Deploy keycloak
           command: |
