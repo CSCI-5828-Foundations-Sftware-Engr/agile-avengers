@@ -301,15 +301,15 @@ def get_all_payment_methods(user_id):
         return make_response(jsonify({"message": "Server Error"}), 500)
 
 
-@app.route(f"{payment_route}/get_payee_list", methods=["GET"])
-def get_payee_list():
+@app.route(f"{payment_route}/get_payee_list/<user_id>", methods=["GET"])
+def get_payee_list(user_id):
     payee_dict = {}
     try:
     #     return {
     #     "status": "Success", 
     #     "data": {"first_last_123": "123", "first_last_234": "234", "first_last_345": "345"}
     # }
-        users = session.query(UserInfo).all()
+        users = session.query(UserInfo).filter(UserInfo.user_id!=user_id).all()
         for user in users:
             name = f"{user.first_name}_{user.last_name}"
             user_id = user.user_id

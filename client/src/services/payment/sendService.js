@@ -9,7 +9,7 @@ const sendService = {
     return axios.get(url, config);
   },
   getPayeeList() {
-    const url = `${BACKEND_API_URL}/payment/get_payee_list`;
+    const url = `${BACKEND_API_URL}/payment/get_payee_list/${localStorage.getItem('user_id')}`;
     return axios.get(url, config);
   },
   makePayment(payload) {
