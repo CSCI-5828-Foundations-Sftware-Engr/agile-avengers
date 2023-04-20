@@ -1,0 +1,81 @@
+version: 2.1
+
+orbs:
+  python: circleci/python@2.1.1
+  node: circleci/node@5.1.0
+  gcp-gke: circleci/gcp-gke@2.0.0
+
+jobs:
+  build-backend:
+    executor:
+      name: python/default
+    working_directory: ~/repo/CSCI-5828-Foundations-Sftware-Engr/agile-avengers/
+    steps:
+      - checkout
+      - setup_remote_docker:
+          version: 20.10.14
+          docker_layer_caching: true
+      - run:
+          command: |
+            cd server
+            make build
+            echo "$DOCKER_PASSWORD" | docker login -u aishwarya09031997 --password-stdin
+            docker tag agile-avengers-frontend aishwarya09031997/agile-avengers-frontend:v1
+            docker push aishwarya09031997/agile-avengers-frontend:v1
+  build-frontend:
+    executor:
+      name: node/default
+    working_directory: ~/repo/CSCI-5828-Foundations-Sftware-Engr/agile-avengers/
+    steps:
+      - checkout
+      - run:
+          command: |
+            cd client
+            npm install
+  deploy-app:
+    docker:
+      - image: cimg/gcp:2023.04
+    working_directory: ~/repo/CSCI-5828-Foundations-Sftware-Engr/agile-avengers/
+    steps:
+      - checkout
+      # - gcp-gke/configure-access:
+      #     service-account-email: circleci-agile-avengers@agile-avengers-aish.iam.gserviceaccount.com
+      #     project-id: agile-avengers-aish
+      #     cluster-name: agile-avengers
+      - setup_remote_docker:
+          version: 20.10.14
+          docker_layer_caching: true
+
+      - run:
+          name: Authenticate with GKE
+          command: | 
+            echo $GOOGLE_APPLICATION_CREDENTIALS > /tmp/key.json
+            gcloud auth activate-service-account --key-file=/tmp/key.json
+      - run:
+          name: Set Kubernetes context
+          command: gcloud container clusters get-credentials agile-avengers --zone us-central1-c --project agile-avengers-aish
+      - run:
+          name: Deploy keycloak
+          command: |
+            cd keycloak
+            make delete || true
+            make deploy
+      - run:
+          name: Deploy Postgres
+          command: |
+            cd postgres
+            make deploy
+      - run:
+          name: Deploy Service
+          command: |
+            cd server
+            make build
+            make delete || true
+            make deploy
+
+workflows:
+  test_my_app:
+    jobs:
+      - build-backend
+      - build-frontend
+      - deploy-app
