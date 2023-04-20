@@ -29,7 +29,32 @@ const PendingPaymentRequests = () => {
     paymentMethod: setPaymentMethod
   };
   const rejectPaymentRequest = () =>{
-    pendingRequestsService.cancelPendingRequest(pendingRequestsList[pendingRequestSelected.value].transaction_id).then().catch();
+    pendingRequestsService.cancelPendingRequest(pendingRequestsList[pendingRequestSelected.value].transaction_id).then(data=>{
+      showToast({
+        type: "success",
+        message: "Payment request has been created successfully"
+      });
+      for (const [variableName, setterFunction] of Object.entries(
+        setterFunctionMap
+      )) {
+        if (variableName === "pendingRequestSelected" || variableName=="paymentMethod") {
+          setterFunction({
+            value: "--Select A Value--",
+            error: ""
+          });
+        } else {
+          setterFunction(emptyObject);
+        }
+      }
+      pendingRequestsService.pendingRequests().then(data=>{
+        const finalListOfPendingRequests = [];
+        data.data.data.forEach(indvTransaction=>{
+          const uniqueIdentifier = indvTransaction["requestor_name"] + " - " +indvTransaction["transaction_id"];
+          finalListOfPendingRequests[uniqueIdentifier]=indvTransaction;
+        });
+        setPendingRequestsList(finalListOfPendingRequests);
+      });
+    }).catch();
   }
   const validateSubmission = () => {
     const objectToValidate = {};
@@ -46,6 +71,7 @@ const PendingPaymentRequests = () => {
           variableValue.value !== "--Select A Value--" &&
           variableValue.value !== "") ||
         ((variableName !== "pendingRequestSelected") &&
+        variableValue.value !== "--Select A Value--" &&
           variableValue.value !== "")
       ) {
         objectToValidate[variableName] = variableValue.value;

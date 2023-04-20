@@ -9,8 +9,8 @@ const pendingRequestsService = {
     return axios.get(url, config);
   },
   cancelPendingRequest(transaction_id) {
-    const url = `${BACKEND_API_URL}/payment/cancel_pending_request?transaction_id=${transaction_id}`;
-    return axios.post(url, config);
+    const url = `${BACKEND_API_URL}/payment/cancel_pending_request/${transaction_id}`;
+    return axios.delete(url, config);
   }
 };
 

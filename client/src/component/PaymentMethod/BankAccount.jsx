@@ -83,7 +83,6 @@ const BankAccount = () => {
             setterFunctionMap
           )) {
             if (variableName === "accountType") {
-              // debugger;
               setterFunction({
                 value: "--Select A Value--",
                 error: ""

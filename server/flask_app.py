@@ -496,9 +496,21 @@ def get_pending_requests(user_id):
         make_response(jsonify({"message": "Server Error"}), 500)
 
 
-@app.route(f"{payment_route}/cancel_pending_request", methods=["POST"])
-def cancel_pending_request():
-    transaction_id_to_delete = request.args["transaction_id"]
+@app.route(f"{payment_route}/cancel_pending_request/<transaction_id>", methods=["DELETE"])
+def cancel_pending_request(transaction_id):
+    try:
+        transaction_id_to_delete = session.query(Transaction).filter_by(transaction_id=transaction_id).first()
+        if transaction_id_to_delete:
+            session.delete(transaction_id_to_delete)
+            session.commit()
+            return make_response(
+                jsonify({"result": "Transaction deleted successfully"}), 200
+            )
+        else:
+            return make_response(jsonify({"message": "Unable to delete transaction"}), 404)
+    except Exception as ex:
+        traceback.print_exc()
+        return make_response(jsonify({"message": "Unable to delete transaction"}), 404)
 
 # @app.route(api_url + "/add_new_credit_card", methods=["POST"])
 # def add_new_credit_card():
