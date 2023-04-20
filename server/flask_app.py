@@ -245,7 +245,7 @@ def login():
     for key, value in token.items():
         resp.set_cookie(key, json.dumps(value))
     resp.set_cookie("auth_token", json.dumps(token))
-    return {"token": token}
+    return {"token": token, "user_id":user_id}
 
 
 @app.route(f"{base_route}/logout", methods=["POST"])
