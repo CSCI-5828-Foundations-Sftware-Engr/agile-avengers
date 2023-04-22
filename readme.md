@@ -49,3 +49,15 @@ To start the server, go to `server/` and run `make build` to build the docker im
 1. `pip install pytest pytest-coverage`
 2. `cd server`
 3. `make test` 
+
+## Project Overview
+
+Easy Pay is a payment gateway application for businesses/individuals.<br/> 
+Features of the application include:
+1. Sending payments
+2. Request payments<br/>
+
+User level visualization include: 
+1. Expenditure in a Time duration
+2. Categorized spend
+3. Transaction history
