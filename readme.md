@@ -76,6 +76,7 @@ To run the unit tests,
 To run the graybox tests,
 - Ensure that the above mentioned packages are installed.
 - Ensure that the front end and back end servers are up and running.
+- In order to run the test locally, update the file backend.js to have as follows: ```const host = `http://127.0.0.1:5000`;```
 - Ensure to install the browser and corresponding driver in order to execute the tests.
 Chrome browser and ChromeDriverManager has been utilized here.
 - Run the following commands:
