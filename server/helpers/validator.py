@@ -62,7 +62,7 @@ def validate_transaction(
                     "message": "Transaction method is incorrect. No corresponding credit card account found."
                 }
                 return False, err_resp
-            if method.credit_limit - transaction_amount <= 0:
+            if method.credit_limit - float(transaction_amount) <= 0:
                 err_resp = {
                     "message": "Insufficient funds, transaction cannot take place"
                 }

@@ -94,7 +94,7 @@ def get_user_info(user_id):
 
 @app.route(api_url + "/users/create", methods=["POST"])
 def create_users():
-    data = request.get_json()    
+    data = request.get_json()
     try:
         user_info = session.query(UserInfo).filter(UserInfo.user_name == data["user_name"]).first()
     except Exception as e:
@@ -201,7 +201,7 @@ def create_user():
     session.commit()
 
     response = make_response(jsonify({"message": "user created"}), 200)
-    # response.headers.add('Access-Control-Allow-Origin', 'http://localhost:8081')    
+    # response.headers.add('Access-Control-Allow-Origin', 'http://localhost:8081')
     return response
 
 
@@ -306,11 +306,11 @@ def get_all_payment_methods(user_id):
 def get_payee_list(user_id):
     payee_dict = {}
     try:
-    #     return {
-    #     "status": "Success", 
-    #     "data": {"first_last_123": "123", "first_last_234": "234", "first_last_345": "345"}
-    # }
-        users = session.query(UserInfo).filter(UserInfo.user_id!=user_id).all()
+        #     return {
+        #     "status": "Success",
+        #     "data": {"first_last_123": "123", "first_last_234": "234", "first_last_345": "345"}
+        # }
+        users = session.query(UserInfo).filter(UserInfo.user_id != user_id).all()
         for user in users:
             name = f"{user.first_name}_{user.last_name}"
             user_id = user.user_id
@@ -399,7 +399,7 @@ def make_payment(transaction_id=None):
             bank_detail.account_balance -= float(transaction_amount)
 
         # update the balance for payee
-        bank = session.query(BankAccount).filter_by(user_id=payee_id).first() # @TODO handle scenario when user has multiple bank accounts
+        bank = session.query(BankAccount).filter_by(user_id=payee_id).first()  # @TODO handle scenario when user has multiple bank accounts
         bank.account_balance += float(transaction_amount)
 
         # commit the changes
@@ -450,8 +450,8 @@ def request_payment():
 
 @app.route(f"{payment_route}/pending_requests/<user_id>", methods=["GET"])
 def get_pending_requests(user_id):
-# @app.route(f"{payment_route}/pending_requests", methods=["GET"])
-# def get_pending_requests():
+    # @app.route(f"{payment_route}/pending_requests", methods=["GET"])
+    # def get_pending_requests():
     try:
         # return {
         #     "message": "Success", "data":[{
@@ -675,7 +675,7 @@ def delete_credit_card(card_number):
         make_response(jsonify({"message": "Server Error"}), 500)
 
 
-#route to add bank account details using input from user
+# route to add bank account details using input from user
 
 @app.route(api_url + "/bankaccount/add", methods=['POST'])
 def add_new_bank_account():
@@ -691,40 +691,40 @@ def add_new_bank_account():
         created_by = data['user_id']
         updated_on = datetime.now()
         updated_by = data['user_id']
-        bankaccount = BankAccount(user_id = user_id,account_number=account_number, account_holders_name =account_holders_name, account_balance=account_balance, bank_name =bank_name , routing_number=routing_number, created_on=created_on, created_by=created_by, updated_on=updated_on, updated_by=updated_by)
+        bankaccount = BankAccount(user_id=user_id, account_number=account_number, account_holders_name=account_holders_name, account_balance=account_balance, bank_name=bank_name , routing_number=routing_number, created_on=created_on, created_by=created_by, updated_on=updated_on, updated_by=updated_by)
         session.add(bankaccount)
         session.commit()
-        return make_response(jsonify({'message': 'Bank account details added successfully'}),200)
+        return make_response(jsonify({'message': 'Bank account details added successfully'}), 200)
     except Exception as ex:
         traceback.print_exc()
         session.rollback()
         make_response(jsonify({"message": "Server Error"}), 500)
 
-#route to delete bank account details
+# route to delete bank account details
 
 @app.route(api_url + "/users/<user_id>/transactions", methods=["GET"])
 def get_transactions(user_id):
- args = request.args
- start_date = args.get("start_date", default="", type=str)
- end_date = args.get("end_date", default="", type=str)
- start_date = datetime.strptime(start_date, "%d%m%Y").date()
- end_date = datetime.strptime(end_date, "%d%m%Y").date()
- result = session.query(Transaction).filter_by(payer_id=user_id).filter(Transaction.created_on.between(start_date, end_date))
- response = []
- for r in result:
-    response.append({
-        'transaction_id': r.transaction_id,
-        'payee_id': r.payee_id, 
-        'transaction_amount': r.transaction_amount,
-        'transaction_method': r.transaction_method,
-        'transaction_method_id': r.transaction_method_id,
-        'is_completed': r.is_completed,
-        'created_on': r.created_on,
-        'created_by': r.created_by,
-        'updated_on': r.updated_on,
-        'updated_by': r.updated_by
- })
- return make_response(jsonify({"payer_id": user_id, "transactions": response}),200)
+    args = request.args
+    start_date = args.get("start_date", default="", type=str)
+    end_date = args.get("end_date", default="", type=str)
+    start_date = datetime.strptime(start_date, "%d%m%Y").date()
+    end_date = datetime.strptime(end_date, "%d%m%Y").date()
+    result = session.query(Transaction).filter_by(payer_id=user_id).filter(Transaction.created_on.between(start_date, end_date))
+    response = []
+    for r in result:
+        response.append({
+            'transaction_id': r.transaction_id,
+            'payee_id': r.payee_id,
+            'transaction_amount': r.transaction_amount,
+            'transaction_method': r.transaction_method,
+            'transaction_method_id': r.transaction_method_id,
+            'is_completed': r.is_completed,
+            'created_on': r.created_on,
+            'created_by': r.created_by,
+            'updated_on': r.updated_on,
+            'updated_by': r.updated_by
+        })
+    return make_response(jsonify({"payer_id": user_id, "transactions": response}), 200)
 
 @app.route(api_url + "/bankaccount/delete/<account_number>", methods=["DELETE"])
 def delete_bank_account(account_number):
@@ -732,10 +732,10 @@ def delete_bank_account(account_number):
         bankaccount = session.query(BankAccount).filter_by(account_number=account_number).first()
         if bankaccount:
             session.delete(bankaccount)
-            session.commit()    
-            return make_response(jsonify({"result": "Bank Account deleted successfully"}),200)
+            session.commit()
+            return make_response(jsonify({"result": "Bank Account deleted successfully"}), 200)
         else:
-            return make_response(jsonify({'message': 'Bank Account not found'}),404)
+            return make_response(jsonify({'message': 'Bank Account not found'}), 404)
     except Exception as ex:
         traceback.print_exc()
         session.rollback()
