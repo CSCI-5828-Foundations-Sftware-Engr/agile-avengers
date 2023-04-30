@@ -15,5 +15,5 @@ client/.nyc_output/
 client/package-lock.json
 client/bundle.js.map
 client/.DS_Store
-data-collector/venv/*
-data-collector/.venv/*
+.venv/*
+data-collector/celerybeat-schedule.db

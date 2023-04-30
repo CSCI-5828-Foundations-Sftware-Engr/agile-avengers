@@ -4,13 +4,19 @@ APP_NAME = "agile_avengers_data_collector"
 
 api_version = "/v1"
 
+min_balance = 1000
+max_balance = 15000
+
 ## 3rd party api configs
-api_hostname = "https://haveibeenpwned.com/"
-all_breaches_endpoint = "api/v2/breaches"
+api_hostname = "http://127.0.0.1:5000/"
+create_user_api = f"{api_hostname}v1/auth/create"
+add_userinfo_api = f"{api_hostname}v1/users/create"
+add_credit_card = f"{api_hostname}v1/creditcard/add"
+add_bank_account = f"{api_hostname}v1/bankaccount/add"
 
 ## rabbitmq connection string
-# celery_broker = "amqp://guest:guest@localhost:5672/"
-celery_broker = "amqp://agile_avengers:password@rabbitmq:5672/"
+celery_broker = "amqp://agile_avengers:password@localhost:5672/"
+# celery_broker = "amqp://agile_avengers:password@rabbitmq:5672/"
 
 ## cron configs
 daily_fetch_time = 6

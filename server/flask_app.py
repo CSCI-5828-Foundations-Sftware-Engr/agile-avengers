@@ -114,7 +114,7 @@ def create_users():
     user_info.updated_on = datetime.now()
     user_info.updated_by = data["user_name"]
     session.commit()
-    return make_response(jsonify({"message": "User created successfully"}), 200)
+    return make_response(jsonify({"message": "User created successfully", "id": user_info.user_id}), 200)
 
 
 # route to update user_info
