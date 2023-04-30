@@ -6,10 +6,10 @@ Easy Pay is a payment gateway application for businesses/individuals.<br/>
 Features of the application include:
 - Sending payments
 - Request payments
+- Accept/Reject pending payments
 
 User level visualization include: 
 - Expenditure in a Time duration
-- Categorized spend
 - Transaction history
 
 For more information, please refer to [this](https://github.com/CSCI-5828-Foundations-Sftware-Engr/5828_s23/wiki/Payment-Gateway-Application:-Overview) detailed project overview.
