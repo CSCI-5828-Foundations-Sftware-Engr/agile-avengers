@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-nfs-data
+  namespace: monitoring
+  labels:
+    type: nfs
+    app: prometheus-deployment
+spec:
+  storageClassName: managed-nfs
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteMany
+  nfs:
+    server: 192.168.5.107
+    path: "/Users/ruchidhamnani/promdata"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-nfs-data
+  namespace: monitoring
+  labels:
+    app: prometheus-deployment
+spec:
+  storageClassName: managed-nfs
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 500Mi
+
+
+
