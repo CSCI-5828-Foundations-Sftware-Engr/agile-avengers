@@ -1,10 +1,14 @@
-import src.config as config
 import json
-import requests
 import traceback
+
+import requests
+
+import src.config as config
+
 
 def create_user(users: dict):
     user_name_id_map = {}
+    merchant_name_id_map = {}
     for username, user_info in users.items():
         try:
             # create user
@@ -20,10 +24,14 @@ def create_user(users: dict):
             assert r.status_code == 200
             resp = r.json()
             user_id = resp["id"]
+
+            if req_body["is_merchant"]:
+                merchant_id = resp.get("merchant_id", None)
+                merchant_name_id_map[username] = merchant_id
             user_name_id_map[username] = user_id
-            
+
             print("Successfully created a new user")
-            
+
             if "bank_info" in user_info:
                 bank_info = user_info["bank_info"]
                 bank_info["user_id"] = user_id
@@ -31,7 +39,7 @@ def create_user(users: dict):
                 assert r.status_code == 200
                 resp = r.json()
                 print("Successfully added a bank account")
-            
+
             if "credit_info" in user_info:
                 credit_info = user_info["credit_info"]
                 credit_info["user_id"] = user_id
@@ -44,15 +52,20 @@ def create_user(users: dict):
             print(f"Failed to create user {userinfo['username']}")
             print(r.text)
             traceback.print_exc()
-    
-    return user_name_id_map
+
+    return user_name_id_map, merchant_name_id_map
 
 
-def make_transactions(transactions: list, user_name_id_map: dict):
+def make_transactions(
+    transactions: list, user_name_id_map: dict, merchant_name_id_map: dict
+):
     for transaction in transactions:
         try:
             transaction["payer_id"] = user_name_id_map[transaction["payer_id"]]
             transaction["payee_id"] = user_name_id_map[transaction["payee_id"]]
+            transaction["merchant_id"] = merchant_name_id_map[
+                transaction["merchant_id"]
+            ]
             r = requests.post(config.send_payment_api, json=transaction)
             assert r.status_code == 201
             print("Transaction Successful")
@@ -63,6 +76,6 @@ def make_transactions(transactions: list, user_name_id_map: dict):
 
 
 def insert_data(data: dict):
-    user_name_id_map = create_user(data["users"])
+    user_name_id_map, merchant_name_id_map = create_user(data["users"])
     transactions = data["transactions"]
-    make_transactions(transactions, user_name_id_map)
+    make_transactions(transactions, user_name_id_map, merchant_name_id_map)

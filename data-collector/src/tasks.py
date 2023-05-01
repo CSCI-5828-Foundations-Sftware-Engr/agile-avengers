@@ -1,8 +1,10 @@
-from src.celery import celery_app
-import src.config as config
 import json
-import requests
 import traceback
+
+import requests
+
+import src.config as config
+from src.celery import celery_app
 from src.helpers import create_user
 from src.send import send_data
 
@@ -28,9 +30,11 @@ from src.send import send_data
 #     finally:
 #         conn.close()
 
+
 @celery_app.task()
 def generate_data():
     send_data()
+
 
 # @celery_app.task()
 # def store_entry(data):

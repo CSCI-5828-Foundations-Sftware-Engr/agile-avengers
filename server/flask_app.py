@@ -121,8 +121,26 @@ def create_users():
                                 sub_category=merchant_info["sub_category"], user_id=user_info.user_id)
             session.add(merchant)
         session.commit()
+        return make_response(jsonify({"message": "User created successfully", "id": user_info.user_id, "merchant_id": merchant.merchant_id}), 200)
+    
     return make_response(jsonify({"message": "User created successfully", "id": user_info.user_id}), 200)
 
+# {
+#         "username": profile["username"],
+#         "password": fake.password(),
+#         "first_name": fake.first_name(),
+#         "last_name": fake.last_name(),
+#         "email_id": profile["mail"],
+#         "mobile_number": generate_phone_number(),
+#         "is_merchant": True,
+#         "merchant_info": [
+#             {
+#                 "name": "ABC LTd",
+#                 "category": "Food",
+#                 "sub_category": "groceries"
+#             }
+#         ]
+#     }
 
 # route to update user_info
 
@@ -344,6 +362,7 @@ def make_payment(transaction_id=None):
     transaction_method = data["transaction_method"]
     transaction_method_id = data["transaction_method_id"]
     transaction_amount = data["transaction_amount"]
+    merchant_id = data.get("merchant_id", None)
 
     try:
         # validate the input
@@ -359,6 +378,7 @@ def make_payment(transaction_id=None):
                 transaction_amount=transaction_amount,
                 transaction_method=transaction_method,
                 transaction_method_id=transaction_method_id,
+                merchant_id=merchant_id,
                 is_completed=True,
                 created_on=datetime.now(),
                 created_by=payer_id,
