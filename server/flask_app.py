@@ -114,6 +114,13 @@ def create_users():
     user_info.updated_on = datetime.now()
     user_info.updated_by = data["user_name"]
     session.commit()
+
+    if data["is_merchant"]:
+        for merchant_info in data["merchant_info"]:
+            merchant = Merchant(merchant_name=merchant_info["name"], category=merchant_info["category"], 
+                                sub_category=merchant_info["sub_category"], user_id=user_info.user_id)
+            session.add(merchant)
+        session.commit()
     return make_response(jsonify({"message": "User created successfully", "id": user_info.user_id}), 200)
 
 

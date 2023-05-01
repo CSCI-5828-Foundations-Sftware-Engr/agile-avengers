@@ -8,11 +8,12 @@ min_balance = 1000
 max_balance = 15000
 
 ## 3rd party api configs
-api_hostname = "http://127.0.0.1:5000/"
+api_hostname = "http://127.0.0.1:5000/" # @TODO update the IP when deploy to cloud
 create_user_api = f"{api_hostname}v1/auth/create"
 add_userinfo_api = f"{api_hostname}v1/users/create"
-add_credit_card = f"{api_hostname}v1/creditcard/add"
-add_bank_account = f"{api_hostname}v1/bankaccount/add"
+add_credit_card_api = f"{api_hostname}v1/creditcard/add"
+add_bank_account_api = f"{api_hostname}v1/bankaccount/add"
+send_payment_api = f"{api_hostname}v1/payment/send"
 
 ## rabbitmq connection string
 celery_broker = "amqp://agile_avengers:password@localhost:5672/"

@@ -3,12 +3,12 @@ import os
 import sys
 import json
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "../"))
-from src.helpers import create_user
+from src.helpers import insert_data
 
 def callback(ch, method, properties, body):
         print(" [x] Received %r" % json.loads(body))
         data = json.loads(body)
-        create_user(data)
+        insert_data(data)
         # print(f"username is {resp['username']}, name is {resp['name']}")
 
 def main():

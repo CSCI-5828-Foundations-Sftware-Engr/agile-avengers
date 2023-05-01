@@ -12,3 +12,9 @@ kubectl logs pod/rabbitmq-server-0
 
 ### Use
 To use within another service, use the host as `rabbitmq` and port `5672` with user name ```agile_avengers``` and password as ```password```
+
+### run steps 
+
+- ```make deploy``` 
+- wait for a min for pods to start running and then ```make createuser```
+- finally ```make port-forward```

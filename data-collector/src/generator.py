@@ -2,6 +2,7 @@ from faker import Faker
 import faker.providers as providers
 import random as r
 import src.config as config
+import traceback
 
 # initialize object and add providers
 fake = Faker()
@@ -9,6 +10,7 @@ fake.add_provider(providers.profile)
 fake.add_provider(providers.person)
 fake.add_provider(providers.credit_card)
 fake.add_provider(providers.bank)
+fake.add_provider(providers.address)
 
 def generate_phone_number():
     ph_no = []
@@ -49,16 +51,65 @@ def generate_bank_info():
    return bank_info
 
 def generate_credit_card():
-    profile = fake.simple_profile()
-    address = profile["address"]
     credit_info = {
-        "billing_address": address.split("\n")[0],
-        "postal_code": address.split("\n")[1].split(',')[1].strip().split()[1],
-        "state": address.split("\n")[1].split(',')[1].strip().split()[0],
-        "city": address.split("\n")[1].split(',')[0],
-        "card_number": fake.credit_card_number(),
+        "billing_address": fake.street_address(),
+        "postal_code": fake.postcode(),
+        "state": fake.country_code(),
+        "city": fake.city(),
+        "card_number": fake.credit_card_number()[:16],
         "card_network": fake.credit_card_provider(),
         "cvv": fake.credit_card_security_code()
     }
     return credit_info
     
+
+def generate_fake_data():
+    usernames = []
+    users = {}
+    transactions = []
+    methods = ["bank", "credit"]
+
+    # generate users
+    for _ in range(5):
+        user_info = generate_user_info()
+        usernames.append(user_info["username"])
+        users[user_info["username"]] = {
+            "user_info": user_info,
+            "bank_info": generate_bank_info(),
+            "credit_info": generate_credit_card()
+        }
+
+    # generate transactions between them
+    for _ in range(20):
+        user1, user2 = r.sample(usernames, 2)
+        method = r.choice(methods)
+        try:
+            if method == "bank":
+                transactions.append(
+                    {
+                        "payer_id": user1,
+                        "payee_id": user2,
+                        "transaction_amount": fake.random_int(min=10, max=500, step=5),
+                        "transaction_method": "bank",
+                        "transaction_method_id": users[user1]["bank_info"]["account_number"]
+                    }
+                )
+            elif method == "credit":
+                transactions.append(
+                    {
+                        "payer_id": user1,
+                        "payee_id": user2,
+                        "transaction_amount": fake.random_int(min=10, max=500, step=5),
+                        "transaction_method": "credit",
+                        "transaction_method_id": users[user1]["credit_info"]["card_number"]
+                    }
+                )
+        
+        except Exception as ex:
+            traceback.print_exc()
+            print("Skip this entry")
+    
+    return {
+        "users": users, # type(users) = dict
+        "transactions": transactions # type(transactions) = list
+    }

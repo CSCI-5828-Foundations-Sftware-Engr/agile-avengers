@@ -10,7 +10,6 @@ createuser:
 stop:
 	kubectl delete -f rabbitmq.yaml
 	kubectl delete -f cluster-operator.yaml
-	kubectl delete statefulset.apps/rabbitmq-server 
 	kubectl delete --all all -n rabbitmq-system
 
 port-forward:
