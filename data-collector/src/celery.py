@@ -14,9 +14,9 @@ class CeleryConfig:
     CELERYBEAT_SCHEDULE = {
         "time_scheduler": {
             "task": "src.tasks.generate_data",
-            # "schedule": crontab(hour=f"*/{config.daily_fetch_time}", minute=0) #set schedule time
+            "schedule": crontab(hour=f"*/{config.daily_fetch_time}", minute=0) #set schedule time
             # Ref: https://docs.celeryq.dev/en/stable/userguide/periodic-tasks.html
-            "schedule": 60,
+            # "schedule": 60,
         }
     }
 

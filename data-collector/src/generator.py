@@ -60,7 +60,7 @@ def generate_user_info(is_merchant):
     profile = fake.simple_profile()
     user_info = {
         "username": profile["username"],
-        "password": fake.password(),
+        "password": "password",
         "first_name": fake.first_name(),
         "last_name": fake.last_name(),
         "email_id": profile["mail"],

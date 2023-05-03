@@ -9,7 +9,7 @@ max_balance = 15000
 
 num_users = 5
 num_merchants = 5
-num_transactions = 20
+num_transactions = 1000
 
 api_hostname = "http://backend-svc:5000/"
 # api_hostname = "http://127.0.0.1:5000/"  # un-comment when running locally
@@ -29,4 +29,4 @@ rabbitmq_port = "5672"
 celery_broker = f"amqp://{rabbitmq_user}:{rabbitmq_password}@{rabbitmq_host}:{rabbitmq_port}/"
 
 ## cron configs
-daily_fetch_time = 6
+daily_fetch_time = 1
