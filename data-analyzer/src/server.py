@@ -37,6 +37,19 @@ def get_merchant_summary(user_id):
 
     return jsonify(summary)
 
+@app.before_request
+def basic_authentication():
+    if request.method == 'OPTIONS':
+        response = make_response()
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add("Access-Control-Allow-Headers", "*")
+        response.headers.add("Access-Control-Allow-Methods", "*")
+        return Response()
+    
+@app.after_request
+def add_cors_header(response):
+    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8081'
+    return response
 
 if __name__ == "__main__":
     app.run(port=5000, host="0.0.0.0")
