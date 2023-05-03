@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: data-analyzer-svc
+  labels:
+    app: data-analyzer
+spec:
+  ports:
+    - name: data-analyzer
+      protocol: "TCP"
+      port: 5000
+      targetPort: 5000
+  selector:
+    app: data-analyzer
