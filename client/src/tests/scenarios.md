@@ -1,4 +1,4 @@
-# Scenarios for Graybox testing
+# Scenarios for User Acceptance-tests
 
 ## Scenario 1: Sign up 
 - Open the webpage for Sign up.

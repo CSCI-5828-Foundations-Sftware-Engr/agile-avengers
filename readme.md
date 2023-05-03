@@ -22,7 +22,7 @@ For more information, please refer to [this](https://github.com/CSCI-5828-Founda
     - Required version - 6.14.4
 - To run unit tests:
     - ```pip install pytest pytest-coverage```
-- To run graybox tests:
+- To run user acceptance tests tests:
     - ```pip install webdriver-manager```
     - ```pip install selenium```
     - ```pip install waitress```
@@ -73,14 +73,14 @@ To run the unit tests,
 - `cd server`
 - `make test` 
 
-To run the graybox tests,
+To run the acceptance-tests,
 - Ensure that the above mentioned packages are installed.
 - Ensure that the front end and back end servers are up and running.
 - In order to run the test locally, update the file backend.js to have as follows: ```const host = `http://127.0.0.1:5000`;```
 - Ensure to install the browser and corresponding driver in order to execute the tests.
 Chrome browser and ChromeDriverManager has been utilized here.
 - Run the following commands:
-    - ```cd /client/src/tests/graybox-tests``` 
+    - ```cd /client/src/tests/acceptance-tests``` 
     - ```pytest --html=report.html```. 
     - This will run all the files in the folder that have test_* as the file name and at the end, generate a HTML report which will state which test passed/failed.
 - Note 1: There is a possibility that the URLs present in these test files might not work as these tests are dependent on the URL. Please keep an eye on it.
