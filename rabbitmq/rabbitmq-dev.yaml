@@ -5,7 +5,6 @@ metadata:
 spec:
   replicas: 1
   persistence:
-    storageClassName: standard
     storage: 10Gi
   resources:
     requests:

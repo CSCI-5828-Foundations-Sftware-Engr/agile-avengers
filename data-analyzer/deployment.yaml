@@ -1,20 +1,20 @@
 apiVersion: apps/v1 #  for k8s versions before 1.9.0 use apps/v1beta2  and before 1.8.0 use extensions/v1beta1
 kind: Deployment
 metadata:
-  name: backend
+  name: data-analyzer
 spec:
   selector:
     matchLabels:
-      app: backend
+      app: data-analyzer
   replicas: 1
   template:
     metadata:
       labels:
-        app: backend
+        app: data-analyzer
     spec:
       containers:
       - name: master
-        image: ash002019/agile-avengers-frontend
+        image: ash002019/agile-avengers-data-analyzer
         # resources:
         #   requests:
         #     cpu: 100m

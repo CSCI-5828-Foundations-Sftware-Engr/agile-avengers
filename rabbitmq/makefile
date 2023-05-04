@@ -3,6 +3,11 @@ deploy:
 	sleep 10
 	kubectl apply -f rabbitmq.yaml
 
+deploy-dev:
+	kubectl apply -f cluster-operator.yaml
+	sleep 10
+	kubectl apply -f rabbitmq-dev.yaml
+
 createuser:
 	kubectl exec -it rabbitmq-server-0 -- rabbitmqctl add_user agile_avengers password
 	kubectl exec -it rabbitmq-server-0 -- rabbitmqctl set_permissions -p / agile_avengers ".*" ".*" ".*"
