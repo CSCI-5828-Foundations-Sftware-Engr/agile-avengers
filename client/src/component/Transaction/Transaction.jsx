@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Cell, PieChart, Pie } from "recharts";
-import { BACKEND_API_URL } from "../../constants/backend";
+import { BACKEND_API_URL, ANALYZER_API_URL } from "../../constants/backend";
 
 const Transaction = () => {
   const [transactions, setTransactions] = useState([]);
@@ -65,7 +65,7 @@ const Transaction = () => {
 
     const fetchPieData = () => {
       let userid = localStorage.getItem("user_id")
-      fetch(`${BACKEND_API_URL}/summary/${userid}/category`)
+      fetch(`${ANALYZER_API_URL}/summary/${userid}/category`)
         .then((response) => {
           if (response.ok) {
             return response.json();
@@ -88,7 +88,7 @@ const Transaction = () => {
 
     const fetchPieSubData = () => {
       let userid = localStorage.getItem("user_id")
-      fetch(`${BACKEND_API_URL}/summary/${userid}/sub_category`)
+      fetch(`${ANALYZER_API_URL}/summary/${userid}/sub_category`)
         .then((response) => {
           if (response.ok) {
             return response.json();
