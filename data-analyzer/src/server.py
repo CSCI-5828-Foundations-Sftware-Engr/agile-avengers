@@ -1,14 +1,17 @@
 from flask import *
 
 from flask import Flask
+from flask_cors import CORS, cross_origin
 from helpers import user_exists, summarize_category
 
 app = Flask(__name__)
+CORS(app)
 
 base_url = "/v1/summary"
 
 
 @app.route(f"{base_url}/<user_id>/category")
+@cross_origin()
 def get_category_summary(user_id):
     if not user_exists(user_id):
         return make_response(jsonify({"message": "user does not exist"}), 404)
@@ -19,6 +22,7 @@ def get_category_summary(user_id):
 
 
 @app.route(f"{base_url}/<user_id>/sub_category")
+@cross_origin()
 def get_sub_category_summary(user_id):
     if not user_exists(user_id):
         return make_response(jsonify({"message": "user does not exist"}), 404)
@@ -29,6 +33,7 @@ def get_sub_category_summary(user_id):
 
 
 @app.route(f"{base_url}/<user_id>/merchant")
+@cross_origin()
 def get_merchant_summary(user_id):
     if not user_exists(user_id):
         return make_response(jsonify({"message": "user does not exist"}), 404)
