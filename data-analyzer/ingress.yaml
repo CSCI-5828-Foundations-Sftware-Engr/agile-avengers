@@ -13,10 +13,17 @@ spec:
   # - host: localhost
   - http:
       paths:
-      - path: /api/analyzer/(.*)
+      - path: /analyzer/(.*)
         pathType: Prefix
         backend:
           service:
             name: data-analyzer-svc
+            port:
+              number: 5000
+      - path: /api/(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-svc
             port:
               number: 5000
