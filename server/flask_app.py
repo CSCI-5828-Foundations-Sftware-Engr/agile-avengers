@@ -643,7 +643,7 @@ def add_new_credit_card():
         user_id = request.json.get("user_id")
         card_network = request.json.get("card_network")
         cvv = request.json.get("cvv")
-        credit_limit = random.randint(1000, 2000)
+        credit_limit = random.randint(10000, 20000)
         created_by = user_id
         updated_by = user_id
         created_on = datetime.now()
@@ -711,7 +711,7 @@ def add_new_bank_account():
         account_number = data['account_number']
         user_id = data['user_id']
         account_holders_name = data['account_holders_name']
-        account_balance = random.randint(1000, 2000)
+        account_balance = random.randint(10000, 20000)
         bank_name = data['bank_name']
         routing_number = data['routing_number']
         created_on = datetime.now()

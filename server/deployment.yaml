@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: master
-        image: preethammaiya/agile-avengers-frontend:v1
+        image: ash002019/agile-avengers-frontend
         # resources:
         #   requests:
         #     cpu: 100m

@@ -8,7 +8,7 @@ min_balance = 1000
 max_balance = 15000
 
 num_users = 5
-num_merchants = 5
+num_merchants = 15
 num_transactions = 1000
 
 api_hostname = "http://backend-svc:5000/"

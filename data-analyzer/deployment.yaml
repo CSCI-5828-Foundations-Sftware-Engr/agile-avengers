@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: master
-        image: preethammaiya/agile-avengers-data-analyzer
+        image: ash002019/agile-avengers-data-analyzer
         # resources:
         #   requests:
         #     cpu: 100m
