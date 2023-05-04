@@ -1,5 +1,6 @@
 from datamodel import session, UserInfo, Transaction, Merchant
 import sqlalchemy
+import traceback
 
 
 def user_exists(user_id):
@@ -12,44 +13,56 @@ def user_exists(user_id):
 def summarize_category(user_id, on="category"):
     if on == "category":
         result = {}
-        query = (
-            session.query(
-                Merchant.category, sqlalchemy.func.sum(Transaction.transaction_amount).label("total")
+        try:
+            query = (
+                session.query(
+                    Merchant.category, sqlalchemy.func.sum(Transaction.transaction_amount).label("total")
+                )
+                .join(Merchant, Transaction.merchant_id==Merchant.merchant_id)
+                .filter(Transaction.payer_id==user_id)
+                .group_by(Merchant.category)
             )
-            .join(Merchant, Transaction.merchant_id==Merchant.merchant_id)
-            .filter(Transaction.payer_id==user_id)
-            .group_by(Merchant.category)
-        )
-        for row in query.all():
-            result[row.category] = row.total
+            for row in query.all():
+                result[row.category] = row.total
+        except Exception as ex:
+            traceback.print_exc()
+            session.rollback()
         return result
 
     if on == "sub_category":
         result = {}
-        query = (
-            session.query(
-                Merchant.sub_category,
-                sqlalchemy.func.sum(Transaction.transaction_amount).label("total"),
+        try:
+            query = (
+                session.query(
+                    Merchant.sub_category,
+                    sqlalchemy.func.sum(Transaction.transaction_amount).label("total"),
+                )
+                .join(Merchant, Transaction.merchant_id == Merchant.merchant_id)
+                .filter(Transaction.payer_id==user_id)
+                .group_by(Merchant.sub_category)
             )
-            .join(Merchant, Transaction.merchant_id == Merchant.merchant_id)
-            .filter(Transaction.payer_id==user_id)
-            .group_by(Merchant.sub_category)
-        )
-        for row in query.all():
-            result[row.sub_category] = row.total
+            for row in query.all():
+                result[row.sub_category] = row.total
+        except Exception as ex:
+            traceback.print_exc()
+            session.rollback()
         return result
 
     if on == "merchant":
         result = {}
-        query = (
-            session.query(
-                Merchant.merchant_name,
-                sqlalchemy.func.sum(Transaction.transaction_amount).label("total"),
+        try:
+            query = (
+                session.query(
+                    Merchant.merchant_name,
+                    sqlalchemy.func.sum(Transaction.transaction_amount).label("total"),
+                )
+                .join(Merchant, Transaction.merchant_id == Merchant.merchant_id)
+                .filter(Transaction.payer_id==user_id)
+                .group_by(Merchant.merchant_name)
             )
-            .join(Merchant, Transaction.merchant_id == Merchant.merchant_id)
-            .filter(Transaction.payer_id==user_id)
-            .group_by(Merchant.merchant_name)
-        )
-        for row in query.all():
-            result[row.merchant_name] = row.total
+            for row in query.all():
+                result[row.merchant_name] = row.total
+        except Exception as ex:
+            traceback.print_exc()
+            session.rollback()
         return result
