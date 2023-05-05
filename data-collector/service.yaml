@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: data-collector-svc
+  labels:
+    app: data-collector
+spec:
+  ports:
+    - name: data-collector
+      protocol: "TCP"
+      port: 5010
+      targetPort: 5010
+  selector:
+    app: data-collector

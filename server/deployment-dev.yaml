@@ -14,7 +14,8 @@ spec:
     spec:
       containers:
       - name: master
-        image: ash002019/agile-avengers-frontend
+        image: agile-avengers-frontend
+        imagePullPolicy: Never
         # resources:
         #   requests:
         #     cpu: 100m
